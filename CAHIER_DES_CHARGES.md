@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.1 — 9 novembre 2026
+> Version 1.2 — 9 novembre 2026
 > Rédigé par Claude à partir des échanges avec le porteur du projet.
 > Ce document sert de référence pour le développement, réalisé étape par étape sous sa supervision.
 
@@ -792,12 +792,28 @@ Le **cœur métier** (barème, essais nuls, modificateurs, départage, synchroni
 
 ## 22. Documentation à fournir
 
-- `README.md` : présentation, captures d'écran, démarrage rapide.
-- `docs/installation.md` : installation sur un hébergement mutualisé (OVH en exemple).
-- `docs/configuration.md` : référence complète de `competition.toml`, des traductions et des pages d'aide.
-- `docs/guide-admin.md`, `docs/guide-arbitre.md` : guides d'utilisation (le guide arbitre tient sur une page).
-- `docs/api.md` : référence de l'API.
-- `CONTRIBUTING.md` : règles de contribution, lancement des tests.
+La documentation est rédigée **dans un second temps**, une fois l'application stabilisée, **en français et en anglais**.
+
+### 22.1 Fichiers du dépôt
+
+- `README.md` (anglais) et `README.fr.md` (français), avec un lien croisé en tête de chacun : présentation, captures d'écran sur données fictives, démarrage rapide, lien vers la documentation complète.
+- `CONTRIBUTING.md` : règles de contribution, conventions, lancement des tests.
+- `CHANGELOG.md` : historique des versions.
+
+### 22.2 Site de documentation
+
+- Rédigé en **Markdown** dans le dossier `docs/` du dépôt, donc **versionné avec le code** et relu par *pull request*, ce que ne permet pas le wiki GitHub.
+- Généré avec **MkDocs + thème Material** et le module de traduction **mkdocs-static-i18n** : recherche intégrée, navigation, sélecteur de langue FR/EN, mode sombre, lisible sur téléphone.
+- Publié automatiquement sur **GitHub Pages** (gratuit) à chaque mise à jour.
+- Sections :
+  - **Utilisation** : guide admin, guide organisateur, guide arbitre de table (une page, imprimable), guide participant ;
+  - **Installation et déploiement** : hébergement mutualisé (OVH en exemple), sous-domaines, base de données, secrets, mises à jour ;
+  - **Configuration** : référence complète de `competition.toml`, traductions, pages d'aide ;
+  - **Développement** : architecture, cœur métier, API, tests.
+
+### 22.3 Cahier des charges
+
+Le présent document reste en français. Il sera **archivé** (`docs/archive/`) une fois l'application livrée.
 
 ---
 
@@ -824,7 +840,9 @@ Chaque étape est livrée sur une branche avec une *pull request*, déployée su
 | **14. Répétition générale** | Simulation grandeur nature avec des bénévoles, corrections | Go/no-go pour la production |
 | **15. Phase 2 — API et Claude** | API publique documentée, propositions d'action, branchement de Claude | |
 
-L'ordre pourra être ajusté. Les étapes 0 à 10 constituent le cœur indispensable pour le jour J ; les inscriptions en ligne (11) doivent être prêtes **avant l'ouverture des inscriptions 2027**.
+L'ordre pourra être ajusté.
+
+**Échéance : application complète en production vers la mi-mars 2027** (étapes 0 à 14), date d'ouverture prévue des inscriptions. La phase 2 (étape 15) et la documentation complète (§ 22) viennent ensuite.
 
 ---
 
@@ -834,7 +852,7 @@ L'ordre pourra être ajusté. Les étapes 0 à 10 constituent le cœur indispens
 2. **Valeur par défaut du plancher** : 100 proposé, à valider.
 3. **Plages plausibles** de chaque épreuve : à renseigner à partir des résultats 2026.
 4. **Règlement 2027** : révision à faire (exemple de calcul de l'article 7 erroné, barème avec plancher, nuls, DNF, départage, article 2 sur les inscriptions, article 12 RGPD).
-5. **Date de l'édition 2027** et calendrier de développement en conséquence (inscriptions en ligne prêtes à l'ouverture).
+5. **Date de l'édition 2027** : à fixer. L'application doit être prête vers la mi-mars 2027.
 6. **Tâches planifiées** sur l'offre OVH Perso : à confirmer lors de l'installation.
 7. **Liste des épreuves 2027** : celles de 2026 servent d'exemple, elles pourront changer.
 
