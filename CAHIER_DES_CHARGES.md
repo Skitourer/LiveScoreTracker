@@ -1,14 +1,14 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.2 — 9 novembre 2026
-> Rédigé par Claude à partir des échanges avec le porteur du projet.
-> Ce document sert de référence pour le développement, réalisé étape par étape sous sa supervision.
+> Version 1.3 — 10 novembre 2026
+> Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
+> Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
 ---
 
 ## 1. Contexte et objectifs
 
-Une association sportive scolaire (ci-après « l'organisateur ») organise chaque année une **compétition multisports** : une compétition multisports individuelle pour environ 100 enfants d'écoles primaires (CP à CM2), sur une matinée (environ 3 h).
+Une association sportive scolaire (ci-après « l'organisateur ») organise chaque année une **compétition multisports individuelle** pour environ 100 enfants d'écoles primaires (CP à CM2), sur une matinée (environ 3 h).
 
 Jusqu'ici, la gestion repose sur un formulaire en ligne, des tableurs et des feuilles papier. **LiveScoreTracker** doit remplacer ce dispositif par une application web unique qui couvre :
 
@@ -159,7 +159,7 @@ Un parent peut inscrire **plusieurs enfants** (fratrie) : après une inscription
    - Sinon : statut **en liste d'attente**, email « vous êtes en liste d'attente », notification à l'admin.
 4. Une inscription non vérifiée sous 48 h **expire**. Seules les inscriptions vérifiées comptent dans le quota. L'admin peut valider manuellement une inscription en suspens.
 
-Statuts d'une inscription : `en_attente_verification` → `inscrit` | `liste_attente` → `inscrit` | `desiste` | `expire`.
+Statuts d'une inscription : `pending_verification` → `registered` | `waitlisted` → `registered` | `withdrawn` | `expired`.
 
 ### 5.4 Liste d'attente
 
@@ -758,7 +758,7 @@ L'**historique anonyme** des éditions précédentes reste consultable (comparai
 /src             code PHP (domaine, services, contrôleurs)
   /Domain        modèle métier : barème, départage, essais… (sans dépendance au framework)
 /templates       gabarits Twig
-/config          configuration TOML, traductions, aides
+/config.example  configuration d'exemple fictive (TOML, traductions, aides)
 /migrations      schéma de la base
 /tests           tests automatisés (PHPUnit)
 /docs            documentation (installation, configuration, contribution)
@@ -813,7 +813,7 @@ La documentation est rédigée **dans un second temps**, une fois l'application 
 
 ### 22.3 Cahier des charges
 
-Le présent document reste en français. Il sera **archivé** (`docs/archive/`) une fois l'application livrée.
+Le présent document est rédigé en français, avec une **version anglaise en miroir** (`SPECIFICATION.md`) destinée aux contributeurs. **Toute modification de l'un est reportée dans l'autre dans le même commit.** Les deux seront **archivés** (`docs/archive/`) une fois l'application livrée.
 
 ---
 
@@ -826,7 +826,7 @@ Chaque étape est livrée sur une branche avec une *pull request*, déployée su
 | **0. Socle** | Nettoyage du dépôt, structure, Slim, base de données, **conventions et outils qualité**, **garde-fous de confidentialité** (§ 25.3), déploiement automatique sur le site d'essai, page d'accueil | L'appli « vide » s'affiche sur le site d'essai |
 | **1. Configuration et cœur métier** | Lecture du TOML, i18n, modèle des épreuves, **moteur de barème et de départage** + tests automatiques | Rapport de calcul sur des données fictives |
 | **2. Comptes et sécurité** | Connexion, rôles, 2FA admin, mot de passe oublié, compte partagé, journal d'audit | Connexion avec chaque rôle |
-| **3. Inscriptions (admin)** | Écran inscriptions, ajout manuel, import Excel, dossards | Import du fichier 2026 de test |
+| **3. Inscriptions (admin)** | Écran inscriptions, ajout manuel, import Excel, dossards | Import d'un fichier de test fictif |
 | **4. Accueil** | Liste d'accueil PDF, émargement entrée/sortie | Émargement sur téléphone |
 | **5. Saisie arbitre** | Choix d'atelier, saisie standard, essais, nuls, modificateurs, correction, dossards restants, aide | Saisie complète en ligne |
 | **6. Chrono et compteur** | Chrono 1-2 dossards, mode compteur | Essai sur un vrai sprint et un vrai basket |
