@@ -1,0 +1,21 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('phase.title') }}{% endblock %}
+
+{% block content %}
+    <h1>{{ t('phase.title') }}</h1>
+    <p class="lead">{{ t('phase.current', {phase: t('phase.' ~ current.value)}) }}</p>
+    <form method="post" class="form">
+        {{ csrf_field() }}
+        {% if current.value == 'preparation' %}
+            <p>{{ t('phase.start_hint') }}</p>
+            <input type="hidden" name="phase" value="running">
+            <button type="submit" class="button">{{ t('phase.start') }}</button>
+        {% elseif current.value == 'running' %}
+            <p>{{ t('phase.back_hint') }}</p>
+            <input type="hidden" name="phase" value="preparation">
+            <button type="submit" class="button secondary">{{ t('phase.back_to_preparation') }}</button>
+        {% endif %}
+    </form>
+    <p class="meta">{{ t('phase.closing_later') }}</p>
+{% endblock %}

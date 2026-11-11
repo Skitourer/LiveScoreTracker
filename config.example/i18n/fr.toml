@@ -125,3 +125,254 @@ no_bounds = "Aucune performance valide : pas de barème."
 scale = "Barème : {floor} à {max} points · nul : {foul} · non fait : {dnf}"
 foul = "nul"
 config_invalid = "La configuration contient des erreurs :"
+
+# ---------- Comptes et sécurité ----------
+
+[nav]
+login = "Connexion"
+logout = "Déconnexion"
+
+[role]
+admin = "Admin"
+organizer = "Organisateur"
+referee = "Arbitre de table"
+admin_hint = "accès complet, double authentification obligatoire"
+organizer_hint = "inscriptions, accueil, saisie, suivi"
+
+[login]
+title = "Connexion"
+username = "Identifiant"
+password = "Mot de passe"
+submit = "Se connecter"
+forgot = "Mot de passe oublié ?"
+invalid = "Identifiant ou mot de passe incorrect."
+blocked = "Trop de tentatives. Réessayez dans {minutes} min."
+referee_inactive = "Le compte des arbitres ne fonctionne que pendant la compétition."
+
+[two_factor]
+title = "Double authentification"
+prompt = "Saisissez le code à 6 chiffres affiché par votre application d'authentification."
+code = "Code"
+submit = "Valider"
+recovery_hint = "Téléphone perdu ? Saisissez l'un de vos codes de secours (ex. k7mq-3x9p)."
+invalid_code = "Code incorrect ou expiré."
+recovery_code_used = "Vous avez utilisé un code de secours. Il vous en reste {remaining}."
+setup_title = "Activer la double authentification"
+setup_intro = "Les comptes admin sont protégés par un code à usage unique, en plus du mot de passe."
+setup_step_app = "Installez une application d'authentification sur votre téléphone (Google Authenticator, Microsoft Authenticator…)."
+setup_step_scan = "Dans l'application, ajoutez un compte en scannant ce QR code :"
+setup_manual = "Impossible de scanner ? Saisissez cette clé à la main :"
+setup_step_code = "Saisissez le code à 6 chiffres affiché par l'application."
+setup_submit = "Activer"
+codes_title = "Vos codes de secours"
+codes_intro = "Notez ou imprimez ces 10 codes et rangez-les en lieu sûr. Chacun permet une connexion si vous n'avez plus votre téléphone. Ils ne seront plus affichés."
+codes_continue = "J'ai noté mes codes"
+
+[password]
+forgot_title = "Mot de passe oublié"
+forgot_intro = "Indiquez l'adresse email de votre compte : vous recevrez un lien pour choisir un nouveau mot de passe."
+forgot_submit = "Envoyer le lien"
+forgot_sent = "Si un compte correspond à cette adresse, un email vient d'être envoyé. Le lien est valable une heure."
+back_to_login = "Retour à la connexion"
+reset_title = "Nouveau mot de passe"
+reset_invalid = "Ce lien n'est plus valable : il a déjà servi ou a expiré. Faites une nouvelle demande."
+new = "Nouveau mot de passe"
+confirm = "Confirmation du mot de passe"
+save = "Enregistrer"
+rule = "{min} caractères minimum"
+change_title = "Changer mon mot de passe"
+change_forced = "Vous vous êtes connecté avec un mot de passe provisoire : choisissez votre mot de passe personnel."
+current = "Mot de passe actuel"
+too_short_individual = "Le mot de passe doit contenir au moins {min} caractères."
+too_short_shared = "Le mot de passe des arbitres doit contenir au moins 8 caractères."
+too_long = "Le mot de passe est trop long."
+spaces_around = "Le mot de passe ne doit pas commencer ni finir par un espace."
+mismatch = "Les deux mots de passe ne sont pas identiques."
+current_wrong = "Le mot de passe actuel est incorrect."
+same_as_before = "Choisissez un mot de passe différent de l'actuel."
+reset_done = "Mot de passe enregistré. Vous pouvez vous connecter."
+changed = "Mot de passe modifié."
+
+[setup]
+title = "Installation : premier compte admin"
+intro = "Aucun compte admin n'existe encore. Créez le premier. Le jeton d'installation est la valeur DEPLOY_TOKEN du fichier .env du serveur."
+disabled = "L'installation est impossible : DEPLOY_TOKEN n'est pas défini dans le fichier .env du serveur."
+token = "Jeton d'installation"
+submit = "Créer le compte admin"
+wrong_token = "Jeton d'installation incorrect."
+done = "Compte admin créé. Connectez-vous pour activer la double authentification."
+
+[account]
+title = "Mon compte"
+username = "Identifiant"
+username_rule = "3 à 32 caractères : lettres minuscules, chiffres, . _ -"
+display_name = "Nom affiché"
+email = "Email"
+role = "Rôle"
+2fa_on = "Activée. Codes de secours restants : {count}."
+new_codes = "Générer de nouveaux codes de secours"
+username_invalid = "Identifiant invalide (3 à 32 caractères : lettres minuscules, chiffres, . _ -)."
+username_taken = "Cet identifiant est déjà utilisé."
+display_name_invalid = "Le nom affiché doit contenir entre 2 et 120 caractères."
+email_required = "L'email est obligatoire (il sert en cas de mot de passe oublié)."
+email_invalid = "Adresse email invalide."
+role_invalid = "Rôle invalide."
+use_own_password_page = "Pour votre propre compte, utilisez « Changer mon mot de passe »."
+cannot_disable_self = "Vous ne pouvez pas désactiver votre propre compte."
+last_admin = "Impossible : c'est le dernier compte admin actif."
+cannot_reset_own_2fa = "La double authentification se réinitialise par un autre admin."
+created = "Compte « {username} » créé. Communiquez-lui son mot de passe provisoire."
+updated = "Compte mis à jour."
+disabled = "Compte désactivé."
+enabled = "Compte réactivé."
+password_reset_by_admin = "Mot de passe provisoire enregistré. Il devra être changé à la prochaine connexion."
+2fa_reset = "Double authentification réinitialisée : elle sera à reconfigurer à la prochaine connexion."
+
+[form]
+unknown_action = "Action inconnue."
+
+[dashboard]
+title = "Tableau de bord"
+phase = "Phase : {phase}"
+coming_soon = "bientôt"
+results_entry = "Saisie des résultats"
+registrations = "Inscriptions"
+check_in = "Accueil et émargement"
+monitoring = "Suivi de la compétition"
+rankings = "Résultats et classements"
+phase_tile = "Phase de la compétition"
+accounts = "Comptes"
+referee_account = "Compte des arbitres"
+audit_log = "Journal d'audit"
+configuration = "Configuration"
+
+[phase]
+preparation = "préparation"
+running = "compétition en cours"
+finished = "compétition terminée"
+title = "Phase de la compétition"
+current = "Phase actuelle : {phase}"
+start_hint = "Démarrer la compétition ouvre la saisie des résultats et active le compte des arbitres."
+start = "Démarrer la compétition"
+back_hint = "Revenir en préparation ferme la saisie et déconnecte les téléphones des arbitres."
+back_to_preparation = "Revenir en préparation"
+closing_later = "La clôture de la compétition, avec ses vérifications, arrivera dans une prochaine étape."
+changed_to_preparation = "Retour en phase de préparation."
+changed_to_running = "La compétition est démarrée."
+
+[admin]
+users_title = "Comptes"
+two_admins_advice = "Conseil : créez au moins 2 comptes admin, pour pouvoir réinitialiser la double authentification l'un de l'autre."
+new_account = "Nouveau compte"
+new_account_intro = "Choisissez un mot de passe provisoire et communiquez-le à la personne : elle devra le changer à sa première connexion."
+status = "État"
+disabled = "désactivé"
+temporary_password = "Mot de passe provisoire"
+no_2fa_yet = "double authentification à configurer"
+active = "actif"
+create = "Créer le compte"
+last_login = "Dernière connexion"
+2fa_active = "activée ({count} codes de secours restants)"
+profile = "Profil"
+save = "Enregistrer"
+temporary_password_hint = "Un nouveau mot de passe provisoire déconnecte la personne ; elle devra le changer à sa prochaine connexion."
+set_temporary_password = "Définir le mot de passe provisoire"
+reset_2fa_hint = "À utiliser si cet admin a perdu son téléphone et ses codes de secours."
+reset_2fa = "Réinitialiser la double authentification"
+enable = "Réactiver le compte"
+disable = "Désactiver le compte"
+
+[referee]
+title = "Compte des arbitres"
+intro = "Tous les arbitres de table se connectent avec le même identifiant et le même mot de passe. Changez le mot de passe à chaque édition."
+inactive_now = "Ce compte ne fonctionne que pendant la phase « compétition en cours »."
+password = "Mot de passe des arbitres"
+create = "Créer le compte des arbitres"
+phones = "Téléphones connectés : {count}"
+no_phone = "Aucun téléphone connecté."
+last_seen = "dernière activité {at}"
+disconnect_all = "Déconnecter tous les téléphones"
+change_password = "Changer le mot de passe"
+change_password_hint = "Changer le mot de passe déconnecte aussi tous les téléphones."
+save_password = "Enregistrer le mot de passe"
+created = "Compte des arbitres créé."
+password_changed = "Mot de passe des arbitres changé ; tous les téléphones sont déconnectés."
+disconnected_all = "Tous les téléphones des arbitres sont déconnectés."
+
+[audit]
+title = "Journal d'audit"
+action = "Action"
+all = "Toutes"
+filter = "Filtrer"
+count = "{count} entrée(s)"
+when = "Date"
+who = "Compte"
+details = "Détails"
+device = "appareil"
+newer = "Plus récentes"
+older = "Plus anciennes"
+
+[audit.actions]
+"auth.login" = "Connexion"
+"auth.login_failed" = "Échec de connexion"
+"auth.logout" = "Déconnexion"
+"auth.2fa_failed" = "Code de double authentification refusé"
+"auth.2fa_enabled" = "Double authentification activée"
+"auth.recovery_codes_regenerated" = "Nouveaux codes de secours"
+"auth.password_changed" = "Mot de passe changé"
+"auth.password_reset_requested" = "Lien de mot de passe oublié envoyé"
+"auth.password_reset_mail_failed" = "Échec d'envoi de l'email de mot de passe"
+"auth.password_reset" = "Mot de passe réinitialisé par lien"
+"account.created" = "Compte créé"
+"account.updated" = "Compte modifié"
+"account.disabled" = "Compte désactivé"
+"account.enabled" = "Compte réactivé"
+"account.password_reset_by_admin" = "Mot de passe provisoire défini"
+"account.2fa_reset" = "Double authentification réinitialisée"
+"referee.created" = "Compte des arbitres créé"
+"referee.password_changed" = "Mot de passe des arbitres changé"
+"referee.disconnected_all" = "Téléphones des arbitres déconnectés"
+"phase.changed" = "Changement de phase"
+"setup.first_admin" = "Premier admin créé"
+
+[error.csrf]
+title = "Page expirée"
+text = "Le formulaire a expiré. Revenez en arrière, rechargez la page et recommencez."
+
+[error.400]
+title = "Requête invalide"
+text = "La demande n'a pas pu être traitée."
+
+[error.403]
+title = "Accès refusé"
+text = "Votre compte n'a pas accès à cette page."
+
+[error.404]
+title = "Page introuvable"
+text = "Cette page n'existe pas."
+
+[error.405]
+title = "Action impossible"
+text = "Cette action n'est pas possible sur cette page."
+
+[error.429]
+title = "Trop de tentatives"
+text = "Patientez quelques minutes avant de réessayer."
+
+[error.500]
+title = "Erreur"
+text = "Une erreur inattendue s'est produite. Si elle persiste, prévenez l'administrateur."
+
+[error]
+back_home = "Retour à l'accueil"
+
+[email.password_reset]
+subject = "{app} : nouveau mot de passe"
+body = """
+Bonjour {name},
+
+Pour choisir un nouveau mot de passe, ouvrez ce lien (valable une heure, une seule fois) :
+{link}
+
+Si vous n'êtes pas à l'origine de cette demande, ignorez ce message : votre mot de passe actuel reste valable.
+"""

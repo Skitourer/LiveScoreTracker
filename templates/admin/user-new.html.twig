@@ -1,0 +1,32 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('admin.new_account') }}{% endblock %}
+
+{% block content %}
+    <p><a href="{{ url_for('admin-users') }}">← {{ t('admin.users_title') }}</a></p>
+    <h1>{{ t('admin.new_account') }}</h1>
+    <p>{{ t('admin.new_account_intro') }}</p>
+    {% include 'partials/errors.html.twig' %}
+    <form method="post" action="{{ url_for('admin-user-new') }}" class="form">
+        {{ csrf_field() }}
+        <fieldset>
+            <legend>{{ t('account.role') }}</legend>
+            {% for role in ['organizer', 'admin'] %}
+                <label class="choice"><input type="radio" name="role" value="{{ role }}" {% if old.role == role %}checked{% endif %}> {{ t('role.' ~ role) }} <small>{{ t('role.' ~ role ~ '_hint') }}</small></label>
+            {% endfor %}
+        </fieldset>
+        <label>{{ t('account.username') }} <small>{{ t('account.username_rule') }}</small>
+            <input type="text" name="username" value="{{ old.username }}" autocapitalize="none" spellcheck="false" required>
+        </label>
+        <label>{{ t('account.display_name') }}
+            <input type="text" name="display_name" value="{{ old.display_name }}" required>
+        </label>
+        <label>{{ t('account.email') }}
+            <input type="email" name="email" value="{{ old.email }}" required>
+        </label>
+        <label>{{ t('admin.temporary_password') }} <small>{{ t('password.rule', {min: min}) }}</small>
+            <input type="text" name="password" autocomplete="off" minlength="{{ min }}" required>
+        </label>
+        <button type="submit" class="button">{{ t('admin.create') }}</button>
+    </form>
+{% endblock %}

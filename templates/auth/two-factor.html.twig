@@ -1,0 +1,17 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('two_factor.title') }}{% endblock %}
+
+{% block content %}
+    <h1>{{ t('two_factor.title') }}</h1>
+    <p>{{ t('two_factor.prompt') }}</p>
+    {% include 'partials/errors.html.twig' %}
+    <form method="post" action="{{ url_for('login-2fa') }}" class="form">
+        {{ csrf_field() }}
+        <label>{{ t('two_factor.code') }}
+            <input type="text" name="code" inputmode="numeric" autocomplete="one-time-code" autocapitalize="none" maxlength="12" required autofocus>
+        </label>
+        <button type="submit" class="button">{{ t('two_factor.submit') }}</button>
+    </form>
+    <p class="meta">{{ t('two_factor.recovery_hint') }}</p>
+{% endblock %}

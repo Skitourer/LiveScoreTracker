@@ -6,17 +6,48 @@ namespace LiveScoreTracker;
 
 use DI\ContainerBuilder;
 use Dotenv\Dotenv;
+use LiveScoreTracker\Action\AccountAction;
+use LiveScoreTracker\Action\Admin\AuditAction;
+use LiveScoreTracker\Action\Admin\PhaseAction;
+use LiveScoreTracker\Action\Admin\RefereeAccountAction;
+use LiveScoreTracker\Action\Admin\UserCreateAction;
+use LiveScoreTracker\Action\Admin\UserEditAction;
+use LiveScoreTracker\Action\Admin\UsersAction;
+use LiveScoreTracker\Action\Auth\ChangePasswordAction;
+use LiveScoreTracker\Action\Auth\ForgotPasswordAction;
+use LiveScoreTracker\Action\Auth\LoginAction;
+use LiveScoreTracker\Action\Auth\LogoutAction;
+use LiveScoreTracker\Action\Auth\ResetPasswordAction;
+use LiveScoreTracker\Action\Auth\SetupAction;
+use LiveScoreTracker\Action\Auth\TwoFactorChallengeAction;
+use LiveScoreTracker\Action\Auth\TwoFactorSetupAction;
+use LiveScoreTracker\Action\DashboardAction;
 use LiveScoreTracker\Action\HealthAction;
 use LiveScoreTracker\Action\HomeAction;
 use LiveScoreTracker\Action\MigrateAction;
 use LiveScoreTracker\Action\ScoringReportAction;
 use LiveScoreTracker\Domain\Config\InvalidConfig;
+use LiveScoreTracker\Domain\Security\Permission;
+use LiveScoreTracker\Http\AppErrorHandler;
+use LiveScoreTracker\Http\AuthState;
+use LiveScoreTracker\Http\HtmlErrorRenderer;
+use LiveScoreTracker\Http\Middleware\AuthenticationMiddleware;
+use LiveScoreTracker\Http\Middleware\Authorize;
+use LiveScoreTracker\Http\Middleware\CsrfMiddleware;
+use LiveScoreTracker\Http\Middleware\SecurityHeadersMiddleware;
+use LiveScoreTracker\Http\Middleware\SessionMiddleware;
+use LiveScoreTracker\Http\RequestContext;
 use LiveScoreTracker\Infrastructure\BuildInfo;
+use LiveScoreTracker\Infrastructure\Clock;
 use LiveScoreTracker\Infrastructure\Config\ConfigRepository;
 use LiveScoreTracker\Infrastructure\Database\ConnectionFactory;
 use LiveScoreTracker\Infrastructure\Database\Migrator;
 use LiveScoreTracker\Infrastructure\I18n\CatalogLoader;
 use LiveScoreTracker\Infrastructure\I18n\Translator;
+use LiveScoreTracker\Infrastructure\Mail\LogMailer;
+use LiveScoreTracker\Infrastructure\Mail\Mailer;
+use LiveScoreTracker\Infrastructure\Mail\SmtpMailer;
+use LiveScoreTracker\Infrastructure\Session\SessionStore;
 use LiveScoreTracker\Infrastructure\Settings;
 use LiveScoreTracker\Presentation\ResultFormatter;
 use LiveScoreTracker\Presentation\TwigExtension;
@@ -24,6 +55,7 @@ use PDO;
 use Psr\Container\ContainerInterface;
 use Slim\App;
 use Slim\Factory\AppFactory;
+use Slim\Interfaces\RouteCollectorProxyInterface;
 use Slim\Views\Twig;
 use Slim\Views\TwigMiddleware;
 
@@ -45,37 +77,107 @@ final class Kernel
     }
 
     /**
+     * @param array<string, mixed> $overrides container entries replaced (tests)
+     *
      * @return App<ContainerInterface>
      */
-    public static function createApp(Settings $settings): App
+    public static function createApp(Settings $settings, array $overrides = []): App
     {
-        $container = self::createContainer($settings);
+        $container = self::createContainer($settings, $overrides);
         $app = AppFactory::createFromContainer($container);
+        $context = self::service($container, RequestContext::class);
+        $twig = self::service($container, Twig::class);
 
+        // Middleware: the last added runs first. Request order:
+        // security headers → session → Twig → errors → authentication → body parsing → CSRF → routing.
         $app->addRoutingMiddleware();
+        $app->add(new CsrfMiddleware($context));
         $app->addBodyParsingMiddleware();
-        $app->add(TwigMiddleware::create($app, self::service($container, Twig::class)));
-        $app->addErrorMiddleware($settings->debug, true, true);
+        $app->add(self::service($container, AuthenticationMiddleware::class));
+        $errors = $app->addErrorMiddleware($settings->debug, true, $settings->debug);
+        $handler = new AppErrorHandler($app->getCallableResolver(), $app->getResponseFactory());
+        $renderer = new HtmlErrorRenderer($twig);
+        $handler->registerErrorRenderer('text/html', $renderer);
+        $handler->setDefaultErrorRenderer('text/html', $renderer);
+        $errors->setDefaultErrorHandler($handler);
+        $app->add(TwigMiddleware::create($app, $twig));
+        $app->add(self::service($container, SessionMiddleware::class));
+        $app->add(new SecurityHeadersMiddleware($context));
+
+        self::routes($app, $context);
+
+        return $app;
+    }
+
+    /**
+     * @param App<ContainerInterface> $app
+     */
+    private static function routes(App $app, RequestContext $context): void
+    {
+        $guard = static fn(?Permission $permission = null, AuthState ...$states): Authorize => new Authorize(
+            $context,
+            $permission,
+            $states === [] ? [AuthState::Authenticated] : array_values($states),
+        );
 
         $app->get('/', HomeAction::class)->setName('home');
         $app->get('/health', HealthAction::class)->setName('health');
         $app->post('/internal/migrate', MigrateAction::class)->setName('migrate');
         $app->get('/demo/report', ScoringReportAction::class)->setName('demo-report');
 
-        return $app;
+        // Login and passwords
+        $app->map(['GET', 'POST'], '/setup', SetupAction::class)->setName('setup');
+        $app->map(['GET', 'POST'], '/login', LoginAction::class)->setName('login');
+        $app->map(['GET', 'POST'], '/login/2fa', TwoFactorChallengeAction::class)->setName('login-2fa')
+            ->add($guard(null, AuthState::TwoFactorChallenge));
+        $app->post('/logout', LogoutAction::class)->setName('logout');
+        $app->map(['GET', 'POST'], '/password/forgot', ForgotPasswordAction::class)->setName('password-forgot');
+        $app->map(['GET', 'POST'], '/password/reset/{token}', ResetPasswordAction::class)->setName('password-reset');
+
+        // Own account
+        $app->get('/dashboard', DashboardAction::class)->setName('dashboard')->add($guard());
+        $app->map(['GET', 'POST'], '/account', AccountAction::class)->setName('account')->add($guard());
+        $app->map(['GET', 'POST'], '/account/password', ChangePasswordAction::class)->setName('account-password')
+            ->add($guard(null, AuthState::Authenticated, AuthState::MustChangePassword));
+        $app->map(['GET', 'POST'], '/account/2fa', TwoFactorSetupAction::class)->setName('account-2fa')
+            ->add($guard(null, AuthState::TwoFactorSetup, AuthState::Authenticated));
+
+        // Administration
+        // Slim binds group callbacks to itself: the closure must not be static.
+        $app->group('/admin', function (RouteCollectorProxyInterface $admin) use ($guard): void {
+            $admin->get('/users', UsersAction::class)->setName('admin-users')->add($guard(Permission::ManageAccounts));
+            $admin->map(['GET', 'POST'], '/users/new', UserCreateAction::class)->setName('admin-user-new')->add($guard(Permission::ManageAccounts));
+            $admin->map(['GET', 'POST'], '/users/{id:[0-9]+}', UserEditAction::class)->setName('admin-user')->add($guard(Permission::ManageAccounts));
+            $admin->map(['GET', 'POST'], '/referee', RefereeAccountAction::class)->setName('admin-referee')->add($guard(Permission::ManageAccounts));
+            $admin->map(['GET', 'POST'], '/phase', PhaseAction::class)->setName('admin-phase')->add($guard(Permission::ChangePhase));
+            $admin->get('/audit', AuditAction::class)->setName('admin-audit')->add($guard(Permission::ViewAuditLog));
+        });
     }
 
-    public static function createContainer(Settings $settings): ContainerInterface
+    /**
+     * @param array<string, mixed> $overrides
+     */
+    public static function createContainer(Settings $settings, array $overrides = []): ContainerInterface
     {
         $builder = new ContainerBuilder();
         $builder->addDefinitions([
             Settings::class => $settings,
+            Clock::class => static fn(): Clock => new Clock(),
+            RequestContext::class => static fn(): RequestContext => new RequestContext(),
             BuildInfo::class => static fn(): BuildInfo => BuildInfo::fromRoot($settings->rootDir),
             PDO::class => static fn(): PDO => ConnectionFactory::create($settings),
             Migrator::class => static fn(ContainerInterface $c): Migrator => new Migrator(
                 self::service($c, PDO::class),
                 $settings->rootDir . '/migrations',
             ),
+            SessionStore::class => static fn(ContainerInterface $c): SessionStore => new SessionStore(
+                self::service($c, PDO::class),
+                self::service($c, Clock::class),
+                $settings->sessionIdleMinutes,
+            ),
+            Mailer::class => static fn(): Mailer => $settings->mailTransport === 'smtp'
+                ? new SmtpMailer($settings)
+                : new LogMailer($settings->dataDir . '/logs/mail.log'),
             ConfigRepository::class => static fn(): ConfigRepository => new ConfigRepository(
                 $settings->dataDir,
                 $settings->rootDir . '/config.example',
@@ -106,11 +208,16 @@ final class Kernel
                 $twig->addExtension(new TwigExtension(
                     self::service($c, Translator::class),
                     self::service($c, ResultFormatter::class),
+                    self::service($c, RequestContext::class),
+                    $settings->timezone,
                 ));
 
                 return $twig;
             },
         ]);
+        if ($overrides !== []) {
+            $builder->addDefinitions($overrides);
+        }
 
         return $builder->build();
     }

@@ -29,6 +29,10 @@ final class ConnectionFactory
                 $settings->dbName,
             );
 
+            // Report matched rows (not only changed ones) so "UPDATE … then INSERT if none" works.
+            $options[PDO::MYSQL_ATTR_FOUND_ROWS] = true;
+            $options[PDO::MYSQL_ATTR_INIT_COMMAND] = "SET time_zone = '+00:00'";
+
             return new PDO($dsn, $settings->dbUser, $settings->dbPassword, $options);
         }
 

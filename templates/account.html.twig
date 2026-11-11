@@ -1,0 +1,29 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('account.title') }}{% endblock %}
+
+{% block content %}
+    {% set me = current_user() %}
+    <h1>{{ t('account.title') }}</h1>
+    <dl class="facts">
+        <dt>{{ t('account.username') }}</dt><dd>{{ me.username }}</dd>
+        <dt>{{ t('account.role') }}</dt><dd>{{ t('role.' ~ me.role.value) }}</dd>
+        {% if me.email %}<dt>{{ t('account.email') }}</dt><dd>{{ me.email }}</dd>{% endif %}
+    </dl>
+    {% if me.role.isIndividual() %}
+        <p><a class="button secondary" href="{{ url_for('account-password') }}">{{ t('password.change_title') }}</a></p>
+    {% endif %}
+
+    {% if me.role.requiresTwoFactor() %}
+        <h2>{{ t('two_factor.title') }}</h2>
+        <p>{{ t('account.2fa_on', {count: remainingCodes}) }}</p>
+        {% include 'partials/errors.html.twig' %}
+        <form method="post" action="{{ url_for('account') }}" class="form">
+            {{ csrf_field() }}
+            <label>{{ t('password.current') }}
+                <input type="password" name="current_password" autocomplete="current-password" required>
+            </label>
+            <button type="submit" class="button secondary">{{ t('account.new_codes') }}</button>
+        </form>
+    {% endif %}
+{% endblock %}

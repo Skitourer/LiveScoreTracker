@@ -1,0 +1,28 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('admin.users_title') }}{% endblock %}
+
+{% block content %}
+    <h1>{{ t('admin.users_title') }}</h1>
+    {% if adminCount < 2 %}<p class="notice">{{ t('admin.two_admins_advice') }}</p>{% endif %}
+    <p><a class="button" href="{{ url_for('admin-user-new') }}">{{ t('admin.new_account') }}</a></p>
+    <div class="table-scroll">
+        <table>
+            <thead><tr><th>{{ t('account.display_name') }}</th><th>{{ t('account.role') }}</th><th>{{ t('admin.status') }}</th></tr></thead>
+            <tbody>
+                {% for account in accounts %}
+                    <tr>
+                        <td><a href="{{ url_for('admin-user', {id: account.id}) }}">{{ account.displayName }}</a><br><small class="muted">{{ account.username }}</small></td>
+                        <td>{{ t('role.' ~ account.role.value) }}</td>
+                        <td>
+                            {% if account.disabled %}<span class="badge muted">{{ t('admin.disabled') }}</span>
+                            {% elseif account.mustChangePassword %}<span class="badge">{{ t('admin.temporary_password') }}</span>
+                            {% elseif account.role.requiresTwoFactor() and not account.totpEnabled %}<span class="badge warning">{{ t('admin.no_2fa_yet') }}</span>
+                            {% else %}<span class="badge">{{ t('admin.active') }}</span>{% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

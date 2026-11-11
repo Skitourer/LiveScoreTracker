@@ -1,0 +1,19 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('dashboard.title') }}{% endblock %}
+
+{% block content %}
+    <h1>{{ t('dashboard.title') }}</h1>
+    <p class="meta">{{ t('dashboard.phase', {phase: t('phase.' ~ phase())}) }}</p>
+    <ul class="tiles">
+        {% for tile in tiles %}
+            <li>
+                {% if tile.link %}
+                    <a class="tile" href="{{ tile.link }}">{{ t(tile.label) }}</a>
+                {% else %}
+                    <span class="tile soon">{{ t(tile.label) }} <small>{{ t('dashboard.coming_soon') }}</small></span>
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

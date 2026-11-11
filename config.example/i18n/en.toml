@@ -125,3 +125,254 @@ no_bounds = "No valid performance: no scale."
 scale = "Scale: {floor} to {max} points · foul: {foul} · not done: {dnf}"
 foul = "foul"
 config_invalid = "The configuration has errors:"
+
+# ---------- Accounts and security ----------
+
+[nav]
+login = "Log in"
+logout = "Log out"
+
+[role]
+admin = "Admin"
+organizer = "Organizer"
+referee = "Table referee"
+admin_hint = "full access, two-factor authentication required"
+organizer_hint = "registrations, check-in, result entry, monitoring"
+
+[login]
+title = "Log in"
+username = "Username"
+password = "Password"
+submit = "Log in"
+forgot = "Forgot your password?"
+invalid = "Wrong username or password."
+blocked = "Too many attempts. Try again in {minutes} min."
+referee_inactive = "The referee account only works while the competition is running."
+
+[two_factor]
+title = "Two-factor authentication"
+prompt = "Type the 6-digit code shown by your authenticator app."
+code = "Code"
+submit = "Confirm"
+recovery_hint = "Lost your phone? Type one of your recovery codes (e.g. k7mq-3x9p)."
+invalid_code = "Wrong or expired code."
+recovery_code_used = "You used a recovery code. {remaining} left."
+setup_title = "Turn on two-factor authentication"
+setup_intro = "Admin accounts are protected by a one-time code on top of the password."
+setup_step_app = "Install an authenticator app on your phone (Google Authenticator, Microsoft Authenticator…)."
+setup_step_scan = "In the app, add an account by scanning this QR code:"
+setup_manual = "Cannot scan? Type this key manually:"
+setup_step_code = "Type the 6-digit code shown by the app."
+setup_submit = "Turn on"
+codes_title = "Your recovery codes"
+codes_intro = "Write down or print these 10 codes and keep them safe. Each one lets you log in once without your phone. They will not be shown again."
+codes_continue = "I have saved my codes"
+
+[password]
+forgot_title = "Forgot password"
+forgot_intro = "Type your account's email address: you will receive a link to choose a new password."
+forgot_submit = "Send the link"
+forgot_sent = "If an account matches this address, an email has just been sent. The link is valid for one hour."
+back_to_login = "Back to login"
+reset_title = "New password"
+reset_invalid = "This link is no longer valid: it was already used or has expired. Make a new request."
+new = "New password"
+confirm = "Confirm password"
+save = "Save"
+rule = "at least {min} characters"
+change_title = "Change my password"
+change_forced = "You logged in with a temporary password: choose your own password."
+current = "Current password"
+too_short_individual = "The password must have at least {min} characters."
+too_short_shared = "The referee password must have at least 8 characters."
+too_long = "The password is too long."
+spaces_around = "The password must not start or end with a space."
+mismatch = "The two passwords do not match."
+current_wrong = "The current password is wrong."
+same_as_before = "Choose a password different from the current one."
+reset_done = "Password saved. You can log in."
+changed = "Password changed."
+
+[setup]
+title = "Installation: first admin account"
+intro = "No admin account exists yet. Create the first one. The installation token is the DEPLOY_TOKEN value of the server's .env file."
+disabled = "Installation is impossible: DEPLOY_TOKEN is not set in the server's .env file."
+token = "Installation token"
+submit = "Create the admin account"
+wrong_token = "Wrong installation token."
+done = "Admin account created. Log in to set up two-factor authentication."
+
+[account]
+title = "My account"
+username = "Username"
+username_rule = "3 to 32 characters: lowercase letters, digits, . _ -"
+display_name = "Display name"
+email = "Email"
+role = "Role"
+2fa_on = "On. Recovery codes left: {count}."
+new_codes = "Generate new recovery codes"
+username_invalid = "Invalid username (3 to 32 characters: lowercase letters, digits, . _ -)."
+username_taken = "This username is already used."
+display_name_invalid = "The display name must have 2 to 120 characters."
+email_required = "The email is required (it is used if the password is forgotten)."
+email_invalid = "Invalid email address."
+role_invalid = "Invalid role."
+use_own_password_page = "For your own account, use \"Change my password\"."
+cannot_disable_self = "You cannot disable your own account."
+last_admin = "Impossible: this is the last active admin account."
+cannot_reset_own_2fa = "Two-factor authentication is reset by another admin."
+created = "Account \"{username}\" created. Give them their temporary password."
+updated = "Account updated."
+disabled = "Account disabled."
+enabled = "Account enabled again."
+password_reset_by_admin = "Temporary password saved. It must be changed at next login."
+2fa_reset = "Two-factor authentication reset: it will be set up again at next login."
+
+[form]
+unknown_action = "Unknown action."
+
+[dashboard]
+title = "Dashboard"
+phase = "Phase: {phase}"
+coming_soon = "coming soon"
+results_entry = "Result entry"
+registrations = "Registrations"
+check_in = "Check-in"
+monitoring = "Competition monitoring"
+rankings = "Results and rankings"
+phase_tile = "Competition phase"
+accounts = "Accounts"
+referee_account = "Referee account"
+audit_log = "Audit log"
+configuration = "Configuration"
+
+[phase]
+preparation = "preparation"
+running = "competition running"
+finished = "competition finished"
+title = "Competition phase"
+current = "Current phase: {phase}"
+start_hint = "Starting the competition opens result entry and turns on the referee account."
+start = "Start the competition"
+back_hint = "Going back to preparation closes result entry and logs out the referee phones."
+back_to_preparation = "Back to preparation"
+closing_later = "Closing the competition, with its checks, comes in a later step."
+changed_to_preparation = "Back to the preparation phase."
+changed_to_running = "The competition has started."
+
+[admin]
+users_title = "Accounts"
+two_admins_advice = "Tip: create at least 2 admin accounts, so each can reset the other's two-factor authentication."
+new_account = "New account"
+new_account_intro = "Choose a temporary password and give it to the person: they must change it at first login."
+status = "Status"
+disabled = "disabled"
+temporary_password = "Temporary password"
+no_2fa_yet = "two-factor authentication to set up"
+active = "active"
+create = "Create the account"
+last_login = "Last login"
+2fa_active = "on ({count} recovery codes left)"
+profile = "Profile"
+save = "Save"
+temporary_password_hint = "A new temporary password logs the person out; they must change it at next login."
+set_temporary_password = "Set the temporary password"
+reset_2fa_hint = "Use it if this admin lost their phone and recovery codes."
+reset_2fa = "Reset two-factor authentication"
+enable = "Enable the account"
+disable = "Disable the account"
+
+[referee]
+title = "Referee account"
+intro = "All table referees log in with the same username and password. Change the password for each edition."
+inactive_now = "This account only works during the \"competition running\" phase."
+password = "Referee password"
+create = "Create the referee account"
+phones = "Connected phones: {count}"
+no_phone = "No phone connected."
+last_seen = "last active {at}"
+disconnect_all = "Disconnect all phones"
+change_password = "Change the password"
+change_password_hint = "Changing the password also disconnects every phone."
+save_password = "Save the password"
+created = "Referee account created."
+password_changed = "Referee password changed; every phone is disconnected."
+disconnected_all = "Every referee phone is disconnected."
+
+[audit]
+title = "Audit log"
+action = "Action"
+all = "All"
+filter = "Filter"
+count = "{count} entries"
+when = "Date"
+who = "Account"
+details = "Details"
+device = "device"
+newer = "Newer"
+older = "Older"
+
+[audit.actions]
+"auth.login" = "Login"
+"auth.login_failed" = "Failed login"
+"auth.logout" = "Logout"
+"auth.2fa_failed" = "Two-factor code refused"
+"auth.2fa_enabled" = "Two-factor authentication turned on"
+"auth.recovery_codes_regenerated" = "New recovery codes"
+"auth.password_changed" = "Password changed"
+"auth.password_reset_requested" = "Forgotten-password link sent"
+"auth.password_reset_mail_failed" = "Password email could not be sent"
+"auth.password_reset" = "Password reset by link"
+"account.created" = "Account created"
+"account.updated" = "Account updated"
+"account.disabled" = "Account disabled"
+"account.enabled" = "Account enabled"
+"account.password_reset_by_admin" = "Temporary password set"
+"account.2fa_reset" = "Two-factor authentication reset"
+"referee.created" = "Referee account created"
+"referee.password_changed" = "Referee password changed"
+"referee.disconnected_all" = "Referee phones disconnected"
+"phase.changed" = "Phase change"
+"setup.first_admin" = "First admin created"
+
+[error.csrf]
+title = "Page expired"
+text = "The form has expired. Go back, reload the page and try again."
+
+[error.400]
+title = "Invalid request"
+text = "The request could not be processed."
+
+[error.403]
+title = "Access denied"
+text = "Your account cannot access this page."
+
+[error.404]
+title = "Page not found"
+text = "This page does not exist."
+
+[error.405]
+title = "Action not possible"
+text = "This action is not possible on this page."
+
+[error.429]
+title = "Too many attempts"
+text = "Wait a few minutes before trying again."
+
+[error.500]
+title = "Error"
+text = "An unexpected error occurred. If it happens again, tell the administrator."
+
+[error]
+back_home = "Back to home"
+
+[email.password_reset]
+subject = "{app}: new password"
+body = """
+Hello {name},
+
+To choose a new password, open this link (valid for one hour, single use):
+{link}
+
+If you did not ask for this, ignore this message: your current password still works.
+"""

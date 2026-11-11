@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.4 — 11 November 2026
+> Version 1.5 — 11 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -705,12 +705,16 @@ The **anonymous history** of previous editions remains available (year-over-year
 - **Mandatory 2FA for admins**: TOTP codes (authenticator app: Google Authenticator, Microsoft Authenticator…). No SMS.
 - **10 recovery codes** provided when 2FA is enabled. An admin can reset another admin's 2FA.
 - **Forgotten password** (admin, organizer): email link, valid for **1 hour**, single use.
-- **Rate limiting** on all login screens (including bib + date of birth): progressive temporary lockout.
+- **Rate limiting** on all login screens (including bib + date of birth): progressive temporary lockout. A one-minute lockout starts after **5 failures** for an account (counted **per phone** for the shared referee account, so one mistake does not lock every phone) or **20 failures** from one IP address; the delay doubles with each new failure, up to 1 hour.
 - **Shared referee account**:
   - active only during the "in progress" phase;
   - password changed every edition;
   - admin "**log out all phones**" button;
-  - each entry records a device identifier.
+  - each entry records a device identifier;
+  - password of **at least 8 characters** (it is typed on many phones).
+- **Account creation**: the admin creates admin and organizer accounts with a **temporary password**, which must be changed at first login.
+- **First admin**: on a new installation, the `/setup` page creates the first admin account, once, with the `DEPLOY_TOKEN` of the server's `.env` file (shared hosting offers no command line).
+- **Sessions** stored in the database: they expire after **4 hours of inactivity** (configurable) and at the latest **16 hours** after login. The admin sees the phones logged in to the referee account.
 
 ### 19.2 Application
 

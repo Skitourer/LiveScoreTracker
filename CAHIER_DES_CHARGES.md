@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.4 — 11 novembre 2026
+> Version 1.5 — 11 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -705,12 +705,16 @@ L'**historique anonyme** des éditions précédentes reste consultable (comparai
 - **2FA obligatoire pour les admins** : codes TOTP (application d'authentification : Google Authenticator, Microsoft Authenticator…). Pas de SMS.
 - **10 codes de secours** fournis à l'activation de la 2FA. Un admin peut réinitialiser la 2FA d'un autre admin.
 - **Mot de passe oublié** (admin, organisateur) : lien par email, valable **1 heure**, à usage unique.
-- **Limitation des tentatives** sur tous les écrans de connexion (y compris dossard + date de naissance) : blocage temporaire progressif.
+- **Limitation des tentatives** sur tous les écrans de connexion (y compris dossard + date de naissance) : blocage temporaire progressif. Blocage d'une minute dès **5 échecs** pour un compte (comptés **par téléphone** pour le compte partagé des arbitres, pour qu'une fausse manipulation ne bloque pas tous les téléphones) ou **20 échecs** pour une même adresse IP ; la durée double à chaque nouvel échec, jusqu'à 1 h.
 - **Compte partagé des arbitres** :
   - actif uniquement en phase « en cours » ;
   - mot de passe changé à chaque édition ;
   - bouton admin « **déconnecter tous les téléphones** » ;
-  - chaque saisie enregistre un identifiant d'appareil.
+  - chaque saisie enregistre un identifiant d'appareil ;
+  - mot de passe de **8 caractères minimum** (il est saisi sur de nombreux téléphones).
+- **Création des comptes** : l'admin crée les comptes admin et organisateur avec un **mot de passe provisoire**, à changer obligatoirement à la première connexion.
+- **Premier admin** : sur une nouvelle installation, la page `/setup` permet de créer le premier compte admin, une seule fois, avec le jeton `DEPLOY_TOKEN` du fichier `.env` du serveur (l'hébergement mutualisé n'offre pas de ligne de commande).
+- **Sessions** enregistrées en base de données : elles expirent après **4 h d'inactivité** (réglable) et au plus tard **16 h** après la connexion. L'admin voit les téléphones connectés au compte des arbitres.
 
 ### 19.2 Application
 

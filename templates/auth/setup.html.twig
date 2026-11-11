@@ -1,0 +1,35 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('setup.title') }}{% endblock %}
+
+{% block content %}
+    <h1>{{ t('setup.title') }}</h1>
+    {% if disabled %}
+        <p class="notice error">{{ t('setup.disabled') }}</p>
+    {% else %}
+        <p>{{ t('setup.intro') }}</p>
+        {% include 'partials/errors.html.twig' %}
+        <form method="post" action="{{ url_for('setup') }}" class="form">
+            {{ csrf_field() }}
+            <label>{{ t('setup.token') }}
+                <input type="password" name="setup_token" autocomplete="off" required>
+            </label>
+            <label>{{ t('account.username') }} <small>{{ t('account.username_rule') }}</small>
+                <input type="text" name="username" value="{{ old.username }}" autocapitalize="none" spellcheck="false" required>
+            </label>
+            <label>{{ t('account.display_name') }}
+                <input type="text" name="display_name" value="{{ old.display_name }}" required>
+            </label>
+            <label>{{ t('account.email') }}
+                <input type="email" name="email" value="{{ old.email }}" required>
+            </label>
+            <label>{{ t('password.new') }} <small>{{ t('password.rule', {min: min}) }}</small>
+                <input type="password" name="password" autocomplete="new-password" minlength="{{ min }}" required>
+            </label>
+            <label>{{ t('password.confirm') }}
+                <input type="password" name="password_confirm" autocomplete="new-password" minlength="{{ min }}" required>
+            </label>
+            <button type="submit" class="button">{{ t('setup.submit') }}</button>
+        </form>
+    {% endif %}
+{% endblock %}
