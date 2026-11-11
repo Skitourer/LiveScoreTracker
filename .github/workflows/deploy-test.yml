@@ -30,7 +30,8 @@ jobs:
 
   deploy:
     needs: ci
-    runs-on: ubuntu-latest
+    # Pinned: package downloads fail on the new ubuntu-26.04 runner image.
+    runs-on: ubuntu-24.04
     environment: test
     env:
       SFTP_HOST: ${{ secrets.SFTP_HOST }}
