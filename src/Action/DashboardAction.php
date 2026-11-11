@@ -19,7 +19,7 @@ final class DashboardAction
      * Tiles in display order: [translation key, link or null when not built yet, permission].
      */
     private const TILES = [
-        ['dashboard.results_entry', null, Permission::EnterResultsChosenEvent],
+        ['dashboard.results_entry', '/entry', Permission::EnterResultsChosenEvent],
         ['dashboard.registrations', '/registrations', Permission::ViewRegistrations],
         ['dashboard.check_in', '/check-in', Permission::CheckInOut],
         ['dashboard.monitoring', null, Permission::ViewMonitoring],
