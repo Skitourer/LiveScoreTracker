@@ -84,6 +84,11 @@ final class LoginAction
             return $this->responder->redirect($response, $user->totpEnabled ? '/login/2fa' : '/account/2fa');
         }
 
+        if ($user->role === Role::Referee) {
+            // The shared account: ask who is holding the phone before anything else.
+            return $this->responder->redirect($response, '/referee/name');
+        }
+
         $this->responder->audit('auth.login', [], $user);
 
         return $this->responder->redirect($response, self::takeNext($context->session()));

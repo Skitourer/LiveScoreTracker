@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.6 — 11 November 2026
+> Version 1.7 — 11 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -709,6 +709,8 @@ The **anonymous history** of previous editions remains available (year-over-year
 - **Shared referee account**:
   - active only during the "in progress" phase;
   - password changed every edition;
+  - after logging in, each referee **types their first name**, recorded with each of their actions and entries;
+  - the admin sees **who is connected** (first name, phone, last activity) and can **log out one referee**;
   - admin "**log out all phones**" button;
   - each entry records a device identifier;
   - password of **at least 8 characters** (it is typed on many phones).
@@ -1133,6 +1135,7 @@ help = "basketball.md"
 [import.columns]
 last_name = "Child last name"
 first_name = "Child first name"
+birth_date = "Child birth date"
 gender = "Gender"
 school = "School"
 level = "Class"

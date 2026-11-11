@@ -14,6 +14,8 @@ enum AuthState: string
     case TwoFactorChallenge = 'two_factor_challenge';
     /** Password OK, the admin has no 2FA yet and must set it up. */
     case TwoFactorSetup = 'two_factor_setup';
+    /** Shared referee account: the referee must first say who they are. */
+    case RefereeNameRequired = 'referee_name_required';
     /** Logged in with a temporary password that must be changed first. */
     case MustChangePassword = 'must_change_password';
     case Authenticated = 'authenticated';

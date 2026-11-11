@@ -62,6 +62,20 @@ final class RefereeAccountAction
 
                     return $this->responder->redirect($response, '/admin/referee');
                 }
+            } elseif ($op === 'disconnect_one' && $account !== null) {
+                $target = null;
+                foreach ($this->sessions->activeForUser($account->id) as $phone) {
+                    if (hash_equals($phone['id'], Responder::field($request, 'session'))) {
+                        $target = $phone;
+                    }
+                }
+                if ($target !== null && $this->sessions->deleteStored($target['id'], $account->id)) {
+                    $name = $target['referee_name'] ?? '?';
+                    $this->responder->audit('referee.disconnected_one', ['referee_name' => $name, 'device' => substr((string) $target['device_id'], 0, 6)]);
+                    $this->responder->flash('success', 'referee.disconnected_one', ['name' => $name]);
+                }
+
+                return $this->responder->redirect($response, '/admin/referee');
             } elseif ($op === 'disconnect' && $account !== null) {
                 $this->users->bumpSessionVersion($account->id);
                 $this->sessions->deleteForUser($account->id);

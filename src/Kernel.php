@@ -17,6 +17,7 @@ use LiveScoreTracker\Action\Auth\ChangePasswordAction;
 use LiveScoreTracker\Action\Auth\ForgotPasswordAction;
 use LiveScoreTracker\Action\Auth\LoginAction;
 use LiveScoreTracker\Action\Auth\LogoutAction;
+use LiveScoreTracker\Action\Auth\RefereeNameAction;
 use LiveScoreTracker\Action\Auth\ResetPasswordAction;
 use LiveScoreTracker\Action\Auth\SetupAction;
 use LiveScoreTracker\Action\Auth\TwoFactorChallengeAction;
@@ -141,6 +142,8 @@ final class Kernel
         $app->map(['GET', 'POST'], '/login/2fa', TwoFactorChallengeAction::class)->setName('login-2fa')
             ->add($guard(null, AuthState::TwoFactorChallenge));
         $app->post('/logout', LogoutAction::class)->setName('logout');
+        $app->map(['GET', 'POST'], '/referee/name', RefereeNameAction::class)->setName('referee-name')
+            ->add($guard(null, AuthState::RefereeNameRequired, AuthState::Authenticated));
         $app->map(['GET', 'POST'], '/password/forgot', ForgotPasswordAction::class)->setName('password-forgot');
         $app->map(['GET', 'POST'], '/password/reset/{token}', ResetPasswordAction::class)->setName('password-reset');
 

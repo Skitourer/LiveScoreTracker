@@ -106,19 +106,23 @@ final class SessionStore
     /**
      * Active sessions of an account, most recent first (connected phones).
      *
-     * @return list<array{device_id: string|null, ip: string|null, user_agent: string|null, last_seen_at: string}>
+     * @return list<array{id: string, device_id: string|null, ip: string|null, user_agent: string|null, last_seen_at: string, referee_name: string|null}>
      */
     public function activeForUser(int $userId): array
     {
         $statement = $this->pdo->prepare(
-            'SELECT device_id, ip, user_agent, last_seen_at FROM sessions
+            'SELECT id, data, device_id, ip, user_agent, last_seen_at FROM sessions
              WHERE user_id = :u AND expires_at > :now ORDER BY last_seen_at DESC',
         );
         $statement->execute(['u' => $userId, 'now' => $this->clock->stamp()]);
 
         $sessions = [];
         foreach (Row::all($statement) as $row) {
+            $data = json_decode(Row::string($row, 'data'), true);
+            $name = \is_array($data) && \is_string($data['referee_name'] ?? null) ? $data['referee_name'] : null;
             $sessions[] = [
+                'id' => Row::string($row, 'id'),
+                'referee_name' => $name,
                 'device_id' => Row::nullableString($row, 'device_id'),
                 'ip' => Row::nullableString($row, 'ip'),
                 'user_agent' => Row::nullableString($row, 'user_agent'),
@@ -127,6 +131,17 @@ final class SessionStore
         }
 
         return $sessions;
+    }
+
+    /**
+     * Ends one stored session (identified by its stored id, not by the browser's token).
+     */
+    public function deleteStored(string $storedId, int $userId): bool
+    {
+        $statement = $this->pdo->prepare('DELETE FROM sessions WHERE id = :id AND user_id = :u');
+        $statement->execute(['id' => $storedId, 'u' => $userId]);
+
+        return $statement->rowCount() > 0;
     }
 
     public function deleteForUser(int $userId): void

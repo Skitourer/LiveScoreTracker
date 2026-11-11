@@ -120,18 +120,42 @@ final class AccountsTest extends TestCase
         self::assertSame(403, $refused->getStatusCode(), 'Inactive during preparation.');
 
         $this->admin->post('/admin/phase', ['phase' => 'running']);
-        self::assertSame('/dashboard', $phone->post('/login', ['username' => 'arbitre', 'password' => 'whistle-2027'])->getHeaderLine('Location'));
+        self::assertSame('/referee/name', $phone->post('/login', ['username' => 'arbitre', 'password' => 'whistle-2027'])->getHeaderLine('Location'));
+
+        // The first name is required before anything else.
+        self::assertSame('/referee/name', $phone->get('/dashboard')->getHeaderLine('Location'));
+        self::assertSame(422, $phone->post('/referee/name', ['first_name' => ' '])->getStatusCode());
+        self::assertSame('/dashboard', $phone->post('/referee/name', ['first_name' => 'paul'])->getHeaderLine('Location'));
         self::assertSame(200, $phone->get('/dashboard')->getStatusCode());
+        self::assertStringContainsString('Paul <small>· Arbitre de table</small>', $phone->lastBody);
         self::assertStringContainsString('Saisie des résultats', $phone->lastBody);
         self::assertSame(403, $phone->get('/admin/audit')->getStatusCode());
 
+        // A second referee on another phone.
+        $phone2 = $this->admin->otherBrowser();
+        $phone2->post('/login', ['username' => 'arbitre', 'password' => 'whistle-2027']);
+        $phone2->post('/referee/name', ['first_name' => 'Julie']);
+
         $this->admin->get('/admin/referee');
-        self::assertStringContainsString('Téléphones connectés : 1', $this->admin->lastBody);
+        self::assertStringContainsString('Téléphones connectés : 2', $this->admin->lastBody);
+        self::assertStringContainsString('<strong>Paul</strong>', $this->admin->lastBody);
+        self::assertStringContainsString('<strong>Julie</strong>', $this->admin->lastBody);
+
+        // Disconnect only Julie.
+        $julieSession = self::firstMatch('#<strong>Julie</strong>.*?name="session" value="([a-f0-9]{64})"#s', $this->admin->lastBody);
+        $this->admin->post('/admin/referee', ['op' => 'disconnect_one', 'session' => $julieSession]);
+        self::assertStringStartsWith('/login', $phone2->get('/dashboard')->getHeaderLine('Location'));
+        self::assertSame(200, $phone->get('/dashboard')->getStatusCode(), 'Paul stays connected.');
+
+        $this->admin->get('/admin/audit');
+        self::assertStringContainsString('referee: Paul', $this->admin->lastBody);
+        self::assertStringContainsString('Un arbitre déconnecté', $this->admin->lastBody);
+
+        // "Disconnect all phones", then back to preparation.
         $this->admin->post('/admin/referee', ['op' => 'disconnect']);
         self::assertStringStartsWith('/login', $phone->get('/dashboard')->getHeaderLine('Location'));
-
-        // Back to preparation logs the phone out too.
         $phone->post('/login', ['username' => 'arbitre', 'password' => 'whistle-2027']);
+        $phone->post('/referee/name', ['first_name' => 'Paul']);
         $this->admin->post('/admin/phase', ['phase' => 'preparation']);
         self::assertStringStartsWith('/login', $phone->get('/dashboard')->getHeaderLine('Location'));
     }
@@ -162,7 +186,7 @@ final class AccountsTest extends TestCase
 
         $other = $this->admin->otherBrowser();
         $other->ip = '198.51.100.1'; // same mobile network
-        self::assertSame('/dashboard', $other->post('/login', ['username' => 'arbitre', 'password' => 'whistle-2027'])->getHeaderLine('Location'));
+        self::assertSame('/referee/name', $other->post('/login', ['username' => 'arbitre', 'password' => 'whistle-2027'])->getHeaderLine('Location'));
     }
 
     public function testForgotPasswordByEmailLink(): void

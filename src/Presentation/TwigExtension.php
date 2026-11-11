@@ -48,6 +48,7 @@ final class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFunction('can', $this->context->can(...)),
             new TwigFunction('phase', fn(): string => $this->context->phase->value),
             new TwigFunction('local_time', $this->localTime(...)),
+            new TwigFunction('referee_name', $this->context->refereeName(...)),
             new TwigFunction('flashes', fn(): array => $this->context->hasSession() ? $this->context->session()->takeFlashes() : []),
         ];
     }

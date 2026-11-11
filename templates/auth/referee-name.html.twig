@@ -1,0 +1,16 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('referee.name_title') }}{% endblock %}
+
+{% block content %}
+    <h1>{{ t('referee.name_title') }}</h1>
+    <p>{{ t('referee.name_intro') }}</p>
+    {% include 'partials/errors.html.twig' %}
+    <form method="post" action="{{ url_for('referee-name') }}" class="form">
+        {{ csrf_field() }}
+        <label>{{ t('registration.field.first_name') }}
+            <input type="text" name="first_name" value="{{ name }}" maxlength="{{ max }}" autocomplete="given-name" required autofocus>
+        </label>
+        <button type="submit" class="button">{{ t('referee.name_submit') }}</button>
+    </form>
+{% endblock %}

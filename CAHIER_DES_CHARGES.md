@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.6 — 11 novembre 2026
+> Version 1.7 — 11 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -709,6 +709,8 @@ L'**historique anonyme** des éditions précédentes reste consultable (comparai
 - **Compte partagé des arbitres** :
   - actif uniquement en phase « en cours » ;
   - mot de passe changé à chaque édition ;
+  - après la connexion, chaque arbitre **indique son prénom**, enregistré avec chacune de ses actions et de ses saisies ;
+  - l'admin voit **qui est connecté** (prénom, téléphone, dernière activité) et peut **déconnecter un arbitre** en particulier ;
   - bouton admin « **déconnecter tous les téléphones** » ;
   - chaque saisie enregistre un identifiant d'appareil ;
   - mot de passe de **8 caractères minimum** (il est saisi sur de nombreux téléphones).
@@ -1133,6 +1135,7 @@ help = "basketball.md"
 [import.columns]
 last_name = "Child last name"
 first_name = "Child first name"
+birth_date = "Child birth date"
 gender = "Gender"
 school = "School"
 level = "Class"

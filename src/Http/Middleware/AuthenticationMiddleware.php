@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace LiveScoreTracker\Http\Middleware;
 
 use LiveScoreTracker\Domain\Security\AccessPolicy;
+use LiveScoreTracker\Domain\Security\Role;
 use LiveScoreTracker\Http\AuthState;
 use LiveScoreTracker\Http\RequestContext;
 use LiveScoreTracker\Infrastructure\Persistence\AppState;
@@ -62,6 +63,7 @@ final class AuthenticationMiddleware implements MiddlewareInterface
                 $this->context->state = match (true) {
                     $user->role->requiresTwoFactor() && !$secondFactorDone && $user->totpEnabled => AuthState::TwoFactorChallenge,
                     $user->role->requiresTwoFactor() && !$secondFactorDone => AuthState::TwoFactorSetup,
+                    $user->role === Role::Referee && !\is_string($session->get(RequestContext::REFEREE_NAME)) => AuthState::RefereeNameRequired,
                     $user->mustChangePassword => AuthState::MustChangePassword,
                     default => AuthState::Authenticated,
                 };
