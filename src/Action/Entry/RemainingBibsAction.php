@@ -61,6 +61,30 @@ final class RemainingBibsAction
             'remaining' => $remaining,
             'done' => $done,
             'query' => Responder::query($request, 'q'),
+            'reason' => $remaining === [] && $query !== '' ? $this->whyNotListed($workshop, $query, $byChild) : null,
         ]);
+    }
+
+    /**
+     * Why a search finds no remaining child: for a bib, the precise reason
+     * (unknown, other level, not checked in, already finished); otherwise "no match".
+     *
+     * @param array<int, list<\LiveScoreTracker\Domain\Results\StoredAttempt>> $byChild
+     */
+    private function whyNotListed(\LiveScoreTracker\Domain\Config\Workshop $workshop, string $query, array $byChild): string
+    {
+        if (!ctype_digit($query)) {
+            return 'entry.remaining_no_match';
+        }
+        $resolved = $this->desk->resolve($workshop, (int) $query);
+        if (!\is_array($resolved)) {
+            return $resolved;
+        }
+        [$child, $variant] = $resolved;
+        if (!$child->isPresent()) {
+            return 'entry.remaining_not_present';
+        }
+
+        return (new AttemptProgress($variant, $byChild[$child->id] ?? []))->isFinished() ? 'entry.remaining_finished' : 'entry.remaining_no_match';
     }
 }

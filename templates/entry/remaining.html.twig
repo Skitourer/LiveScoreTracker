@@ -15,7 +15,9 @@
         </label>
         <button type="submit" class="button secondary">{{ t('check_in.search') }}</button>
     </form>
-    {% if remaining is empty %}
+    {% if reason %}
+        <p class="flash error">{{ t(reason, {bib: query, query: query}) }}</p>
+    {% elseif remaining is empty %}
         <p class="meta">{{ t('entry.remaining_none') }}</p>
     {% else %}
         <div class="table-scroll">

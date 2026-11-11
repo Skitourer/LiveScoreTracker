@@ -156,6 +156,17 @@ final class EntryTest extends TestCase
         $this->admin->get('/entry/hockey/remaining?q=hu');
         self::assertStringContainsString('Hugo D.', $this->admin->lastBody);
 
+        // A bib typed in the search gives the real reason when it is not listed.
+        $this->admin->get('/entry/long_jump/remaining?q=2');
+        self::assertStringContainsString('pas du bon niveau', $this->admin->lastBody);
+        self::assertStringNotContainsString('ont terminé cet atelier', $this->admin->lastBody);
+        $this->admin->get('/entry/hockey/remaining?q=1');
+        self::assertStringContainsString('Le dossard 1 a déjà terminé', $this->admin->lastBody);
+        $this->admin->get('/entry/hockey/remaining?q=99');
+        self::assertStringContainsString('Dossard 99 inconnu', $this->admin->lastBody);
+        $this->admin->get('/entry/hockey/remaining?q=zz');
+        self::assertStringContainsString('Aucun enfant restant ne correspond', $this->admin->lastBody);
+
         $this->admin->get('/entry/hockey/help');
         self::assertStringContainsString('<h2>Matériel</h2>', $this->admin->lastBody);
         self::assertStringContainsString('href="tel:+33600000001"', $this->admin->lastBody);
