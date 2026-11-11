@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace LiveScoreTracker\Action\Registration;
 
 use LiveScoreTracker\Action\Support\Responder;
+use LiveScoreTracker\Application\RegistrationMailer;
 use LiveScoreTracker\Domain\Config\CompetitionConfig;
 use LiveScoreTracker\Domain\Registration\ChildValidator;
 use LiveScoreTracker\Domain\Registration\RegistrationSource;
@@ -26,17 +27,20 @@ final class RegistrationNewAction
         private readonly RegistrationRepository $registrations,
         private readonly ChildValidator $validator,
         private readonly CompetitionConfig $config,
+        private readonly RegistrationMailer $mailer,
     ) {}
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
         $onSite = $this->responder->context->phase === Phase::Running;
         $input = array_fill_keys(ChildValidator::FIELDS, '');
+        $sendEmail = true;
         $errors = [];
         $warnings = [];
 
         if ($request->getMethod() === 'POST') {
             $input = RegistrationForm::input($request);
+            $sendEmail = Responder::field($request, 'send_email') === '1';
             $result = $this->validator->validate($input, birthDateRequired: !$onSite);
             $errors = $result->errors;
             $warnings = $result->warnings;
@@ -57,6 +61,9 @@ final class RegistrationNewAction
                     $bib = $created === null ? null : $created->bib;
                     $this->responder->audit('registration.created', ['bib' => $bib, 'on_site' => $onSite]);
                     $this->responder->flash('success', 'registration.created', ['bib' => $bib ?? '–', 'name' => $result->data->firstName . ' ' . $result->data->lastName]);
+                    if ($created !== null && Responder::field($request, 'send_email') === '1') {
+                        ConfirmationEmail::send($this->mailer, $this->responder, $created);
+                    }
                     if ($this->registeredCount() > $this->config->registration->quota) {
                         $this->responder->flash('warning', 'registration.over_quota', ['quota' => $this->config->registration->quota]);
                     }
@@ -71,6 +78,7 @@ final class RegistrationNewAction
             'errors' => $errors,
             'warnings' => $errors === [] ? $warnings : [],
             'onSite' => $onSite,
+            'sendEmail' => $sendEmail,
             'config' => $this->config,
         ], $errors === [] && $warnings === [] ? 200 : 422);
     }

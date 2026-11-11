@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace LiveScoreTracker\Action\Registration;
 
 use LiveScoreTracker\Action\Support\Responder;
+use LiveScoreTracker\Application\RegistrationMailer;
 use LiveScoreTracker\Domain\Config\CompetitionConfig;
 use LiveScoreTracker\Domain\Registration\ChildValidator;
 use LiveScoreTracker\Domain\Registration\RegistrationSource;
@@ -29,6 +30,7 @@ final class RegistrationCardAction
         private readonly RegistrationRepository $registrations,
         private readonly ChildValidator $validator,
         private readonly CompetitionConfig $config,
+        private readonly RegistrationMailer $mailer,
     ) {}
 
     /**
@@ -71,6 +73,13 @@ final class RegistrationCardAction
                         return $this->responder->redirect($response, '/registrations/' . $registration->id);
                     }
                 }
+            } elseif ($op === 'resend_email') {
+                if (!$context->can(Permission::EditRegistration) || $registration->status !== RegistrationStatus::Registered) {
+                    throw new HttpForbiddenException($request);
+                }
+                ConfirmationEmail::send($this->mailer, $this->responder, $registration);
+
+                return $this->responder->redirect($response, '/registrations/' . $registration->id);
             } elseif ($op === 'status') {
                 $target = RegistrationStatus::tryFrom(Responder::field($request, 'status'));
                 $permission = $target === RegistrationStatus::Withdrawn ? Permission::Unregister : Permission::ManageWaitingList;
@@ -79,6 +88,11 @@ final class RegistrationCardAction
                 }
                 if ($target !== null && \in_array($target, $registration->status->adminTransitions(), true)) {
                     $this->registrations->changeStatus($registration->id, $target, $context->user, $this->config->registration->firstBib);
+                    $updated = $this->registrations->find($registration->id);
+                    // "Your registration is confirmed" when a child leaves the waiting list (spec § 5.4).
+                    if ($target === RegistrationStatus::Registered && $updated !== null && Responder::field($request, 'send_email') === '1') {
+                        ConfirmationEmail::send($this->mailer, $this->responder, $updated);
+                    }
                     $this->responder->audit('registration.status_changed', [
                         'bib' => $registration->bib,
                         'from' => $registration->status->value,

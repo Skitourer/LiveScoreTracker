@@ -345,6 +345,9 @@ older = "Older"
 "referee.disconnected_all" = "Referee phones disconnected"
 "phase.changed" = "Phase change"
 "setup.first_admin" = "First admin created"
+"registration.email_sent" = "Confirmation email sent"
+"registration.email_failed" = "Confirmation email failed"
+"registration.emails_sent" = "Import confirmation emails"
 "referee.renamed" = "Referee: first name changed"
 "referee.disconnected_one" = "One referee disconnected"
 "registration.created" = "Child registered"
@@ -409,6 +412,11 @@ checkbox = "Checkbox"
 # ---------- Registrations ----------
 
 [registration]
+send_email = "Send the confirmation email to the responsible adult"
+email_sent = "Confirmation email sent to {email}."
+email_failed = "The confirmation email could not be sent to {email}: the registration is saved anyway."
+resend_email = "Send the confirmation email again"
+confirm_resend = "Send the confirmation email to {email} again?"
 title = "Registrations"
 guardian = "Responsible adult present on the day"
 optional = "optional"
@@ -439,7 +447,9 @@ date_invalid = "Invalid birth date: \"{value}\"."
 gender_unknown = "Unknown gender: \"{value}\"."
 level_unknown = "Unknown class: \"{value}\"."
 school_unknown = "School not in the list: \"{value}\"."
-phone_invalid = "Invalid phone number: \"{value}\"."
+phone_invalid = "Invalid phone number: \"{value}\" (10 digits starting with 0, or international format +33 6…)."
+phone_format = "10 digits starting with 0, or international format (+33 6…)"
+email_format = "Full email address, for example first.last@example.org"
 email_invalid = "Invalid email address: \"{value}\"."
 age_unusual = "Unusual birth date for a {level} child (usually born in {year})."
 duplicate = "This child is already registered: bib {bib}, {name}."
@@ -498,7 +508,7 @@ waitlisted = "Put on the waiting list"
 withdrawn = "Unregister"
 
 [registration.confirm_status]
-registered = "Confirm this registration? The child will get the next bib."
+registered = "Confirm this registration? The child will get the next bib and the family a confirmation email."
 waitlisted = "Put this child on the waiting list?"
 withdrawn = "Unregister this child? Their bib will not be given again."
 
@@ -514,6 +524,8 @@ status = "Status change"
 bib = "Bib given"
 
 [import]
+send_emails = "Send the confirmation email to each new child (avoid it if families were already told)"
+emails_sent = "Confirmation emails: {sent} sent, {failed} failed."
 title = "Import a file"
 intro = "Import registrations collected elsewhere (external form, HelloAsso…). Only new children are added; existing bibs do not change. A preview is shown before any change."
 file = "File"
@@ -549,3 +561,24 @@ new = "new"
 known = "already registered"
 error = "error"
 duplicate = "duplicate"
+
+[email.registration_confirmed]
+subject = "{edition}: {first_name}'s registration confirmed"
+volunteer = """
+You offered to help run a stand: thank you! The organizing team will contact you before the event.
+"""
+body = """
+Hello {guardian},
+
+The registration of {child} ({level}) for {edition} is confirmed.
+Bib number: {bib}.
+
+See you on {date} at {venue}, welcome from {start}.
+{volunteer}
+Reminder: the child remains under the full responsibility of the accompanying adult throughout the event.
+
+For any question, or to cancel the registration: {contact}
+
+See you soon,
+{organizer}
+"""

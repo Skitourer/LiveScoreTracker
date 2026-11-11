@@ -28,11 +28,20 @@
                         {{ csrf_field() }}
                         <input type="hidden" name="op" value="status">
                         <input type="hidden" name="status" value="{{ target.value }}">
+                        {% if target.value == 'registered' %}<input type="hidden" name="send_email" value="1">{% endif %}
                         <button type="submit" class="button {{ target.value == 'withdrawn' ? 'danger' : 'secondary' }}">{{ t('registration.action.' ~ target.value) }}</button>
                     </form>
                 {% endif %}
             {% endfor %}
         </div>
+    {% endif %}
+
+    {% if can('edit_registration') and registration.status.value == 'registered' %}
+        <form method="post" class="inline" data-confirm="{{ t('registration.confirm_resend', {email: c.guardianEmail}) }}">
+            {{ csrf_field() }}
+            <input type="hidden" name="op" value="resend_email">
+            <button type="submit" class="button small secondary">{{ t('registration.resend_email') }}</button>
+        </form>
     {% endif %}
 
     {% if can('edit_registration') %}

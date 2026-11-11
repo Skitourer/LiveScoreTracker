@@ -40,7 +40,12 @@ final class RegistrationRulesTest extends TestCase
         self::assertSame('DE LA FONTAINE', TextCleaner::lastName('de  la fontaine'));
         self::assertSame('06 12 34 56 78', TextCleaner::phone('612345678'), 'Leading zero lost by a spreadsheet');
         self::assertSame('06 12 34 56 78', TextCleaner::phone('06.12.34.56.78'));
-        self::assertSame('+33612345678', TextCleaner::phone('+33 6 12 34 56 78'));
+        self::assertSame('+33 6 12 34 56 78', TextCleaner::phone('+33612345678'));
+        self::assertSame('+33 6 12 34 56 78', TextCleaner::phone('+33 (0)6 12 34 56 78'));
+        self::assertSame('+33 6 12 34 56 78', TextCleaner::phone('0033 6 12 34 56 78'));
+        self::assertTrue(TextCleaner::isPhone(TextCleaner::phone('+1 555 0100 222')));
+        self::assertFalse(TextCleaner::isPhone(TextCleaner::phone('06 12 34 56')), 'Too short');
+        self::assertFalse(TextCleaner::isPhone(TextCleaner::phone('1234567890')), 'French numbers start with 0');
         self::assertTrue(TextCleaner::yes('Oui'));
         self::assertTrue(TextCleaner::yes('x'));
         self::assertFalse(TextCleaner::yes('non'));

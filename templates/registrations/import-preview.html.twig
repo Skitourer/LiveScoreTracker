@@ -22,6 +22,7 @@
             <form method="post" action="{{ url_for('registration-import') }}" class="form" data-confirm="{{ t('import.confirm_question', {count: plan.counts.new}) }}">
                 {{ csrf_field() }}
                 <input type="hidden" name="op" value="confirm">
+                <label class="choice"><input type="checkbox" name="send_emails" value="1"> {{ t('import.send_emails') }}</label>
                 <button type="submit" class="button">{{ t('import.confirm', {count: plan.counts.new}) }}</button>
             </form>
         {% else %}

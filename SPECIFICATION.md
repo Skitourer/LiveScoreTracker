@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.7 — 11 November 2026
+> Version 1.8 — 11 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -138,7 +138,7 @@ Accessible without an account, on the application website. Fields:
 
 **GDPR information notice** displayed below the form (see § 15).
 
-Checks: required fields, email and phone format, date of birth / grade consistency (warning), probable duplicate (same last name + first name + date of birth: rejected with a message).
+Checks: required fields, format of the email (full address with a domain) and of the phone (10 digits starting with 0, or international format "+33 6…"; a leading zero lost by a spreadsheet is restored), checked in the browser and on the server, date of birth / grade consistency (warning), probable duplicate (same last name + first name + date of birth: rejected with a message).
 
 Anti-bot protection **without any third-party service**: invisible honeypot field, minimum fill-in time, rate limiting per IP address.
 
@@ -165,6 +165,7 @@ Registration statuses: `pending_verification` → `registered` | `waitlisted` �
 
 - Handled **manually by the admin**: they move a child from the waiting list to "registered", including beyond the quota.
 - The move triggers the "your registration is confirmed" email.
+- **Confirmation email**: the same email is sent whatever the origin of the registration (public form, admin or organizer; box ticked by default for a manual entry, unticked by default for an import). It recalls the bib, date, venue, welcome time and the adult's responsibility, and **thanks volunteers** for offering to run a stand. The admin can send it again from the child's record.
 
 ### 5.5 Withdrawal
 

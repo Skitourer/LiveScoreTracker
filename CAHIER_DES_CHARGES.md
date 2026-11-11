@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.7 — 11 novembre 2026
+> Version 1.8 — 11 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -138,7 +138,7 @@ Accessible sans compte, sur le site de l'application. Champs :
 
 **Notice d'information RGPD** affichée sous le formulaire (cf. § 15).
 
-Contrôles : champs obligatoires, format de l'email et du téléphone, cohérence date de naissance / classe (avertissement), doublon probable (même nom + prénom + date de naissance : refus avec message).
+Contrôles : champs obligatoires, format de l'email (adresse complète avec domaine) et du téléphone (10 chiffres commençant par 0, ou format international « +33 6… » ; un zéro initial perdu par un tableur est rétabli), vérifiés dans le navigateur et sur le serveur, cohérence date de naissance / classe (avertissement), doublon probable (même nom + prénom + date de naissance : refus avec message).
 
 Protection anti-robots **sans service tiers** : champ piège invisible, délai minimal de remplissage, limitation du nombre d'envois par adresse IP.
 
@@ -165,6 +165,7 @@ Statuts d'une inscription : `pending_verification` → `registered` | `waitliste
 
 - Gérée **manuellement par l'admin** : il fait passer un enfant de la liste d'attente à « inscrit », y compris au-delà du quota.
 - Le passage déclenche l'email « votre inscription est validée ».
+- **Email de confirmation** : le même email est envoyé quelle que soit l'origine de l'inscription (formulaire public, admin ou organisateur ; case cochée par défaut pour une saisie manuelle, décochée par défaut pour un import). Il rappelle le dossard, la date, le lieu, l'heure d'accueil et la responsabilité de l'adulte, et **remercie les volontaires** de s'être proposés pour tenir un stand. L'admin peut le renvoyer depuis la fiche de l'enfant.
 
 ### 5.5 Désistement
 

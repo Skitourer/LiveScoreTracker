@@ -6,6 +6,7 @@ namespace LiveScoreTracker\Action\Registration;
 
 use LiveScoreTracker\Action\Support\Responder;
 use LiveScoreTracker\Application\RegistrationImport;
+use LiveScoreTracker\Application\RegistrationMailer;
 use LiveScoreTracker\Domain\Config\CompetitionConfig;
 use LiveScoreTracker\Domain\Registration\RegistrationStatus;
 use LiveScoreTracker\Infrastructure\Persistence\RegistrationRepository;
@@ -35,6 +36,7 @@ final class RegistrationImportAction
         private readonly RegistrationRepository $registrations,
         private readonly CompetitionConfig $config,
         private readonly Settings $settings,
+        private readonly RegistrationMailer $mailer,
     ) {}
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
@@ -46,9 +48,20 @@ final class RegistrationImportAction
             $session->remove(self::SESSION_KEY);
             $children = \is_array($plan) && \is_array($plan['children'] ?? null) ? array_values(array_filter($plan['children'], 'is_array')) : [];
             /** @var list<array<string, string|bool|null>> $children */
-            $added = $this->import->apply($children, $this->responder->context->user);
-            $this->responder->audit('registration.imported', ['added' => $added]);
-            $this->responder->flash('success', 'import.done', ['count' => $added]);
+            $ids = $this->import->apply($children, $this->responder->context->user);
+            $this->responder->audit('registration.imported', ['added' => \count($ids)]);
+            $this->responder->flash('success', 'import.done', ['count' => \count($ids)]);
+            if (Responder::field($request, 'send_emails') === '1') {
+                $failed = 0;
+                foreach ($ids as $id) {
+                    $registration = $this->registrations->find($id);
+                    if ($registration !== null && !$this->mailer->sendConfirmation($registration)) {
+                        ++$failed;
+                    }
+                }
+                $this->responder->audit('registration.emails_sent', ['sent' => \count($ids) - $failed, 'failed' => $failed]);
+                $this->responder->flash($failed === 0 ? 'success' : 'warning', 'import.emails_sent', ['sent' => \count($ids) - $failed, 'failed' => $failed]);
+            }
 
             return $this->responder->redirect($response, '/registrations');
         }

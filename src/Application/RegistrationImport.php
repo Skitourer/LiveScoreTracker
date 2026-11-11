@@ -96,19 +96,18 @@ final class RegistrationImport
      *
      * @param list<array<string, string|bool|null>> $children data of the "new" lines, in file order
      *
-     * @return int number of children added
+     * @return list<int> ids of the registrations created
      */
-    public function apply(array $children, ?User $actor): int
+    public function apply(array $children, ?User $actor): array
     {
-        $added = 0;
+        $added = [];
         foreach ($children as $data) {
             $child = self::childFromArray($data);
             // Re-check: the list may have changed since the preview.
             if ($this->knownRegistration($child) !== null) {
                 continue;
             }
-            $this->registrations->create($child, RegistrationStatus::Registered, RegistrationSource::Import, $actor, $this->config->registration->firstBib);
-            ++$added;
+            $added[] = $this->registrations->create($child, RegistrationStatus::Registered, RegistrationSource::Import, $actor, $this->config->registration->firstBib);
         }
 
         return $added;

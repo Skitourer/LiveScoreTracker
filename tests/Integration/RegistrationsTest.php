@@ -65,6 +65,40 @@ final class RegistrationsTest extends TestCase
         self::assertSame('/registrations/2', $confirmed->getHeaderLine('Location'));
     }
 
+    public function testConfirmationEmailRemindsVolunteers(): void
+    {
+        $this->add(['send_email' => '1']);
+        self::assertCount(1, $this->admin->mailer->sent);
+        $mail = $this->admin->mailer->sent[0];
+        self::assertSame('anne@example.org', $mail['to']);
+        self::assertSame('Multisport Games 2027 : inscription de Zoé confirmée', $mail['subject']);
+        self::assertStringContainsString('Bonjour Anne Martin', $mail['body']);
+        self::assertStringContainsString('Numéro de dossard : 1.', $mail['body']);
+        self::assertStringContainsString('dimanche 6 juin 2027', $mail['body']);
+        self::assertStringContainsString('volontaire', $mail['body']);
+        self::assertStringContainsString('Email de confirmation envoyé à anne@example.org', $this->admin->follow($this->lastResponse())->getBody()->__toString());
+
+        // Not a volunteer: no volunteer paragraph. No checkbox: no email.
+        $this->add(['last_name' => 'Durand', 'first_name' => 'Hugo', 'gender' => 'boy', 'volunteer' => '', 'send_email' => '1']);
+        self::assertStringNotContainsString('volontaire', $this->admin->mailer->sent[1]['body']);
+        $this->add(['last_name' => 'Petit', 'first_name' => 'Léo', 'gender' => 'boy']);
+        self::assertCount(2, $this->admin->mailer->sent);
+
+        // Sending it again from the child card.
+        $this->admin->post('/registrations/3', ['op' => 'resend_email']);
+        self::assertCount(3, $this->admin->mailer->sent);
+        self::assertSame('anne@example.org', $this->admin->mailer->sent[2]['to']);
+    }
+
+    public function testPhoneNumbersMustBeComplete(): void
+    {
+        self::assertSame(422, $this->add(['guardian_phone' => '06 12 34 56'])->getStatusCode());
+        self::assertStringContainsString('Numéro de téléphone invalide', $this->admin->lastBody);
+        self::assertSame(422, $this->add(['guardian_email' => 'anne@example'])->getStatusCode());
+        self::assertStringContainsString('Adresse email invalide', $this->admin->lastBody);
+        self::assertSame('/registrations/1', $this->add(['guardian_phone' => '+33 (0)6 11 22 33 44'])->getHeaderLine('Location'));
+    }
+
     public function testCorrectionIsRecordedInTheHistory(): void
     {
         $this->add();
@@ -112,7 +146,8 @@ final class RegistrationsTest extends TestCase
         self::assertStringContainsString('Classe non reconnue : « 6e »', $this->admin->lastBody);
         self::assertStringContainsString('<strong>1</strong> doublon', $this->admin->lastBody);
 
-        $done = $this->admin->post('/registrations/import', ['op' => 'confirm']);
+        $done = $this->admin->post('/registrations/import', ['op' => 'confirm', 'send_emails' => '1']);
+        self::assertCount(40, $this->admin->mailer->sent);
         self::assertSame('/registrations', $done->getHeaderLine('Location'));
         $this->admin->get('/registrations');
         self::assertStringContainsString('<strong>41</strong> / 100', $this->admin->lastBody);
@@ -163,12 +198,19 @@ final class RegistrationsTest extends TestCase
         self::assertSame('06 11 22 33 44', $rows[1][9]);
     }
 
+    private ?\Psr\Http\Message\ResponseInterface $last = null;
+
     /**
      * @param array<string, string> $overrides
      */
     private function add(array $overrides = []): \Psr\Http\Message\ResponseInterface
     {
-        return $this->admin->post('/registrations/new', self::form($overrides));
+        return $this->last = $this->admin->post('/registrations/new', self::form($overrides));
+    }
+
+    private function lastResponse(): \Psr\Http\Message\ResponseInterface
+    {
+        return $this->last ?? throw new \LogicException('No request yet.');
     }
 
     /**

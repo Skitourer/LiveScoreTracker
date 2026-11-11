@@ -68,27 +68,53 @@ final class TextCleaner
     }
 
     /**
-     * "0612345678" → "06 12 34 56 78"; "+33 6 12…" kept with its prefix.
+     * Normalizes a phone number:
+     * "0612345678" → "06 12 34 56 78" (leading zero restored if a spreadsheet lost it),
+     * "0033 6 12…" or "+33 (0)6 12…" → "+33 6 12 34 56 78", other countries → "+" and digits.
      */
     public static function phone(string $value): string
     {
         $value = self::spaces($value);
+        $international = str_starts_with($value, '+') || str_starts_with($value, '00');
         $digits = preg_replace('/\D/', '', $value) ?? '';
-        if (\strlen($digits) === 9 && !str_starts_with($value, '+')) {
-            $digits = '0' . $digits; // leading zero lost by a spreadsheet
-        }
-        if (\strlen($digits) === 10 && str_starts_with($digits, '0')) {
-            return trim(chunk_split($digits, 2, ' '));
+
+        if (!$international) {
+            if (\strlen($digits) === 9 && !str_starts_with($digits, '0')) {
+                $digits = '0' . $digits; // leading zero lost by a spreadsheet
+            }
+
+            return \strlen($digits) === 10 ? trim(chunk_split($digits, 2, ' ')) : $digits;
         }
 
-        return (str_starts_with($value, '+') ? '+' : '') . $digits;
+        if (str_starts_with($value, '00')) {
+            $digits = substr($digits, 2);
+        }
+        // French number written "+33 (0)6…": drop the national zero.
+        if (str_starts_with($digits, '330') && \strlen($digits) === 12) {
+            $digits = '33' . substr($digits, 3);
+        }
+        if (str_starts_with($digits, '33') && \strlen($digits) === 11) {
+            return '+33 ' . substr($digits, 2, 1) . ' ' . trim(chunk_split(substr($digits, 3), 2, ' '));
+        }
+
+        return '+' . $digits;
     }
 
+    /**
+     * A French number (10 digits starting with 0) or an international one (+ and 8 to 15 digits;
+     * exactly 9 digits after +33).
+     */
     public static function isPhone(string $value): bool
     {
-        $digits = \strlen(preg_replace('/\D/', '', $value) ?? '');
+        $digits = preg_replace('/\D/', '', $value) ?? '';
+        if (!str_starts_with(trim($value), '+')) {
+            return \strlen($digits) === 10 && str_starts_with($digits, '0');
+        }
+        if (str_starts_with($digits, '33')) {
+            return \strlen($digits) === 11 && $digits[2] !== '0';
+        }
 
-        return $digits >= 8 && $digits <= 15;
+        return \strlen($digits) >= 8 && \strlen($digits) <= 15;
     }
 
     public static function yes(string $value): bool

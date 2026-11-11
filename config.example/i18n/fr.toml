@@ -345,6 +345,9 @@ older = "Plus anciennes"
 "referee.disconnected_all" = "Téléphones des arbitres déconnectés"
 "phase.changed" = "Changement de phase"
 "setup.first_admin" = "Premier admin créé"
+"registration.email_sent" = "Email de confirmation envoyé"
+"registration.email_failed" = "Échec d'envoi d'un email de confirmation"
+"registration.emails_sent" = "Emails de confirmation de l'import"
 "referee.renamed" = "Arbitre : prénom changé"
 "referee.disconnected_one" = "Un arbitre déconnecté"
 "registration.created" = "Enfant inscrit"
@@ -409,6 +412,11 @@ checkbox = "Case à cocher"
 # ---------- Inscriptions ----------
 
 [registration]
+send_email = "Envoyer l'email de confirmation à l'adulte responsable"
+email_sent = "Email de confirmation envoyé à {email}."
+email_failed = "L'email de confirmation n'a pas pu être envoyé à {email} : l'inscription est bien enregistrée."
+resend_email = "Renvoyer l'email de confirmation"
+confirm_resend = "Renvoyer l'email de confirmation à {email} ?"
 title = "Inscriptions"
 guardian = "Adulte responsable présent le jour J"
 optional = "facultatif"
@@ -439,7 +447,9 @@ date_invalid = "Date de naissance invalide : « {value} »."
 gender_unknown = "Genre non reconnu : « {value} »."
 level_unknown = "Classe non reconnue : « {value} »."
 school_unknown = "École absente de la liste : « {value} »."
-phone_invalid = "Numéro de téléphone invalide : « {value} »."
+phone_invalid = "Numéro de téléphone invalide : « {value} » (10 chiffres commençant par 0, ou format international +33 6…)."
+phone_format = "10 chiffres commençant par 0, ou format international (+33 6…)"
+email_format = "Adresse email complète, par exemple prenom.nom@exemple.fr"
 email_invalid = "Adresse email invalide : « {value} »."
 age_unusual = "Date de naissance inhabituelle pour un enfant de {level} (né en {year} en général)."
 duplicate = "Cet enfant est déjà inscrit : dossard {bib}, {name}."
@@ -498,7 +508,7 @@ waitlisted = "Mettre en liste d'attente"
 withdrawn = "Désinscrire"
 
 [registration.confirm_status]
-registered = "Valider cette inscription ? L'enfant recevra le prochain dossard."
+registered = "Valider cette inscription ? L'enfant recevra le prochain dossard et la famille un email de confirmation."
 waitlisted = "Mettre cet enfant en liste d'attente ?"
 withdrawn = "Désinscrire cet enfant ? Son dossard ne sera pas réattribué."
 
@@ -514,6 +524,8 @@ status = "Changement de statut"
 bib = "Dossard attribué"
 
 [import]
+send_emails = "Envoyer l'email de confirmation à chaque nouvel inscrit (à éviter si les familles ont déjà été prévenues)"
+emails_sent = "Emails de confirmation : {sent} envoyé(s), {failed} échec(s)."
 title = "Importer un fichier"
 intro = "Importez des inscriptions recueillies ailleurs (formulaire externe, HelloAsso…). Seuls les nouveaux enfants sont ajoutés ; les dossards existants ne changent pas. Un aperçu s'affiche avant toute modification."
 file = "Fichier"
@@ -549,3 +561,24 @@ new = "nouveau"
 known = "déjà inscrit"
 error = "erreur"
 duplicate = "doublon"
+
+[email.registration_confirmed]
+subject = "{edition} : inscription de {first_name} confirmée"
+volunteer = """
+Vous vous êtes proposé(e) comme volontaire pour aider à tenir un stand : merci ! L'équipe d'organisation reviendra vers vous avant la manifestation.
+"""
+body = """
+Bonjour {guardian},
+
+L'inscription de {child} ({level}) à {edition} est confirmée.
+Numéro de dossard : {bib}.
+
+Rendez-vous le {date} à {venue}, accueil à partir de {start}.
+{volunteer}
+Rappel : l'enfant reste sous l'entière responsabilité de l'adulte qui l'accompagne pendant toute la manifestation.
+
+Pour toute question, ou pour annuler l'inscription : {contact}
+
+À bientôt,
+{organizer}
+"""

@@ -45,10 +45,12 @@
             <input type="text" name="guardian_name" value="{{ values.guardian_name }}" autocomplete="off" required>
         </label>
         <label>{{ t('registration.field.guardian_phone') }}
-            <input type="tel" name="guardian_phone" value="{{ values.guardian_phone }}" autocomplete="off" required>
+            <input type="tel" name="guardian_phone" value="{{ values.guardian_phone }}" autocomplete="off" inputmode="tel"
+                   pattern="[+0-9 .\(\)\-]{9,25}" title="{{ t('registration.phone_format') }}" required>
         </label>
         <label>{{ t('registration.field.guardian_email') }}
-            <input type="email" name="guardian_email" value="{{ values.guardian_email }}" autocomplete="off" required>
+            <input type="email" name="guardian_email" value="{{ values.guardian_email }}" autocomplete="off"
+                   pattern="[^@\s]+@[^@\s]+\.[^@\s]+" title="{{ t('registration.email_format') }}" required>
         </label>
     </div>
     <label class="choice"><input type="checkbox" name="volunteer" value="1" {% if values.volunteer %}checked{% endif %}> {{ t('registration.volunteer_label') }}</label>
