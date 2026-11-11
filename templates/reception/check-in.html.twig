@@ -36,8 +36,9 @@
     {% endif %}
 
     <div class="toolbar">
-        <a class="button small {{ list == 'absent' ? '' : 'secondary' }}" href="{{ url_for('check-in') }}?list=absent">{{ t('check_in.list.absent', {count: counts.registered - counts.present}) }}</a>
-        <a class="button small {{ list == 'not_left' ? '' : 'secondary' }}" href="{{ url_for('check-in') }}?list=not_left">{{ t('check_in.list.not_left') }}</a>
+        {% for name, count in listCounts %}
+            <a class="button small {{ list == name ? '' : 'secondary' }}" href="{{ url_for('check-in') }}?list={{ name }}">{{ t('check_in.list.' ~ name, {count: count}) }}</a>
+        {% endfor %}
         {% if can('print_documents') %}<a class="button small secondary" href="{{ url_for('reception-list') }}">{{ t('reception_list.download') }}</a>{% endif %}
     </div>
     {% if list %}

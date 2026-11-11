@@ -227,7 +227,7 @@ Précisions :
 - Une case cochée par erreur peut être décochée (avec confirmation). L'arrivée ne peut pas être annulée tant qu'une case de sortie est cochée. Chaque changement est horodaté et enregistré dans l'historique de la fiche, avec le nom de la personne.
 - Les cases de sortie ne sont proposées qu'à un enfant pointé à l'arrivée ; seul un enfant inscrit peut être pointé.
 - L'émargement s'ouvre en phase « en cours » et reste possible après la clôture (remise des médailles) ; en préparation, l'écran est en lecture seule.
-- Deux listes : les **absents** (inscrits sans dossard remis) et les enfants **pas encore partis** (dossard non rendu ou cadeau non remis), pour récupérer les dossards en fin de journée.
+- Des listes, avec leur effectif sur chaque bouton : **tous les dossards** (triés par numéro, avec l'état de chacun, y compris les désinscrits qui gardent leur dossard), **présents**, **absents** (inscrits sans dossard remis), **pas encore partis** (dossard non rendu ou cadeau non remis, pour récupérer les dossards en fin de journée) et **partis**.
 
 ### 6.3 Statuts de présence
 

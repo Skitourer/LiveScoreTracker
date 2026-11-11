@@ -92,7 +92,19 @@ final class ReceptionTest extends TestCase
         self::assertStringContainsString('<strong>1</strong> dossards rendus', $this->admin->lastBody);
         self::assertStringContainsString('<strong>1</strong> cadeaux remis', $this->admin->lastBody);
 
-        // Undo a mistake, and see it all in the history.
+        // The lists, then undo a mistake and see it all in the history.
+        $this->admin->get('/check-in?list=left');
+        self::assertStringContainsString('Partis (1)', $this->admin->lastBody);
+        self::assertStringContainsString('Hugo</strong> DURAND', $this->admin->lastBody);
+
+        // The full list, by bib, with each child's state.
+        $this->admin->get('/check-in?list=all');
+        self::assertStringContainsString('Tous (3)', $this->admin->lastBody);
+        self::assertStringContainsString('Présents (1)', $this->admin->lastBody);
+        self::assertStringContainsString('Absents (2)', $this->admin->lastBody);
+        self::assertMatchesRegularExpression('#Zoé</strong>.*Hugo</strong>.*Léo</strong>#s', $this->admin->lastBody);
+        self::assertStringContainsString('parti', $this->admin->lastBody);
+
         $this->admin->post('/check-in/2', ['mark' => 'gift_given', 'done' => '0']);
         $this->admin->get('/registrations/2');
         self::assertStringContainsString('Cadeau + médaille remis : oui → non', $this->admin->lastBody);

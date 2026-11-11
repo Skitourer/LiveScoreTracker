@@ -18,7 +18,8 @@ use Psr\Http\Message\ServerRequestInterface;
  */
 final class CheckInAction
 {
-    public const LISTS = ['absent', 'not_left'];
+    /** Lists below the search, in display order (spec § 6.2). */
+    public const LISTS = ['all', 'present', 'absent', 'not_left', 'left'];
 
     public function __construct(
         private readonly Responder $responder,
@@ -46,21 +47,39 @@ final class CheckInAction
             $notFound = $matches === [];
         }
 
-        $shown = null;
-        if (\in_array($list, self::LISTS, true)) {
-            $shown = array_values(array_filter(
-                $this->registrations->search(['statuses' => [RegistrationStatus::Registered]]),
-                static fn(Registration $r): bool => $list === 'absent' ? !$r->isPresent() : $r->isPresent() && !$r->hasLeft(),
-            ));
+        // Every child holding a bib, sorted by bib: registered children, and withdrawn
+        // children who keep their bib once the competition has started.
+        $holders = array_values(array_filter(
+            $this->registrations->search(['statuses' => [RegistrationStatus::Registered, RegistrationStatus::Withdrawn]]),
+            static fn(Registration $r): bool => $r->bib !== null,
+        ));
+        $lists = [];
+        foreach (self::LISTS as $name) {
+            $lists[$name] = array_values(array_filter($holders, static fn(Registration $r): bool => self::inList($name, $r)));
         }
 
         return $this->responder->render($response, 'reception/check-in.html.twig', [
             'query' => $query,
             'matches' => $matches,
             'notFound' => $notFound,
-            'list' => $shown === null ? '' : $list,
-            'listed' => $shown ?? [],
+            'list' => isset($lists[$list]) ? $list : '',
+            'listed' => $lists[$list] ?? [],
+            'listCounts' => array_map(\count(...), $lists),
             'counts' => $this->registrations->attendanceCounts(),
         ], $notFound ? 404 : 200);
+    }
+
+    private static function inList(string $list, Registration $r): bool
+    {
+        $registered = $r->status === RegistrationStatus::Registered;
+
+        return match ($list) {
+            'all' => true,
+            'present' => $registered && $r->isPresent(),
+            'absent' => $registered && !$r->isPresent(),
+            'not_left' => $r->isPresent() && !$r->hasLeft(),
+            'left' => $r->hasLeft(),
+            default => false,
+        };
     }
 }

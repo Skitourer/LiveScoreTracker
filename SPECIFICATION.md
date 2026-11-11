@@ -227,7 +227,7 @@ Details:
 - A box ticked by mistake can be unticked (with confirmation). Check-in cannot be undone while a check-out box is ticked. Every change is timestamped and recorded in the record's history, with the person's name.
 - Check-out boxes are only offered for a child checked in on arrival; only a registered child can be checked in.
 - Check-in opens in the "in progress" phase and remains possible after closing (medal ceremony); during preparation the screen is read-only.
-- Two lists: **absent** children (registered, no bib handed out) and children **not left yet** (bib not returned or gift not handed out), to collect the bibs at the end of the day.
+- Lists, with their size on each button: **all bibs** (sorted by number, with each child's state, including withdrawn children who keep their bib), **present**, **absent** (registered, no bib handed out), **not left yet** (bib not returned or gift not handed out, to collect the bibs at the end of the day) and **left**.
 
 ### 6.3 Attendance statuses
 
