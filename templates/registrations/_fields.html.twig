@@ -1,0 +1,61 @@
+{# Registration fields (spec § 5.1). Expects: values, config, birthOptional. #}
+<div class="form-grid">
+    <label>{{ t('registration.field.last_name') }}
+        <input type="text" name="last_name" value="{{ values.last_name }}" autocomplete="off" required>
+    </label>
+    <label>{{ t('registration.field.first_name') }}
+        <input type="text" name="first_name" value="{{ values.first_name }}" autocomplete="off" required>
+    </label>
+    <label>{{ t('registration.field.birth_date') }}{% if birthOptional %} <small>{{ t('registration.optional') }}</small>{% endif %}
+        <input type="date" name="birth_date" value="{{ values.birth_date }}" {% if not birthOptional %}required{% endif %}>
+    </label>
+    <label>{{ t('registration.field.gender') }}
+        <select name="gender" required>
+            <option value=""></option>
+            {% for gender in config.genders %}
+                <option value="{{ gender }}" {% if values.gender == gender %}selected{% endif %}>{{ t('gender.' ~ gender ~ '.one') }}</option>
+            {% endfor %}
+        </select>
+    </label>
+    <label>{{ t('registration.field.level') }}
+        <select name="level" required>
+            <option value=""></option>
+            {% for level in config.levels %}
+                <option value="{{ level }}" {% if values.level == level %}selected{% endif %}>{{ label('level.' ~ level) }}</option>
+            {% endfor %}
+        </select>
+    </label>
+    <label>{{ t('registration.field.school') }}
+        {% if config.schools is empty %}
+            <input type="text" name="school" value="{{ values.school }}" required>
+        {% else %}
+            <select name="school" required>
+                <option value=""></option>
+                {% for school in config.schools %}
+                    <option value="{{ school }}" {% if values.school == school %}selected{% endif %}>{{ school }}</option>
+                {% endfor %}
+            </select>
+        {% endif %}
+    </label>
+</div>
+<fieldset>
+    <legend>{{ t('registration.guardian') }}</legend>
+    <div class="form-grid">
+        <label>{{ t('registration.field.guardian_name') }}
+            <input type="text" name="guardian_name" value="{{ values.guardian_name }}" autocomplete="off" required>
+        </label>
+        <label>{{ t('registration.field.guardian_phone') }}
+            <input type="tel" name="guardian_phone" value="{{ values.guardian_phone }}" autocomplete="off" required>
+        </label>
+        <label>{{ t('registration.field.guardian_email') }}
+            <input type="email" name="guardian_email" value="{{ values.guardian_email }}" autocomplete="off" required>
+        </label>
+    </div>
+    <label class="choice"><input type="checkbox" name="volunteer" value="1" {% if values.volunteer %}checked{% endif %}> {{ t('registration.volunteer_label') }}</label>
+</fieldset>
+{% if warnings is defined and warnings is not empty %}
+    <div class="notice warning" role="alert">
+        <ul>{% for key, params in warnings %}<li>{{ t(key, params) }}</li>{% endfor %}</ul>
+        <label class="choice"><input type="checkbox" name="confirm_warnings" value="1" required> {{ t('registration.confirm_warnings') }}</label>
+    </div>
+{% endif %}

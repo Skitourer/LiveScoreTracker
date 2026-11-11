@@ -24,10 +24,18 @@ use LiveScoreTracker\Action\Auth\TwoFactorSetupAction;
 use LiveScoreTracker\Action\DashboardAction;
 use LiveScoreTracker\Action\HealthAction;
 use LiveScoreTracker\Action\HomeAction;
+use LiveScoreTracker\Action\ImportSampleAction;
 use LiveScoreTracker\Action\MigrateAction;
+use LiveScoreTracker\Action\Registration\RegistrationCardAction;
+use LiveScoreTracker\Action\Registration\RegistrationExportAction;
+use LiveScoreTracker\Action\Registration\RegistrationImportAction;
+use LiveScoreTracker\Action\Registration\RegistrationNewAction;
+use LiveScoreTracker\Action\Registration\RegistrationsAction;
 use LiveScoreTracker\Action\ScoringReportAction;
 use LiveScoreTracker\Action\StyleguideAction;
+use LiveScoreTracker\Domain\Config\CompetitionConfig;
 use LiveScoreTracker\Domain\Config\InvalidConfig;
+use LiveScoreTracker\Domain\Registration\ValueMatcher;
 use LiveScoreTracker\Domain\Security\Permission;
 use LiveScoreTracker\Http\AppErrorHandler;
 use LiveScoreTracker\Http\AuthState;
@@ -144,6 +152,14 @@ final class Kernel
         $app->map(['GET', 'POST'], '/account/2fa', TwoFactorSetupAction::class)->setName('account-2fa')
             ->add($guard(null, AuthState::TwoFactorSetup, AuthState::Authenticated));
 
+        // Registrations (spec § 5)
+        $app->get('/registrations', RegistrationsAction::class)->setName('registrations')->add($guard(Permission::ViewRegistrations));
+        $app->map(['GET', 'POST'], '/registrations/new', RegistrationNewAction::class)->setName('registration-new')->add($guard(Permission::AddOnSite));
+        $app->map(['GET', 'POST'], '/registrations/import', RegistrationImportAction::class)->setName('registration-import')->add($guard(Permission::ImportSpreadsheets));
+        $app->get('/registrations/export', RegistrationExportAction::class)->setName('registration-export')->add($guard(Permission::ViewRegistrations));
+        $app->map(['GET', 'POST'], '/registrations/{id:[0-9]+}', RegistrationCardAction::class)->setName('registration')->add($guard(Permission::ViewRegistrations));
+        $app->get('/demo/import-sample.xlsx', ImportSampleAction::class)->setName('demo-import-sample')->add($guard(Permission::ImportSpreadsheets));
+
         // Administration
         // Slim binds group callbacks to itself: the closure must not be static.
         $app->group('/admin', function (RouteCollectorProxyInterface $admin) use ($guard): void {
@@ -196,6 +212,17 @@ final class Kernel
                 ]);
 
                 return $loader->translator($locale);
+            },
+            CompetitionConfig::class => static fn(ContainerInterface $c): CompetitionConfig => self::service($c, ConfigRepository::class)->get(),
+            ValueMatcher::class => static function (ContainerInterface $c): ValueMatcher {
+                $config = self::service($c, CompetitionConfig::class);
+                $translator = self::service($c, Translator::class);
+                $labels = [];
+                foreach ($config->genders as $gender) {
+                    $labels[$gender] = [$translator->trans("gender.{$gender}.one"), $translator->trans("gender.{$gender}.many")];
+                }
+
+                return new ValueMatcher($config, $labels);
             },
             ResultFormatter::class => static fn(ContainerInterface $c): ResultFormatter => new ResultFormatter(
                 self::service($c, Translator::class),

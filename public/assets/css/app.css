@@ -517,3 +517,16 @@ pre.details {
 .errors code {
   white-space: pre-wrap;
 }
+
+/* ---------- Registrations ---------- */
+.form.wide-form {
+  max-width: var(--content-width);
+}
+
+.history {
+  padding-left: var(--space-5);
+}
+
+.history li {
+  margin-bottom: var(--space-2);
+}

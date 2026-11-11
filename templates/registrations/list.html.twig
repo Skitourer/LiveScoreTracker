@@ -1,0 +1,84 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('registration.title') }}{% endblock %}
+
+{% block content %}
+    <h1>{{ t('registration.title') }}</h1>
+    <ul class="stats">
+        <li><strong>{{ counts.registered }}</strong> / {{ quota }} {{ t('registration.counter.registered') }}</li>
+        <li><strong>{{ counts.waitlisted }}</strong> {{ t('registration.counter.waitlisted') }}</li>
+        <li><strong>{{ counts.pending_verification }}</strong> {{ t('registration.counter.pending') }}</li>
+        {% if counts.withdrawn > 0 %}<li><strong>{{ counts.withdrawn }}</strong> {{ t('registration.counter.withdrawn') }}</li>{% endif %}
+    </ul>
+    <div class="toolbar">
+        {% if can('add_on_site') %}<a class="button" href="{{ url_for('registration-new') }}">{{ t('registration.add') }}</a>{% endif %}
+        {% if can('import_spreadsheets') %}<a class="button secondary" href="{{ url_for('registration-import') }}">{{ t('import.title') }}</a>{% endif %}
+        <a class="button secondary" href="{{ url_for('registration-export') }}">{{ t('registration.export') }}</a>
+    </div>
+
+    <form method="get" class="filters" role="search">
+        <label>{{ t('registration.search') }}
+            <input type="search" name="q" value="{{ filters.q }}" placeholder="{{ t('registration.search_hint') }}">
+        </label>
+        <label>{{ t('registration.field.status') }}
+            <select name="status">
+                <option value="">{{ t('registration.active_statuses') }}</option>
+                {% for status in statuses %}<option value="{{ status.value }}" {% if filters.status == status.value %}selected{% endif %}>{{ t('registration.status.' ~ status.value) }}</option>{% endfor %}
+                <option value="all" {% if filters.status == 'all' %}selected{% endif %}>{{ t('registration.all_statuses') }}</option>
+            </select>
+        </label>
+        <label>{{ t('registration.field.level') }}
+            <select name="level">
+                <option value=""></option>
+                {% for level in config.levels %}<option value="{{ level }}" {% if filters.level == level %}selected{% endif %}>{{ label('level.' ~ level) }}</option>{% endfor %}
+            </select>
+        </label>
+        <label>{{ t('registration.field.gender') }}
+            <select name="gender">
+                <option value=""></option>
+                {% for gender in config.genders %}<option value="{{ gender }}" {% if filters.gender == gender %}selected{% endif %}>{{ t('gender.' ~ gender ~ '.one') }}</option>{% endfor %}
+            </select>
+        </label>
+        {% if config.schools is not empty %}
+            <label>{{ t('registration.field.school') }}
+                <select name="school">
+                    <option value=""></option>
+                    {% for school in config.schools %}<option value="{{ school }}" {% if filters.school == school %}selected{% endif %}>{{ school }}</option>{% endfor %}
+                </select>
+            </label>
+        {% endif %}
+        <label class="choice"><input type="checkbox" name="volunteer" value="1" {% if filters.volunteer %}checked{% endif %}> {{ t('registration.volunteers_only') }}</label>
+        <button type="submit" class="button secondary small">{{ t('audit.filter') }}</button>
+    </form>
+
+    <p class="meta">{{ t('registration.shown', {count: registrations|length}) }}</p>
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th class="num">{{ t('registration.field.bib') }}</th>
+                    <th>{{ t('registration.child') }}</th>
+                    <th>{{ t('registration.field.level') }}</th>
+                    <th>{{ t('registration.field.school') }}</th>
+                    <th>{{ t('registration.field.status') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in registrations %}
+                    <tr>
+                        <td class="num">{{ r.bib ?? '–' }}</td>
+                        <td>
+                            <a href="{{ url_for('registration', {id: r.id}) }}">{{ r.child.lastName }} {{ r.child.firstName }}</a>
+                            <br><small class="muted">{{ t('gender.' ~ r.child.gender ~ '.one') }}{% if r.child.volunteer %} · {{ t('registration.volunteer_short') }}{% endif %}{% if r.source.value == 'on_site' %} · {{ t('registration.source.on_site') }}{% endif %}</small>
+                        </td>
+                        <td>{{ label('level.' ~ r.child.level) }}</td>
+                        <td>{{ r.child.school }}</td>
+                        <td><span class="badge {{ r.status.value == 'registered' ? 'ok' : (r.status.value == 'waitlisted' ? 'warning' : 'muted') }}">{{ t('registration.status.' ~ r.status.value) }}</span></td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="5" class="muted">{{ t('registration.none') }}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+{% endblock %}

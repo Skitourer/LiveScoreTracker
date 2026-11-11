@@ -1,0 +1,33 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('import.title') }}{% endblock %}
+
+{% block content %}
+    <p><a href="{{ url_for('registrations') }}">← {{ t('registration.title') }}</a></p>
+    <h1>{{ t('import.title') }}</h1>
+    <p>{{ t('import.intro') }}</p>
+    {% include 'partials/errors.html.twig' %}
+    <form method="post" action="{{ url_for('registration-import') }}" enctype="multipart/form-data" class="form">
+        {{ csrf_field() }}
+        <label>{{ t('import.file') }} <small>{{ t('import.formats') }}</small>
+            <input type="file" name="file" accept=".xlsx,.csv" required>
+        </label>
+        <button type="submit" class="button">{{ t('import.preview') }}</button>
+    </form>
+
+    <h2>{{ t('import.columns_title') }}</h2>
+    <p class="meta">{{ t('import.columns_intro') }}</p>
+    <div class="table-scroll">
+        <table>
+            <thead><tr><th>{{ t('import.field') }}</th><th>{{ t('import.column') }}</th></tr></thead>
+            <tbody>
+                {% for field in fields %}
+                    <tr><td>{{ t('registration.field.' ~ field) }}</td><td>{% if columns[field] is defined %}<code>{{ columns[field] }}</code>{% else %}<span class="muted">{{ t('import.not_mapped') }}</span>{% endif %}</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if sample %}
+        <p><a class="button secondary small" href="{{ url_for('demo-import-sample') }}">{{ t('import.sample') }}</a></p>
+    {% endif %}
+{% endblock %}
