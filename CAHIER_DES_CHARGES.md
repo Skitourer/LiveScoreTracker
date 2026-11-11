@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.3 — 10 novembre 2026
+> Version 1.4 — 11 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -395,7 +395,7 @@ Le score est **arrondi à l'entier le plus proche**. Pour une épreuve « plus p
 - Un seul enfant avec une performance valide, ou toutes les performances identiques : **1000 points** pour tous.
 - Aucun enfant avec une performance valide dans la catégorie : pas de barème. Les nuls reçoivent `foul_score`.
 
-**Remarque** : avec `floor = 1`, on retrouve le barème historique (1 à 1000). Il faut alors fixer `foul_score = 0` pour distinguer le nul de la moins bonne performance.
+**Remarque** : avec `floor = 1`, on retrouve le barème historique (1 à 1000). Il faut alors fixer `foul_score = 0` pour distinguer le nul de la moins bonne performance. La configuration est **refusée** si `foul_score` n'est pas strictement inférieur à `floor`, ou si `dnf_score` dépasse `foul_score`.
 
 **Exemple** (plancher 100, plus grand = meilleur) : best = 68 m, worst = 8 m, v = 45 m
 → progression = 37/60 = 0,6167 → score = 100 + 0,6167 × 900 = **655 points**.
@@ -425,6 +425,8 @@ Critères appliqués **dans l'ordre**, jusqu'à lever l'égalité :
 1. Le plus grand **nombre de 1res places** en épreuve ;
 2. Le plus grand **nombre de places dans le top 3** en épreuve ;
 3. Le **plus jeune** (date de naissance la plus récente).
+
+Seules les épreuves avec une **performance valide** comptent comme places (un nul ou un DNF n'est jamais une 1re place). Le critère « plus jeune » n'est appliqué que si tous les enfants à départager ont une date de naissance.
 
 Si l'égalité persiste (jumeaux, date de naissance absente), l'application le signale à l'admin, qui **tranche manuellement** avant la clôture.
 
@@ -541,7 +543,7 @@ config.example/                      data/
     en/…                             .env                 (secrets)
 ```
 
-- Au premier lancement, l'application **copie** `config.example/` dans le dossier de données, puis l'admin l'adapte via l'écran de configuration.
+- Tant que le dossier de données ne contient pas de `competition.toml`, l'application utilise l'**exemple fictif** de `config.example/` (affiché comme tel sur l'accueil). L'écran de configuration l'y **copie** au premier enregistrement, puis l'admin l'adapte. Ainsi, le site d'essai suit toujours l'exemple à jour.
 - Les **traductions génériques** (`i18n/`) sont versionnées dans le dépôt. Le dossier de données peut les **surcharger** clé par clé (ex. nom de l'organisateur dans un email).
 - Les **secrets** (accès base de données, SMTP, clés API, accès Google Drive) sont dans un fichier `.env` propre à chaque installation, jamais versionné.
 
@@ -824,7 +826,7 @@ Chaque étape est livrée sur une branche avec une *pull request*, déployée su
 | Étape | Contenu | Résultat testable |
 |---|---|---|
 | **0. Socle** | Nettoyage du dépôt, structure, Slim, base de données, **conventions et outils qualité**, **garde-fous de confidentialité** (§ 25.3), déploiement automatique sur le site d'essai, page d'accueil | L'appli « vide » s'affiche sur le site d'essai |
-| **1. Configuration et cœur métier** | Lecture du TOML, i18n, modèle des épreuves, **moteur de barème et de départage** + tests automatiques | Rapport de calcul sur des données fictives |
+| **1. Configuration et cœur métier** | Lecture du TOML, i18n, modèle des épreuves, **moteur de barème et de départage** + tests automatiques | Rapport de calcul sur des données fictives (page `/demo/report`, absente en production) |
 | **2. Comptes et sécurité** | Connexion, rôles, 2FA admin, mot de passe oublié, compte partagé, journal d'audit | Connexion avec chaque rôle |
 | **3. Inscriptions (admin)** | Écran inscriptions, ajout manuel, import Excel, dossards | Import d'un fichier de test fictif |
 | **4. Accueil** | Liste d'accueil PDF, émargement entrée/sortie | Émargement sur téléphone |

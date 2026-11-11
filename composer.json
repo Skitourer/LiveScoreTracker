@@ -6,6 +6,7 @@
     "require": {
         "php": "^8.2",
         "ext-pdo": "*",
+        "internal/toml": "^1.1",
         "php-di/php-di": "^7.1",
         "slim/psr7": "^1.8",
         "slim/slim": "^4.15",

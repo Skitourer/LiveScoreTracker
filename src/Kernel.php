@@ -9,10 +9,17 @@ use Dotenv\Dotenv;
 use LiveScoreTracker\Action\HealthAction;
 use LiveScoreTracker\Action\HomeAction;
 use LiveScoreTracker\Action\MigrateAction;
+use LiveScoreTracker\Action\ScoringReportAction;
+use LiveScoreTracker\Domain\Config\InvalidConfig;
 use LiveScoreTracker\Infrastructure\BuildInfo;
+use LiveScoreTracker\Infrastructure\Config\ConfigRepository;
 use LiveScoreTracker\Infrastructure\Database\ConnectionFactory;
 use LiveScoreTracker\Infrastructure\Database\Migrator;
+use LiveScoreTracker\Infrastructure\I18n\CatalogLoader;
+use LiveScoreTracker\Infrastructure\I18n\Translator;
 use LiveScoreTracker\Infrastructure\Settings;
+use LiveScoreTracker\Presentation\ResultFormatter;
+use LiveScoreTracker\Presentation\TwigExtension;
 use PDO;
 use Psr\Container\ContainerInterface;
 use Slim\App;
@@ -53,6 +60,7 @@ final class Kernel
         $app->get('/', HomeAction::class)->setName('home');
         $app->get('/health', HealthAction::class)->setName('health');
         $app->post('/internal/migrate', MigrateAction::class)->setName('migrate');
+        $app->get('/demo/report', ScoringReportAction::class)->setName('demo-report');
 
         return $app;
     }
@@ -68,10 +76,40 @@ final class Kernel
                 self::service($c, PDO::class),
                 $settings->rootDir . '/migrations',
             ),
-            Twig::class => static fn(): Twig => Twig::create($settings->rootDir . '/templates', [
-                'cache' => $settings->debug ? false : $settings->dataDir . '/cache/twig',
-                'strict_variables' => $settings->debug,
-            ]),
+            ConfigRepository::class => static fn(): ConfigRepository => new ConfigRepository(
+                $settings->dataDir,
+                $settings->rootDir . '/config.example',
+            ),
+            Translator::class => static function (ContainerInterface $c) use ($settings): Translator {
+                try {
+                    $locale = self::service($c, ConfigRepository::class)->get()->edition->defaultLocale;
+                } catch (InvalidConfig) {
+                    $locale = 'fr';
+                }
+                $loader = new CatalogLoader([
+                    $settings->rootDir . '/config.example/i18n',
+                    $settings->dataDir . '/i18n',
+                ]);
+
+                return $loader->translator($locale);
+            },
+            ResultFormatter::class => static fn(ContainerInterface $c): ResultFormatter => new ResultFormatter(
+                self::service($c, Translator::class),
+            ),
+            Twig::class => static function (ContainerInterface $c) use ($settings): Twig {
+                $twig = Twig::create($settings->rootDir . '/templates', [
+                    'cache' => $settings->debug ? false : $settings->dataDir . '/cache/twig',
+                    // Recompile templates changed by a deployment (the cache lives in the data folder).
+                    'auto_reload' => true,
+                    'strict_variables' => $settings->debug,
+                ]);
+                $twig->addExtension(new TwigExtension(
+                    self::service($c, Translator::class),
+                    self::service($c, ResultFormatter::class),
+                ));
+
+                return $twig;
+            },
         ]);
 
         return $builder->build();

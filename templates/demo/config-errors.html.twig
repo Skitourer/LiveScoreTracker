@@ -1,0 +1,11 @@
+{% extends 'layout.html.twig' %}
+
+{% block content %}
+    <h1>{{ t('report.title') }}</h1>
+    <p class="notice error">{{ t('report.config_invalid') }}</p>
+    <ul class="errors">
+        {% for error in errors %}
+            <li><code>{{ error }}</code></li>
+        {% endfor %}
+    </ul>
+{% endblock %}

@@ -1,0 +1,127 @@
+# Textes génériques en français. Chaque clé peut être surchargée par le fichier
+# i18n/fr.toml du dossier de données de l'installation.
+
+[app]
+name = "LiveScoreTracker"
+
+[format]
+decimal_separator = ","
+
+[unit]
+seconds = "{value} s"
+minutes_seconds = "{minutes} min {seconds} s"
+metres = "{value} m"
+points = "{value} pts"
+
+[home]
+lead = "Le socle de l'application est en place."
+system_status = "État du système"
+database_ok = "Base de données : connectée"
+database_error = "Base de données : inaccessible"
+schema_ok = "Schéma : à jour"
+schema_pending = "Schéma : {count} migration(s) en attente"
+version = "Version {version} · révision {revision}"
+deployed_at = "déployée le {date}"
+environment = "environnement {environment}"
+config_ok = "Configuration : valide ({events} épreuves, {categories} catégories)"
+config_example = "exemple fictif"
+config_error = "Configuration : invalide"
+report_link = "Voir le rapport de calcul sur des données fictives"
+
+[level]
+CP = "CP"
+CE1 = "CE1"
+CE2 = "CE2"
+CM1 = "CM1"
+CM2 = "CM2"
+
+[gender.girl]
+one = "Fille"
+many = "Filles"
+
+[gender.boy]
+one = "Garçon"
+many = "Garçons"
+
+[category]
+label = "{gender} {level}"
+
+[workshop.sprint]
+name = "Sprint"
+
+[workshop.hurdles]
+name = "Haies"
+
+[workshop.vortex_throw]
+name = "Lancer de vortex"
+
+[workshop.hockey]
+name = "Hockey"
+
+[workshop.football]
+name = "Football"
+
+[workshop.obstacle_course]
+name = "Parcours d'obstacles"
+
+[workshop.long_jump]
+name = "Saut en longueur"
+
+[workshop.basketball]
+name = "Basket"
+
+[modifier]
+goal_scored = "But marqué"
+
+[action]
+basket = "Panier"
+rim = "Cercle"
+board = "Cadre"
+miss = "Raté"
+
+[contact]
+data_entry = "Saisie informatique"
+general = "Autres problèmes"
+
+[status]
+valid = "Valide"
+foul = "Nul"
+dnf = "Non fait"
+pending = "À faire"
+absent = "Absent"
+
+[tie_breaker]
+first_places = "1res places"
+top3_places = "places dans le top 3"
+youngest = "le plus jeune"
+
+[report]
+title = "Rapport de calcul"
+fictitious = "Toutes les données de cette page sont fictives et générées automatiquement : {count} enfants, tirage n° {seed}."
+another_draw = "Autre tirage"
+competition_running = "Compétition en cours"
+competition_closed = "Compétition clôturée"
+show_running = "Voir en cours de compétition"
+show_closed = "Voir après la clôture"
+category = "Catégorie"
+overall = "Classement général"
+rank = "Rang"
+bib = "Dossard"
+child = "Enfant"
+total = "Total"
+first_places = "1res"
+top3_places = "Top 3"
+decided_by = "départagé : {criterion}"
+tie_unresolved = "égalité à trancher"
+incomplete = "épreuves en attente"
+absent_children = "Absents : {bibs}"
+event = "Épreuve"
+attempts = "Essais"
+result = "Résultat"
+status = "Statut"
+points = "Points"
+bounds = "Meilleure performance : {best} · moins bonne : {worst}"
+no_bounds = "Aucune performance valide : pas de barème."
+scale = "Barème : {floor} à {max} points · nul : {foul} · non fait : {dnf}"
+foul = "nul"
+config_invalid = "La configuration contient des erreurs :"

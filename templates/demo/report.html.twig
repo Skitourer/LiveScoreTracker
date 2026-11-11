@@ -1,0 +1,121 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('report.title') }} · {{ t('app.name') }}{% endblock %}
+
+{% block content %}
+    {% set base = url_for('demo-report') %}
+    {% set state = closed ? 'closed' : 'running' %}
+    {% set category_id = report.category.id() %}
+
+    <h1>{{ t('report.title') }}</h1>
+    <p class="notice">{{ t('report.fictitious', {count: childCount, seed: seed}) }}</p>
+
+    <nav class="toolbar">
+        <a class="button" href="{{ base }}?seed={{ seed + 1 }}&amp;state={{ state }}&amp;category={{ category_id }}">{{ t('report.another_draw') }}</a>
+        {% if closed %}
+            <a class="button secondary" href="{{ base }}?seed={{ seed }}&amp;state=running&amp;category={{ category_id }}">{{ t('report.show_running') }}</a>
+        {% else %}
+            <a class="button secondary" href="{{ base }}?seed={{ seed }}&amp;state=closed&amp;category={{ category_id }}">{{ t('report.show_closed') }}</a>
+        {% endif %}
+    </nav>
+    <p class="meta">{{ closed ? t('report.competition_closed') : t('report.competition_running') }}</p>
+
+    <nav class="chips" aria-label="{{ t('report.category') }}">
+        {% for category in categories %}
+            <a href="{{ base }}?seed={{ seed }}&amp;state={{ state }}&amp;category={{ category.id() }}"
+               {% if category.id() == category_id %}aria-current="page"{% endif %}>{{ category_label(category) }}</a>
+        {% endfor %}
+    </nav>
+
+    <h2>{{ t('report.overall') }} · {{ category_label(report.category) }}</h2>
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th class="num">{{ t('report.rank') }}</th>
+                    <th>{{ t('report.child') }}</th>
+                    <th class="num">{{ t('report.total') }}</th>
+                    <th class="num">{{ t('report.first_places') }}</th>
+                    <th class="num">{{ t('report.top3_places') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% set absents = [] %}
+                {% for line in report.ranking %}
+                    {% if line.present %}
+                        {% set child = report.children[line.bib] %}
+                        <tr{% if line.rank <= 3 %} class="podium"{% endif %}>
+                            <td class="num">{{ line.rank }}</td>
+                            <td>
+                                <span class="bib">{{ line.bib }}</span> {{ child.displayName() }}
+                                {% if line.tied %}<span class="badge warning">{{ t('report.tie_unresolved') }}</span>
+                                {% elseif line.decidedBy %}<span class="badge">{{ t('report.decided_by', {criterion: tie_breaker(line.decidedBy)}) }}</span>{% endif %}
+                                {% if not line.complete %}<span class="badge muted">{{ t('report.incomplete') }}</span>{% endif %}
+                            </td>
+                            <td class="num strong">{{ line.total }}</td>
+                            <td class="num">{{ line.firstPlaces }}</td>
+                            <td class="num">{{ line.top3Places }}</td>
+                        </tr>
+                    {% else %}
+                        {% set absents = absents|merge([line.bib]) %}
+                    {% endif %}
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if absents is not empty %}
+        <p class="meta">{{ t('report.absent_children', {bibs: absents|join(', ')}) }}</p>
+    {% endif %}
+
+    {% for event in report.events %}
+        {% set variant = event.variant %}
+        {% set scores = event.scores %}
+        <details class="event">
+            <summary>{{ event_label(variant) }}</summary>
+            <p class="meta">
+                {% if scores.best is not null %}
+                    {{ t('report.bounds', {best: result(scores.best, variant), worst: result(scores.worst, variant)}) }}
+                {% else %}
+                    {{ t('report.no_bounds') }}
+                {% endif %}
+                <br>{{ t('report.scale', {floor: variant.scoring.floor, max: variant.scoring.maxScore, foul: variant.scoring.foulScore, dnf: variant.scoring.dnfScore}) }}
+            </p>
+            <div class="table-scroll">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="num">{{ t('report.rank') }}</th>
+                            <th>{{ t('report.child') }}</th>
+                            <th>{{ t('report.attempts') }}</th>
+                            <th class="num">{{ t('report.points') }}</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in scores.entries %}
+                            {% if entry.status.value != 'absent' %}
+                                <tr>
+                                    <td class="num">{{ entry.rank ?? '–' }}</td>
+                                    <td><span class="bib">{{ entry.bib }}</span> {{ report.children[entry.bib].displayName() }}</td>
+                                    <td>
+                                        {% for attempt in report.attempts[variant.id()][entry.bib] ?? [] %}
+                                            {%- if attempt.isFoul() -%}
+                                                <span class="foul">{{ t('report.foul') }}</span>
+                                            {%- else -%}
+                                                <span{% if entry.best == attempt.result() %} class="best"{% endif %}>{{ result(attempt.result(), variant) }}</span>
+                                                {%- if attempt.modifierTotal != 0 %} <small>({{ attempt.modifierTotal < 0 ? '−' : '+' }}{{ result(attempt.modifierTotal|abs, variant) }})</small>{% endif -%}
+                                            {%- endif -%}
+                                            {%- if not loop.last %} · {% endif -%}
+                                        {% else %}
+                                            <span class="muted">{{ t('status.' ~ entry.status.value) }}</span>
+                                        {% endfor %}
+                                    </td>
+                                    <td class="num strong">{{ entry.score ?? '–' }}</td>
+                                </tr>
+                            {% endif %}
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </details>
+    {% endfor %}
+{% endblock %}
