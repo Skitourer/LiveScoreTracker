@@ -144,6 +144,14 @@ final class SessionStore
         return $statement->rowCount() > 0;
     }
 
+    /**
+     * Ends the sessions of one phone on an account.
+     */
+    public function deleteForDevice(int $userId, string $deviceId): void
+    {
+        $this->pdo->prepare('DELETE FROM sessions WHERE user_id = :u AND device_id = :d')->execute(['u' => $userId, 'd' => $deviceId]);
+    }
+
     public function deleteForUser(int $userId): void
     {
         $this->pdo->prepare('DELETE FROM sessions WHERE user_id = :u')->execute(['u' => $userId]);

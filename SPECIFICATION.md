@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.8 — 11 November 2026
+> Version 1.9 — 11 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -704,6 +704,7 @@ The **anonymous history** of previous editions remains available (year-over-year
 
 - Passwords **hashed** (`password_hash`, Argon2id), **12 characters minimum** for individual accounts.
 - **Mandatory 2FA for admins**: TOTP codes (authenticator app: Google Authenticator, Microsoft Authenticator…). No SMS.
+- **Trusted device**: when typing the code, the admin can tick "trust this device". The code is then no longer asked on that browser for **30 days** (the password still is). Trust is tied to the browser (secret cookie, hashed in the database): a cookie copied to another device is not enough. Each admin sees their trusted devices and can remove them; a password change, a 2FA reset or disabling the account removes them all.
 - **10 recovery codes** provided when 2FA is enabled. An admin can reset another admin's 2FA.
 - **Forgotten password** (admin, organizer): email link, valid for **1 hour**, single use.
 - **Rate limiting** on all login screens (including bib + date of birth): progressive temporary lockout. A one-minute lockout starts after **5 failures** for an account (counted **per phone** for the shared referee account, so one mistake does not lock every phone) or **20 failures** from one IP address; the delay doubles with each new failure, up to 1 hour.
@@ -711,7 +712,9 @@ The **anonymous history** of previous editions remains available (year-over-year
   - active only during the "in progress" phase;
   - password changed every edition;
   - after logging in, each referee **types their first name**, recorded with each of their actions and entries;
-  - the admin sees **who is connected** (first name, phone, last activity) and can **log out one referee**;
+  - each phone is **remembered with its referee's first name**: after being logged out, a referee who logs in again on the same phone gets their first name back without typing it;
+  - the admin sees **the known phones** (first name, phone, last activity, connected or not) and can **log out one referee**, **block a phone for good** (misuse, e.g. a child changing results), unblock it, or forget it;
+  - blocking relies on the device identifier (cookie): clearing cookies gets around it. Against a determined person who knows the password, the answer is to **change the referee password**, which logs out every phone;
   - admin "**log out all phones**" button;
   - each entry records a device identifier;
   - password of **at least 8 characters** (it is typed on many phones).

@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace LiveScoreTracker\Action\Auth;
 
 use LiveScoreTracker\Action\Support\Responder;
+use LiveScoreTracker\Http\Middleware\SessionMiddleware;
 use LiveScoreTracker\Infrastructure\Persistence\RecoveryCodeRepository;
 use LiveScoreTracker\Infrastructure\Persistence\Throttle;
+use LiveScoreTracker\Infrastructure\Persistence\TrustedDeviceRepository;
 use LiveScoreTracker\Infrastructure\Security\TwoFactor;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -24,6 +26,7 @@ final class TwoFactorChallengeAction
         private readonly TwoFactor $twoFactor,
         private readonly RecoveryCodeRepository $recoveryCodes,
         private readonly Throttle $throttle,
+        private readonly TrustedDeviceRepository $trustedDevices,
     ) {}
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
@@ -63,7 +66,19 @@ final class TwoFactorChallengeAction
             $this->responder->flash('warning', 'two_factor.recovery_code_used', ['remaining' => $this->recoveryCodes->remaining($user->id)]);
         }
 
-        return $this->responder->redirect($response, LoginAction::takeNext($context->session()));
+        $response = $this->responder->redirect($response, LoginAction::takeNext($context->session()));
+        if (Responder::field($request, 'trust_device') === '1') {
+            $token = $this->trustedDevices->trust($user->id, $context->deviceId, $request->getHeaderLine('User-Agent') ?: null);
+            $this->responder->audit('auth.device_trusted', ['days' => TrustedDeviceRepository::LIFETIME_DAYS]);
+            $response = $response->withAddedHeader('Set-Cookie', SessionMiddleware::cookie(
+                SessionMiddleware::TRUST_COOKIE,
+                $token,
+                TrustedDeviceRepository::LIFETIME_DAYS * 86400,
+                SessionMiddleware::isHttps($request),
+            ));
+        }
+
+        return $response;
     }
 
     /**

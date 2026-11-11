@@ -7,6 +7,7 @@ namespace LiveScoreTracker\Action\Admin;
 use LiveScoreTracker\Action\Support\Responder;
 use LiveScoreTracker\Domain\Security\PasswordPolicy;
 use LiveScoreTracker\Domain\Security\Role;
+use LiveScoreTracker\Infrastructure\Persistence\RefereeDeviceRepository;
 use LiveScoreTracker\Infrastructure\Persistence\UserRepository;
 use LiveScoreTracker\Infrastructure\Session\SessionStore;
 use Psr\Http\Message\ResponseInterface;
@@ -22,6 +23,7 @@ final class RefereeAccountAction
         private readonly Responder $responder,
         private readonly UserRepository $users,
         private readonly SessionStore $sessions,
+        private readonly RefereeDeviceRepository $devices,
     ) {}
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
@@ -62,17 +64,19 @@ final class RefereeAccountAction
 
                     return $this->responder->redirect($response, '/admin/referee');
                 }
-            } elseif ($op === 'disconnect_one' && $account !== null) {
-                $target = null;
-                foreach ($this->sessions->activeForUser($account->id) as $phone) {
-                    if (hash_equals($phone['id'], Responder::field($request, 'session'))) {
-                        $target = $phone;
-                    }
-                }
-                if ($target !== null && $this->sessions->deleteStored($target['id'], $account->id)) {
-                    $name = $target['referee_name'] ?? '?';
-                    $this->responder->audit('referee.disconnected_one', ['referee_name' => $name, 'device' => substr((string) $target['device_id'], 0, 6)]);
-                    $this->responder->flash('success', 'referee.disconnected_one', ['name' => $name]);
+            } elseif (\in_array($op, ['disconnect_device', 'block', 'unblock', 'forget'], true) && $account !== null) {
+                $deviceId = Responder::field($request, 'device');
+                $device = $this->devices->find($deviceId);
+                $name = $device['referee_name'] ?? '?';
+                if (preg_match('/^[a-f0-9]{32}$/', $deviceId) === 1) {
+                    match ($op) {
+                        'disconnect_device' => $this->sessions->deleteForDevice($account->id, $deviceId),
+                        'block' => $this->blockDevice($account->id, $deviceId),
+                        'unblock' => $this->devices->unblock($deviceId),
+                        'forget' => $this->devices->forget($deviceId),
+                    };
+                    $this->responder->audit('referee.device_' . $op, ['referee_name' => $name, 'device' => substr($deviceId, 0, 6)]);
+                    $this->responder->flash('success', 'referee.device_' . $op, ['name' => $name]);
                 }
 
                 return $this->responder->redirect($response, '/admin/referee');
@@ -87,13 +91,31 @@ final class RefereeAccountAction
             }
         }
 
+        $sessions = $account === null ? [] : $this->sessions->activeForUser($account->id);
+        $connected = array_count_values(array_filter(array_map(static fn(array $s): ?string => $s['device_id'], $sessions)));
+        $devices = $this->devices->all();
+        $known = array_column($devices, 'device_id');
+
         return $this->responder->render($response, 'admin/referee.html.twig', [
             'account' => $account,
             'username' => $username !== '' ? $username : 'arbitre',
-            'phones' => $account === null ? [] : $this->sessions->activeForUser($account->id),
+            'devices' => $devices,
+            'connected' => $connected,
+            'connectedCount' => \count($connected),
+            // Logged in but first name not typed yet (unknown phone).
+            'unnamed' => array_values(array_filter($sessions, static fn(array $s): bool => !\in_array($s['device_id'], $known, true))),
             'errors' => $errors,
             'min' => PasswordPolicy::SHARED_MIN_LENGTH,
         ], $errors === [] ? 200 : 422);
+    }
+
+    /**
+     * Blocks a phone for good and ends its sessions.
+     */
+    private function blockDevice(int $accountId, string $deviceId): void
+    {
+        $this->devices->block($deviceId, $this->responder->context->user->username ?? '');
+        $this->sessions->deleteForDevice($accountId, $deviceId);
     }
 
     /**

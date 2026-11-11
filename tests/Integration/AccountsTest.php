@@ -142,22 +142,101 @@ final class AccountsTest extends TestCase
         self::assertStringContainsString('<strong>Julie</strong>', $this->admin->lastBody);
 
         // Disconnect only Julie.
-        $julieSession = self::firstMatch('#<strong>Julie</strong>.*?name="session" value="([a-f0-9]{64})"#s', $this->admin->lastBody);
-        $this->admin->post('/admin/referee', ['op' => 'disconnect_one', 'session' => $julieSession]);
+        $julieDevice = $phone2->cookies['lst_device'];
+        self::assertStringContainsString('name="device" value="' . $julieDevice . '"', $this->admin->lastBody);
+        $this->admin->post('/admin/referee', ['op' => 'disconnect_device', 'device' => $julieDevice]);
         self::assertStringStartsWith('/login', $phone2->get('/dashboard')->getHeaderLine('Location'));
         self::assertSame(200, $phone->get('/dashboard')->getStatusCode(), 'Paul stays connected.');
 
         $this->admin->get('/admin/audit');
         self::assertStringContainsString('referee: Paul', $this->admin->lastBody);
-        self::assertStringContainsString('Un arbitre déconnecté', $this->admin->lastBody);
+        self::assertStringContainsString('Arbitre déconnecté', $this->admin->lastBody);
+
+        // Julie's phone is remembered: logging in again brings her name back.
+        $phone2->get('/login');
+        self::assertSame('/dashboard', $phone2->post('/login', ['username' => 'arbitre', 'password' => 'whistle-2027'])->getHeaderLine('Location'));
+        $phone2->get('/dashboard');
+        self::assertStringContainsString('Julie <small>', $phone2->lastBody);
 
         // "Disconnect all phones", then back to preparation.
         $this->admin->post('/admin/referee', ['op' => 'disconnect']);
         self::assertStringStartsWith('/login', $phone->get('/dashboard')->getHeaderLine('Location'));
-        $phone->post('/login', ['username' => 'arbitre', 'password' => 'whistle-2027']);
-        $phone->post('/referee/name', ['first_name' => 'Paul']);
+        $phone->get('/login');
+        self::assertSame('/dashboard', $phone->post('/login', ['username' => 'arbitre', 'password' => 'whistle-2027'])->getHeaderLine('Location'));
         $this->admin->post('/admin/phase', ['phase' => 'preparation']);
         self::assertStringStartsWith('/login', $phone->get('/dashboard')->getHeaderLine('Location'));
+    }
+
+    public function testAbusivePhoneCanBeBlockedForGood(): void
+    {
+        $this->loginAsAdmin();
+        $this->admin->post('/admin/referee', ['op' => 'create', 'username' => 'arbitre', 'password' => 'whistle-2027']);
+        $this->admin->post('/admin/phase', ['phase' => 'running']);
+
+        $kid = $this->admin->otherBrowser();
+        $kid->post('/login', ['username' => 'arbitre', 'password' => 'whistle-2027']);
+        $kid->post('/referee/name', ['first_name' => 'Tom']);
+        $device = $kid->cookies['lst_device'];
+
+        $this->admin->post('/admin/referee', ['op' => 'block', 'device' => $device]);
+        self::assertStringStartsWith('/login', $kid->get('/dashboard')->getHeaderLine('Location'), 'The session is killed.');
+        $kid->get('/login');
+        self::assertSame(403, $kid->post('/login', ['username' => 'arbitre', 'password' => 'whistle-2027'])->getStatusCode());
+        self::assertStringContainsString('bloqué par l&#039;administrateur', $kid->lastBody);
+
+        // A blocked phone cannot be forgotten (that would unblock it).
+        $this->admin->post('/admin/referee', ['op' => 'forget', 'device' => $device]);
+        $this->admin->get('/admin/referee');
+        self::assertStringContainsString('<strong>Tom</strong>', $this->admin->lastBody);
+        self::assertStringContainsString('bloqué', $this->admin->lastBody);
+
+        $this->admin->post('/admin/referee', ['op' => 'unblock', 'device' => $device]);
+        self::assertSame('/dashboard', $kid->post('/login', ['username' => 'arbitre', 'password' => 'whistle-2027'])->getHeaderLine('Location'));
+
+        // Forgotten: the next login asks for a first name again.
+        $kid->post('/logout');
+        $this->admin->post('/admin/referee', ['op' => 'forget', 'device' => $device]);
+        self::assertSame('/referee/name', $kid->post('/login', ['username' => 'arbitre', 'password' => 'whistle-2027'])->getHeaderLine('Location'));
+
+        $this->admin->get('/admin/audit');
+        self::assertStringContainsString('Téléphone d&#039;arbitre bloqué', $this->admin->lastBody);
+        self::assertStringContainsString('Connexion refusée : téléphone bloqué', $this->admin->lastBody);
+    }
+
+    public function testTrustedDeviceSkipsTheCodeForThirtyDays(): void
+    {
+        $this->loginAsAdmin();
+        $this->logout($this->admin);
+
+        // Tick "trust this device" when typing the code.
+        $this->admin->post('/login', ['username' => 'boss', 'password' => self::ADMIN_PASSWORD]);
+        $this->admin->get('/login/2fa');
+        self::assertStringContainsString('pendant 30 jours', $this->admin->lastBody);
+        $this->admin->post('/login/2fa', ['code' => $this->currentCode(), 'trust_device' => '1']);
+        self::assertArrayHasKey('lst_trust', $this->admin->cookies);
+        $this->logout($this->admin);
+
+        self::assertSame('/dashboard', $this->admin->post('/login', ['username' => 'boss', 'password' => self::ADMIN_PASSWORD])->getHeaderLine('Location'));
+        $this->admin->get('/account');
+        self::assertStringContainsString('cet appareil', $this->admin->lastBody);
+
+        // Another browser still needs the code, even with a copied trust cookie.
+        $other = $this->admin->otherBrowser();
+        $other->cookies['lst_trust'] = $this->admin->cookies['lst_trust'];
+        self::assertSame('/login/2fa', $other->post('/login', ['username' => 'boss', 'password' => self::ADMIN_PASSWORD])->getHeaderLine('Location'));
+
+        // A password change revokes every trusted device.
+        $this->admin->post('/account/password', [
+            'current_password' => self::ADMIN_PASSWORD, 'password' => 'another-long-pass-9', 'password_confirm' => 'another-long-pass-9',
+        ]);
+        $this->logout($this->admin);
+        self::assertSame('/login/2fa', $this->loginLocation('another-long-pass-9'));
+        $this->admin->post('/login/2fa', ['code' => $this->currentCode(), 'trust_device' => '1']);
+
+        // Revoked from the account page.
+        $this->admin->post('/account', ['op' => 'revoke_all']);
+        $this->logout($this->admin);
+        self::assertSame('/login/2fa', $this->loginLocation('another-long-pass-9'));
     }
 
     public function testFailedLoginsAreThrottled(): void
@@ -285,8 +364,28 @@ final class AccountsTest extends TestCase
         $this->admin->post('/login', ['username' => 'boss', 'password' => self::ADMIN_PASSWORD]);
         $this->admin->get('/account/2fa');
         $this->totpSecret = $this->secretFromPage();
-        $this->admin->post('/account/2fa', ['code' => self::totp($this->totpSecret)]);
+        $this->admin->post('/account/2fa', ['code' => $this->currentCode()]);
         self::assertSame(200, $this->admin->get('/dashboard')->getStatusCode());
+    }
+
+    /**
+     * Logs the admin in and returns where the login sends him.
+     *
+     * @phpstan-impure
+     */
+    private function loginLocation(string $password): string
+    {
+        return $this->admin->post('/login', ['username' => 'boss', 'password' => $password])->getHeaderLine('Location');
+    }
+
+    private function currentCode(): string
+    {
+        $secret = $this->totpSecret;
+        if ($secret === '') {
+            self::fail('2FA is not set up.');
+        }
+
+        return self::totp($secret);
     }
 
     private function logout(WebClient $client): ResponseInterface

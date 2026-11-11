@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.8 — 11 novembre 2026
+> Version 1.9 — 11 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -704,6 +704,7 @@ L'**historique anonyme** des éditions précédentes reste consultable (comparai
 
 - Mots de passe **hachés** (`password_hash`, Argon2id), **12 caractères minimum** pour les comptes individuels.
 - **2FA obligatoire pour les admins** : codes TOTP (application d'authentification : Google Authenticator, Microsoft Authenticator…). Pas de SMS.
+- **Appareil de confiance** : en saisissant le code, l'admin peut cocher « faire confiance à cet appareil ». Le code n'est alors plus demandé sur ce navigateur pendant **30 jours** (le mot de passe reste demandé). La confiance est liée au navigateur (cookie secret, haché en base) : un cookie copié sur un autre appareil ne suffit pas. Chaque admin voit ses appareils de confiance et peut les retirer ; un changement de mot de passe, une réinitialisation de la 2FA ou une désactivation du compte les retire tous.
 - **10 codes de secours** fournis à l'activation de la 2FA. Un admin peut réinitialiser la 2FA d'un autre admin.
 - **Mot de passe oublié** (admin, organisateur) : lien par email, valable **1 heure**, à usage unique.
 - **Limitation des tentatives** sur tous les écrans de connexion (y compris dossard + date de naissance) : blocage temporaire progressif. Blocage d'une minute dès **5 échecs** pour un compte (comptés **par téléphone** pour le compte partagé des arbitres, pour qu'une fausse manipulation ne bloque pas tous les téléphones) ou **20 échecs** pour une même adresse IP ; la durée double à chaque nouvel échec, jusqu'à 1 h.
@@ -711,7 +712,9 @@ L'**historique anonyme** des éditions précédentes reste consultable (comparai
   - actif uniquement en phase « en cours » ;
   - mot de passe changé à chaque édition ;
   - après la connexion, chaque arbitre **indique son prénom**, enregistré avec chacune de ses actions et de ses saisies ;
-  - l'admin voit **qui est connecté** (prénom, téléphone, dernière activité) et peut **déconnecter un arbitre** en particulier ;
+  - chaque téléphone est **mémorisé avec le prénom** de son arbitre : après une déconnexion, l'arbitre qui se reconnecte sur le même téléphone retrouve son prénom sans le ressaisir ;
+  - l'admin voit **les téléphones connus** (prénom, téléphone, dernière activité, connecté ou non) et peut **déconnecter un arbitre** en particulier, **bloquer définitivement un téléphone** (usage abusif, par exemple un enfant qui modifie des résultats), le débloquer, ou l'oublier ;
+  - le blocage repose sur l'identifiant d'appareil (cookie) : effacer les cookies le contourne. Face à une personne déterminée qui connaît le mot de passe, la parade est de **changer le mot de passe des arbitres**, ce qui déconnecte tous les téléphones ;
   - bouton admin « **déconnecter tous les téléphones** » ;
   - chaque saisie enregistre un identifiant d'appareil ;
   - mot de passe de **8 caractères minimum** (il est saisi sur de nombreux téléphones).

@@ -7,6 +7,7 @@ namespace LiveScoreTracker\Action\Auth;
 use LiveScoreTracker\Action\Support\Responder;
 use LiveScoreTracker\Domain\Registration\TextCleaner;
 use LiveScoreTracker\Http\RequestContext;
+use LiveScoreTracker\Infrastructure\Persistence\RefereeDeviceRepository;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -19,7 +20,10 @@ final class RefereeNameAction
 {
     public const MAX_LENGTH = 40;
 
-    public function __construct(private readonly Responder $responder) {}
+    public function __construct(
+        private readonly Responder $responder,
+        private readonly RefereeDeviceRepository $devices,
+    ) {}
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
@@ -35,6 +39,7 @@ final class RefereeNameAction
             } else {
                 $first = $context->refereeName() === null;
                 $context->session()->set(RequestContext::REFEREE_NAME, $name);
+                $this->devices->remember($context->deviceId, $name, $request->getHeaderLine('User-Agent') ?: null);
                 $this->responder->audit($first ? 'auth.login' : 'referee.renamed');
 
                 return $this->responder->redirect($response, $first ? LoginAction::takeNext($context->session()) : '/dashboard');

@@ -9,6 +9,7 @@ use LiveScoreTracker\Domain\Security\Role;
 use LiveScoreTracker\Http\AuthState;
 use LiveScoreTracker\Http\RequestContext;
 use LiveScoreTracker\Infrastructure\Persistence\AppState;
+use LiveScoreTracker\Infrastructure\Persistence\RefereeDeviceRepository;
 use LiveScoreTracker\Infrastructure\Persistence\UserRepository;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -27,6 +28,7 @@ final class AuthenticationMiddleware implements MiddlewareInterface
         private readonly RequestContext $context,
         private readonly UserRepository $users,
         private readonly AppState $appState,
+        private readonly RefereeDeviceRepository $refereeDevices,
     ) {}
 
     public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
@@ -53,7 +55,8 @@ final class AuthenticationMiddleware implements MiddlewareInterface
             $valid = $user !== null
                 && !$user->disabled
                 && $session->get('session_version') === $user->sessionVersion
-                && AccessPolicy::roleActiveIn($user->role, $this->context->phase);
+                && AccessPolicy::roleActiveIn($user->role, $this->context->phase)
+                && ($user->role !== Role::Referee || !$this->refereeDevices->isBlocked($this->context->deviceId));
 
             if ($user === null || !$valid) {
                 $session->destroy();
