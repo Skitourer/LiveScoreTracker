@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.9 — 11 November 2026
+> Version 1.10 — 11 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -159,7 +159,7 @@ A parent can register **several children** (siblings): after one registration, o
    - Otherwise: status **waitlisted**, "you are on the waiting list" email, admin notification.
 4. A registration not verified within 48 h **expires**. Only verified registrations count toward the quota. The admin can manually approve a pending registration.
 
-Registration statuses: `pending_verification` → `registered` | `waitlisted` → `registered` | `withdrawn` | `expired`.
+Registration statuses: `pending_verification` → `registered` | `waitlisted` → `registered` | `withdrawn` | `expired`. A withdrawn child can be **registered again** by the admin (or put back on the waiting list).
 
 ### 5.4 Waiting list
 
@@ -177,9 +177,10 @@ In both cases the admin is notified, so they can approve a child from the waitin
 
 ### 5.6 Bibs
 
-- Assigned **in the order children reach the "registered" status**, starting from 1 (or a configurable starting number).
-- A number is **never reassigned** within an edition, even after a withdrawal.
-- On-site additions (§ 5.8) get the next number.
+- Assigned **in the order children reach the "registered" status**, starting from 1 (or a configurable starting number): each newly registered child gets the **lowest free number**.
+- **During preparation**, a withdrawn child **gives their bib back**, and it goes to the next registered child: the stock of paper bibs is limited. If registered again, they get the first free number.
+- **Once the competition has started**, a withdrawn child **keeps their bib**: it is never given to another child. If registered again, they get their bib back.
+- On-site additions (§ 5.8) get the first free number.
 
 ### 5.7 Spreadsheet import (fallback and migration)
 

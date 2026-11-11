@@ -9,6 +9,7 @@ use LiveScoreTracker\Domain\Registration\Registration;
 use LiveScoreTracker\Domain\Registration\RegistrationSource;
 use LiveScoreTracker\Domain\Registration\RegistrationStatus;
 use LiveScoreTracker\Domain\Registration\TextCleaner;
+use LiveScoreTracker\Domain\Security\Phase;
 use LiveScoreTracker\Domain\Security\User;
 use LiveScoreTracker\Infrastructure\Clock;
 use PDO;
@@ -20,9 +21,6 @@ use RuntimeException;
  */
 final class RegistrationRepository
 {
-    /** Highest bib ever given in this edition (bibs are never given twice). */
-    private const LAST_BIB = 'last_bib';
-
     private const ACTIVE = [RegistrationStatus::PendingVerification, RegistrationStatus::Registered, RegistrationStatus::Waitlisted];
 
     public function __construct(
@@ -202,7 +200,12 @@ final class RegistrationRepository
     }
 
     /**
-     * Moves a registration to another status; becoming "registered" gives the next bib.
+     * Moves a registration to another status; becoming "registered" gives a bib.
+     *
+     * Bibs (spec § 5.6): during preparation, a withdrawn child gives their bib back,
+     * so the limited stock of paper bibs is used up in order. Once the competition
+     * has started, a withdrawn child keeps their bib: it is never given to anyone
+     * else, and they find it again if registered back.
      */
     public function changeStatus(int $id, RegistrationStatus $status, ?User $actor, int $firstBib): void
     {
@@ -223,6 +226,10 @@ final class RegistrationRepository
         $this->pdo->prepare("UPDATE registrations SET status = :status, updated_at = :now{$extra} WHERE id = :id")->execute($params);
         $this->addHistory($id, 'status', ['status' => [$current->status->value, $status->value]], $actor);
 
+        if ($status === RegistrationStatus::Withdrawn && $current->bib !== null && $this->appState->phase() === Phase::Preparation) {
+            $this->pdo->prepare('UPDATE registrations SET bib = NULL WHERE id = :id')->execute(['id' => $id]);
+            $this->addHistory($id, 'bib_freed', ['bib' => [$current->bib, null]], null);
+        }
         if ($status === RegistrationStatus::Registered) {
             $this->markRegistered($id, $firstBib);
         }
@@ -255,26 +262,26 @@ final class RegistrationRepository
 
     /**
      * Gives the registration its bib (if it has none yet) and sets the registration date.
-     * The next bib is above every bib ever given, so a number is never reused (spec § 5.6).
+     *
+     * The bib is the lowest number not held by any registration, from the first bib
+     * of the configuration. A withdrawn child still holds their bib once the
+     * competition has started, so a bib worn on the day is never given again.
      */
     private function markRegistered(int $id, int $firstBib): void
     {
         for ($attempt = 1; ; ++$attempt) {
             $this->pdo->beginTransaction();
             try {
-                $statement = $this->pdo->query('SELECT MAX(bib) FROM registrations');
-                $maxBib = $statement === false ? null : $statement->fetchColumn();
-                $next = max((int) ($this->appState->get(self::LAST_BIB) ?? 0), \is_numeric($maxBib) ? (int) $maxBib : 0, $firstBib - 1) + 1;
+                $next = $this->lowestFreeBib($firstBib);
 
                 $update = $this->pdo->prepare(
                     'UPDATE registrations SET bib = :bib, registered_at = :now WHERE id = :id AND bib IS NULL',
                 );
                 $update->execute(['bib' => $next, 'now' => $this->clock->stamp(), 'id' => $id]);
                 if ($update->rowCount() > 0) {
-                    $this->appState->set(self::LAST_BIB, (string) $next);
                     $this->addHistory($id, 'bib', ['bib' => [null, $next]], null);
                 } else {
-                    // Already numbered (e.g. back from the waiting list after a mistake): keep the bib.
+                    // Already numbered (registered back during the competition): keep the bib.
                     $this->pdo->prepare('UPDATE registrations SET registered_at = COALESCE(registered_at, :now) WHERE id = :id')
                         ->execute(['now' => $this->clock->stamp(), 'id' => $id]);
                 }
@@ -289,6 +296,21 @@ final class RegistrationRepository
                 }
             }
         }
+    }
+
+    private function lowestFreeBib(int $firstBib): int
+    {
+        $statement = $this->pdo->prepare('SELECT bib FROM registrations WHERE bib >= :first ORDER BY bib');
+        $statement->execute(['first' => $firstBib]);
+        $next = $firstBib;
+        foreach ($statement->fetchAll(PDO::FETCH_COLUMN) as $bib) {
+            if ((int) $bib !== $next) {
+                break;
+            }
+            ++$next;
+        }
+
+        return $next;
     }
 
     /**

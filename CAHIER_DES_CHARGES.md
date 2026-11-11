@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.9 — 11 novembre 2026
+> Version 1.10 — 11 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -159,7 +159,7 @@ Un parent peut inscrire **plusieurs enfants** (fratrie) : après une inscription
    - Sinon : statut **en liste d'attente**, email « vous êtes en liste d'attente », notification à l'admin.
 4. Une inscription non vérifiée sous 48 h **expire**. Seules les inscriptions vérifiées comptent dans le quota. L'admin peut valider manuellement une inscription en suspens.
 
-Statuts d'une inscription : `pending_verification` → `registered` | `waitlisted` → `registered` | `withdrawn` | `expired`.
+Statuts d'une inscription : `pending_verification` → `registered` | `waitlisted` → `registered` | `withdrawn` | `expired`. Un enfant désinscrit peut être **réinscrit** par l'admin (ou remis en liste d'attente).
 
 ### 5.4 Liste d'attente
 
@@ -177,9 +177,10 @@ Dans les deux cas, l'admin est notifié, pour éventuellement valider un enfant 
 
 ### 5.6 Dossards
 
-- Attribués **dans l'ordre de passage au statut « inscrit »**, à partir de 1 (ou d'un numéro de départ configurable).
-- Un numéro n'est **jamais réattribué** au sein d'une édition, même après un désistement.
-- Les ajouts sur place (§ 5.8) reçoivent le numéro suivant.
+- Attribués **dans l'ordre de passage au statut « inscrit »**, à partir de 1 (ou d'un numéro de départ configurable) : chaque nouvel inscrit reçoit le **plus petit numéro libre**.
+- **En phase de préparation**, un enfant désinscrit **libère son dossard**, qui est donné au prochain inscrit : le stock de dossards papier est limité. S'il est réinscrit, il reçoit le premier numéro libre.
+- **Une fois la compétition commencée**, un enfant désinscrit **garde son dossard** : il n'est plus jamais donné à un autre enfant. S'il est réinscrit, il retrouve son dossard.
+- Les ajouts sur place (§ 5.8) reçoivent le premier numéro libre.
 
 ### 5.7 Import Excel (secours et migration)
 

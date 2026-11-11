@@ -6,7 +6,8 @@ namespace LiveScoreTracker\Domain\Registration;
 
 /**
  * Life cycle of a registration (spec § 5.3):
- * pending_verification → registered | waitlisted → registered | withdrawn | expired.
+ * pending_verification → registered | waitlisted → registered | withdrawn | expired;
+ * a withdrawn child can be registered again (or put on the waiting list).
  */
 enum RegistrationStatus: string
 {
@@ -27,7 +28,8 @@ enum RegistrationStatus: string
             self::PendingVerification => [self::Registered, self::Waitlisted, self::Withdrawn],
             self::Waitlisted => [self::Registered, self::Withdrawn],
             self::Registered => [self::Withdrawn],
-            self::Withdrawn, self::Expired => [],
+            self::Withdrawn => [self::Registered, self::Waitlisted],
+            self::Expired => [],
         };
     }
 }

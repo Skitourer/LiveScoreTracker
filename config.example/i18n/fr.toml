@@ -530,11 +530,15 @@ guardian_email = "L'email est obligatoire."
 registered = "Valider l'inscription"
 waitlisted = "Mettre en liste d'attente"
 withdrawn = "Désinscrire"
+reinstate = "Réinscrire"
 
 [registration.confirm_status]
-registered = "Valider cette inscription ? L'enfant recevra le prochain dossard et la famille un email de confirmation."
+registered = "Valider cette inscription ? L'enfant recevra le premier dossard libre et la famille un email de confirmation."
+registered_keep = "Réinscrire cet enfant ? Il retrouve son dossard {bib} et la famille reçoit un email de confirmation."
 waitlisted = "Mettre cet enfant en liste d'attente ?"
-withdrawn = "Désinscrire cet enfant ? Son dossard ne sera pas réattribué."
+withdrawn = "Désinscrire cet enfant ?"
+withdrawn_free = "Désinscrire cet enfant ? Son dossard {bib} sera libéré et donné au prochain inscrit."
+withdrawn_keep = "Désinscrire cet enfant ? La compétition a commencé : il garde son dossard {bib}, qui ne sera donné à personne d'autre."
 
 [registration.status_changed_to]
 registered = "Inscription validée."
@@ -546,6 +550,7 @@ created = "Fiche créée"
 updated = "Fiche corrigée"
 status = "Changement de statut"
 bib = "Dossard attribué"
+bib_freed = "Dossard libéré"
 
 [import]
 send_emails = "Envoyer l'email de confirmation à chaque nouvel inscrit (à éviter si les familles ont déjà été prévenues)"

@@ -530,11 +530,15 @@ guardian_email = "The email is required."
 registered = "Confirm the registration"
 waitlisted = "Put on the waiting list"
 withdrawn = "Unregister"
+reinstate = "Register again"
 
 [registration.confirm_status]
-registered = "Confirm this registration? The child will get the next bib and the family a confirmation email."
+registered = "Confirm this registration? The child will get the first free bib and the family a confirmation email."
+registered_keep = "Register this child again? They get their bib {bib} back and the family receives a confirmation email."
 waitlisted = "Put this child on the waiting list?"
-withdrawn = "Unregister this child? Their bib will not be given again."
+withdrawn = "Unregister this child?"
+withdrawn_free = "Unregister this child? Their bib {bib} will be freed and given to the next registered child."
+withdrawn_keep = "Unregister this child? The competition has started: they keep their bib {bib}, which will not be given to anyone else."
 
 [registration.status_changed_to]
 registered = "Registration confirmed."
@@ -546,6 +550,7 @@ created = "Record created"
 updated = "Record corrected"
 status = "Status change"
 bib = "Bib given"
+bib_freed = "Bib freed"
 
 [import]
 send_emails = "Send the confirmation email to each new child (avoid it if families were already told)"

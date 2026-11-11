@@ -29,7 +29,7 @@ final class RegistrationsTest extends TestCase
         exec('rm -rf ' . escapeshellarg($this->dataDir));
     }
 
-    public function testManualRegistrationGetsTheNextBibWhichIsNeverReused(): void
+    public function testDuringPreparationAWithdrawnChildGivesTheBibBack(): void
     {
         $first = $this->add(['last_name' => 'martin', 'first_name' => 'zoé']);
         self::assertSame('/registrations/1', $first->getHeaderLine('Location'));
@@ -37,17 +37,58 @@ final class RegistrationsTest extends TestCase
         self::assertStringContainsString('<span class="bib">1</span> Zoé MARTIN', $this->admin->lastBody);
 
         $this->add(['last_name' => 'Durand', 'first_name' => 'Hugo', 'gender' => 'boy']);
-        // Withdraw bib 2, then add a third child: it gets 3, never 2 again.
+        $this->add(['last_name' => 'Petit', 'first_name' => 'Léo', 'gender' => 'boy']);
+        $this->admin->get('/registrations/2');
+        self::assertStringContainsString('Son dossard 2 sera libéré', $this->admin->lastBody);
+
+        // Withdraw bib 2: the next child gets it (paper bibs are limited).
         $this->admin->post('/registrations/2', ['op' => 'status', 'status' => 'withdrawn']);
+        $this->admin->get('/registrations/2');
+        self::assertStringNotContainsString('<span class="bib">', $this->admin->lastBody);
+        self::assertStringContainsString('Dossard libéré', $this->admin->lastBody);
+        $this->add(['last_name' => 'Roux', 'first_name' => 'Lina']);
+        $this->admin->get('/registrations/4');
+        self::assertStringContainsString('<span class="bib">2</span>', $this->admin->lastBody);
+
+        $this->admin->get('/registrations');
+        self::assertStringContainsString('<strong>3</strong> / 100', $this->admin->lastBody);
+        self::assertStringNotContainsString('DURAND', $this->admin->lastBody, 'Withdrawn children are hidden by default');
+        $this->admin->get('/registrations?status=all');
+        self::assertStringContainsString('DURAND', $this->admin->lastBody);
+
+        // Registered again: Hugo gets the first free bib, and a new confirmation email.
+        $this->admin->get('/registrations/2');
+        self::assertStringContainsString('Réinscrire', $this->admin->lastBody);
+        $sent = \count($this->admin->mailer->sent);
+        $this->admin->post('/registrations/2', ['op' => 'status', 'status' => 'registered', 'send_email' => '1']);
+        $this->admin->get('/registrations/2');
+        self::assertStringContainsString('<span class="bib">4</span> Hugo DURAND', $this->admin->lastBody);
+        self::assertCount($sent + 1, $this->admin->mailer->sent);
+    }
+
+    public function testDuringTheCompetitionAWithdrawnChildKeepsTheBib(): void
+    {
+        $this->add(['last_name' => 'Martin', 'first_name' => 'Zoé']);
+        $this->add(['last_name' => 'Durand', 'first_name' => 'Hugo', 'gender' => 'boy']);
+        $this->admin->post('/admin/phase', ['phase' => 'running']);
+
+        $this->admin->get('/registrations/2');
+        self::assertStringContainsString('il garde son dossard 2', $this->admin->lastBody);
+        $this->admin->post('/registrations/2', ['op' => 'status', 'status' => 'withdrawn']);
+        $this->admin->get('/registrations/2');
+        self::assertStringContainsString('<span class="bib">2</span>', $this->admin->lastBody);
+
+        // An on-site addition never gets a bib held by a withdrawn child.
         $this->add(['last_name' => 'Petit', 'first_name' => 'Léo', 'gender' => 'boy']);
         $this->admin->get('/registrations/3');
         self::assertStringContainsString('<span class="bib">3</span>', $this->admin->lastBody);
 
-        $this->admin->get('/registrations');
-        self::assertStringContainsString('<strong>2</strong> / 100', $this->admin->lastBody);
-        self::assertStringNotContainsString('DURAND', $this->admin->lastBody, 'Withdrawn children are hidden by default');
-        $this->admin->get('/registrations?status=all');
-        self::assertStringContainsString('DURAND', $this->admin->lastBody);
+        // Registered again: Hugo finds his bib.
+        $this->admin->get('/registrations/2');
+        self::assertStringContainsString('Il retrouve son dossard 2', $this->admin->lastBody);
+        $this->admin->post('/registrations/2', ['op' => 'status', 'status' => 'registered']);
+        $this->admin->get('/registrations/2');
+        self::assertStringContainsString('<span class="bib">2</span> Hugo DURAND', $this->admin->lastBody);
     }
 
     public function testDuplicatesAreRefusedAndWarningsMustBeConfirmed(): void
