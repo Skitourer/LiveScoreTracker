@@ -1,0 +1,75 @@
+/*
+ * Design tokens (spec § 20.6): the ONLY place where colors, font sizes,
+ * spacing and radii are written. Components in app.css use these variables,
+ * and Stylelint rejects hard-coded values anywhere else.
+ *
+ * To change the look of the site, edit this file (or, per installation,
+ * the [theme] section of competition.toml, from step 12).
+ */
+:root {
+  /* Colors: one accent, neutrals, status colors */
+  --color-bg: #ffffff;
+  --color-surface: #f2f4f7;
+  --color-text: #1a1a1a;
+  --color-muted: #555555;
+  --color-border: #d0d5dd;
+  --color-accent: #1f5fbf;
+  --color-accent-text: #ffffff;
+  --color-ok: #146c2e;
+  --color-warning: #8a5a00;
+  --color-error: #b3261e;
+  --color-highlight: #fff6d6;
+  --color-qr-background: #ffffff;
+
+  /* Typography: system font, no external font */
+  --font-family: system-ui, -apple-system, 'Segoe UI', roboto, sans-serif;
+  --font-family-mono: ui-monospace, 'SFMono-Regular', menlo, consolas, monospace;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.875rem;
+  --font-size-md: 1.0625rem;
+  --font-size-lg: 1.15rem;
+  --font-size-xl: 1.3rem;
+  --font-size-xxl: 1.75rem;
+  --font-weight-normal: 400;
+  --font-weight-strong: 600;
+  --font-weight-heavy: 700;
+  --line-height: 1.5;
+
+  /* Spacing scale */
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+
+  /* Shapes and sizes */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-pill: 999px;
+  --border-width: 1px;
+  --border-width-strong: 2px;
+  --accent-bar-width: 4px;
+  --touch-target: 44px;
+  --content-width: 40rem;
+  --content-width-wide: 64rem;
+  --form-width: 26rem;
+  --qr-size: 220px;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --color-bg: #121212;
+    --color-surface: #1e1e1e;
+    --color-text: #f2f2f2;
+    --color-muted: #b8b8b8;
+    --color-border: #3a3a3a;
+    --color-accent: #8ab4f8;
+    --color-accent-text: #0b1a33;
+    --color-ok: #6dd58c;
+    --color-warning: #f2c94c;
+    --color-error: #ff8a80;
+    --color-highlight: #3a3320;
+  }
+}

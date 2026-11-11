@@ -376,3 +376,14 @@ To choose a new password, open this link (valid for one hour, single use):
 
 If you did not ask for this, ignore this message: your current password still works.
 """
+
+[styleguide]
+title = "Style guide"
+intro = "Every interface component, to check a theme change at a glance."
+buttons = "Buttons"
+messages = "Messages"
+badges = "Badges, filters and counters"
+table = "Table"
+forms = "Form"
+cards = "Tiles, facts and cards"
+checkbox = "Checkbox"

@@ -70,7 +70,7 @@
     {% for event in report.events %}
         {% set variant = event.variant %}
         {% set scores = event.scores %}
-        <details class="event">
+        <details class="card">
             <summary>{{ event_label(variant) }}</summary>
             <p class="meta">
                 {% if scores.best is not null %}

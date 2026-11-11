@@ -376,3 +376,14 @@ Pour choisir un nouveau mot de passe, ouvrez ce lien (valable une heure, une seu
 
 Si vous n'êtes pas à l'origine de cette demande, ignorez ce message : votre mot de passe actuel reste valable.
 """
+
+[styleguide]
+title = "Guide de style"
+intro = "Tous les composants de l'interface, pour vérifier un changement d'habillage d'un coup d'œil."
+buttons = "Boutons"
+messages = "Messages"
+badges = "Badges, filtres et compteurs"
+table = "Tableau"
+forms = "Formulaire"
+cards = "Tuiles, fiches et cartes"
+checkbox = "Case à cocher"

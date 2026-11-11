@@ -1,0 +1,96 @@
+{% extends 'layout.html.twig' %}
+
+{# Style guide (spec § 20.6): one example of every component. Sample texts reuse existing translation keys. #}
+{% block title %}{{ t('styleguide.title') }}{% endblock %}
+
+{% block content %}
+    <h1>{{ t('styleguide.title') }}</h1>
+    <p class="lead">{{ t('styleguide.intro') }}</p>
+    <p>{{ t('home.lead') }} <a href="#">{{ t('nav.login') }}</a> · <code>k7mq-3x9p</code></p>
+    <p class="meta">{{ t('home.version', {version: '1.0', revision: 'abc123'}) }}</p>
+
+    <h2>{{ t('styleguide.buttons') }}</h2>
+    <div class="toolbar">
+        <a class="button" href="#">{{ t('login.submit') }}</a>
+        <a class="button secondary" href="#">{{ t('admin.save') }}</a>
+        <a class="button danger" href="#">{{ t('referee.disconnect_all') }}</a>
+        <a class="button small secondary" href="#">{{ t('audit.filter') }}</a>
+        <button type="button" class="link">{{ t('nav.logout') }}</button>
+    </div>
+
+    <h2>{{ t('styleguide.messages') }}</h2>
+    <p class="flash success">{{ t('password.changed') }}</p>
+    <p class="flash warning">{{ t('two_factor.recovery_code_used', {remaining: 9}) }}</p>
+    <p class="flash error">{{ t('login.invalid') }}</p>
+    <p class="notice">{{ t('referee.inactive_now') }}</p>
+    <ul class="form-errors"><li>{{ t('password.mismatch') }}</li></ul>
+    <ul class="status">
+        <li class="ok">{{ t('home.database_ok') }}</li>
+        <li class="warning">{{ t('home.schema_pending', {count: 1}) }}</li>
+        <li class="error">{{ t('home.database_error') }}</li>
+    </ul>
+
+    <h2>{{ t('styleguide.badges') }}</h2>
+    <p>
+        <span class="badge">{{ t('admin.active') }}</span>
+        <span class="badge ok">{{ t('status.valid') }}</span>
+        <span class="badge warning">{{ t('report.tie_unresolved') }}</span>
+        <span class="badge error">{{ t('status.foul') }}</span>
+        <span class="badge muted">{{ t('admin.disabled') }}</span>
+    </p>
+    <nav class="chips">
+        <a href="#" aria-current="page">{{ t('gender.girl.many') }} CP</a>
+        <a href="#">{{ t('gender.boy.many') }} CP</a>
+        <a href="#">{{ t('gender.girl.many') }} CE1</a>
+    </nav>
+    <ul class="stats">
+        <li><strong>87</strong> / 100</li>
+        <li><strong>4</strong> {{ t('status.pending') }}</li>
+    </ul>
+
+    <h2>{{ t('styleguide.table') }}</h2>
+    <div class="table-scroll">
+        <table>
+            <thead><tr><th class="num">{{ t('report.rank') }}</th><th>{{ t('report.child') }}</th><th class="num">{{ t('report.total') }}</th></tr></thead>
+            <tbody>
+                <tr class="highlight"><td class="num">1</td><td><span class="bib">12</span> Alice B.</td><td class="num strong">5 782</td></tr>
+                <tr><td class="num">2</td><td><span class="bib">7</span> Hugo M. <span class="badge">{{ t('report.decided_by', {criterion: t('tie_breaker.first_places')}) }}</span></td><td class="num strong">5 283</td></tr>
+                <tr><td class="num">3</td><td><span class="bib">31</span> Lina G. <span class="foul">{{ t('report.foul') }}</span></td><td class="num strong">4 801</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h2>{{ t('styleguide.forms') }}</h2>
+    <form class="form" action="#">
+        <fieldset>
+            <legend>{{ t('account.role') }}</legend>
+            <label class="choice"><input type="radio" name="r" checked> {{ t('role.organizer') }} <small>{{ t('role.organizer_hint') }}</small></label>
+            <label class="choice"><input type="radio" name="r"> {{ t('role.admin') }}</label>
+        </fieldset>
+        <label>{{ t('account.username') }} <small>{{ t('account.username_rule') }}</small>
+            <input type="text" value="paul">
+        </label>
+        <label>{{ t('account.email') }}
+            <input type="email" placeholder="name@example.org">
+        </label>
+        <label>{{ t('report.category') }}
+            <select><option>CP</option><option>CE1</option></select>
+        </label>
+        <label class="choice"><input type="checkbox" checked> {{ t('styleguide.checkbox') }}</label>
+        <button type="button" class="button">{{ t('admin.save') }}</button>
+    </form>
+
+    <h2>{{ t('styleguide.cards') }}</h2>
+    <ul class="tiles">
+        <li><a class="tile" href="#">{{ t('dashboard.accounts') }}</a></li>
+        <li><span class="tile soon">{{ t('dashboard.rankings') }} <small>{{ t('dashboard.coming_soon') }}</small></span></li>
+    </ul>
+    <dl class="facts">
+        <dt>{{ t('account.username') }}</dt><dd>paul</dd>
+        <dt>{{ t('account.role') }}</dt><dd>{{ t('role.organizer') }}</dd>
+    </dl>
+    <details class="card" open>
+        <summary>Sprint 30 m</summary>
+        <p class="meta">{{ t('report.bounds', {best: '6,20 s', worst: '9,80 s'}) }}</p>
+    </details>
+{% endblock %}

@@ -109,3 +109,33 @@ jobs:
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  styleguide:
+    name: Style guide screenshots
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo, pdo_sqlite
+          coverage: none
+      - uses: ramsey/composer-install@v3
+        with:
+          composer-options: --no-dev
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Start the application on fictitious data
+        run: |
+          printf 'APP_ENV=test\nAPP_DEBUG=false\n' > .env
+          php bin/console.php migrate
+          php -S 127.0.0.1:8000 -t public public/index.php > "$RUNNER_TEMP/server.log" 2>&1 &
+          sleep 2
+      - name: Take the screenshots (phone and desktop, light and dark)
+        run: scripts/styleguide-screenshots.sh http://127.0.0.1:8000 screenshots
+      - uses: actions/upload-artifact@v4
+        with:
+          name: styleguide-screenshots
+          path: screenshots/
+          retention-days: 30
