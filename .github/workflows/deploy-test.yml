@@ -59,6 +59,7 @@ jobs:
       - name: Prepare the release
         if: steps.config.outputs.ready == 'true'
         run: |
+          sudo apt-get update -qq
           sudo apt-get install -y -qq lftp git-restore-mtime > /dev/null
           # Keep each file's last-commit date so unchanged files are not uploaded again.
           git restore-mtime --quiet
