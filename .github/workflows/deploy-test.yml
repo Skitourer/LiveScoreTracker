@@ -3,13 +3,12 @@
 # Triggered by pushes to step branches (feat/**, fix/**) and the `test` branch,
 # or manually from the Actions tab ("Run workflow", then pick a branch).
 #
+# Files are sent by SFTP (available on shared hosting, unlike SSH).
 # Required repository secrets:
-#   FTP_SERVER, FTP_USERNAME, FTP_PASSWORD   FTP account of the hosting
-#   TEST_FTP_DIR      remote folder of the test site, ending with "/" (e.g. "test-site/")
-#   TEST_SITE_URL     public URL of the test site, without trailing "/"
-#   TEST_DEPLOY_TOKEN same value as DEPLOY_TOKEN in the test site's .env
-# Optional repository variable:
-#   FTP_PROTOCOL      "ftps" (default) or "ftp"
+#   SFTP_HOST, SFTP_USERNAME, SFTP_PASSWORD   SFTP account of the hosting
+#   TEST_REMOTE_DIR    remote folder of the test site, relative to the SFTP home (e.g. "test-site")
+#   TEST_SITE_URL      public URL of the test site, without trailing "/"
+#   TEST_DEPLOY_TOKEN  same value as DEPLOY_TOKEN in the test site's .env
 name: Deploy test site
 
 on:
@@ -34,13 +33,13 @@ jobs:
     runs-on: ubuntu-latest
     environment: test
     env:
-      FTP_SERVER: ${{ secrets.FTP_SERVER }}
+      SFTP_HOST: ${{ secrets.SFTP_HOST }}
     steps:
       - name: Check configuration
         id: config
         run: |
-          if [ -z "$FTP_SERVER" ]; then
-            echo "::warning::FTP secrets are not configured yet: deployment skipped."
+          if [ -z "$SFTP_HOST" ]; then
+            echo "::warning::SFTP secrets are not configured yet: deployment skipped."
             echo "ready=false" >> "$GITHUB_OUTPUT"
           else
             echo "ready=true" >> "$GITHUB_OUTPUT"
@@ -48,6 +47,8 @@ jobs:
 
       - uses: actions/checkout@v4
         if: steps.config.outputs.ready == 'true'
+        with:
+          fetch-depth: 0
 
       - uses: shivammathur/setup-php@v2
         if: steps.config.outputs.ready == 'true'
@@ -55,45 +56,39 @@ jobs:
           php-version: '8.2'
           coverage: none
 
-      - name: Install production dependencies
+      - name: Prepare the release
         if: steps.config.outputs.ready == 'true'
-        run: composer install --no-dev --optimize-autoloader --no-interaction --no-progress
+        run: |
+          sudo apt-get install -y -qq lftp git-restore-mtime > /dev/null
+          # Keep each file's last-commit date so unchanged files are not uploaded again.
+          git restore-mtime --quiet
+          composer install --no-dev --optimize-autoloader --no-interaction --no-progress
+          printf '%s\n%s\n' "$GITHUB_SHA" "$(date -u '+%Y-%m-%d %H:%M UTC')" > REVISION
 
-      - name: Record the deployed revision
+      # Only code is sent: .env, data/ and server backups are never touched (spec § 25.2).
+      - name: Upload by SFTP
         if: steps.config.outputs.ready == 'true'
-        run: printf '%s\n%s\n' "$GITHUB_SHA" "$(date -u '+%Y-%m-%d %H:%M UTC')" > REVISION
-
-      # Only code is sent: .env, data/ and server backups are never overwritten (spec § 25.2).
-      - name: Upload by FTP
-        if: steps.config.outputs.ready == 'true'
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ${{ vars.FTP_PROTOCOL || 'ftps' }}
-          server-dir: ${{ secrets.TEST_FTP_DIR }}
-          exclude: |
-            **/.git*
-            **/.git*/**
-            .github/**
-            .githooks/**
-            node_modules/**
-            tests/**
-            scripts/**
-            docs/**
-            data/**
-            .env
-            .env.*
-            *.md
-            package.json
-            package-lock.json
-            eslint.config.js
-            .prettierrc.json
-            .editorconfig
-            .php-cs-fixer.dist.php
-            phpstan.dist.neon
-            phpunit.xml.dist
+        env:
+          SFTP_USERNAME: ${{ secrets.SFTP_USERNAME }}
+          LFTP_PASSWORD: ${{ secrets.SFTP_PASSWORD }}
+          REMOTE_DIR: ${{ secrets.TEST_REMOTE_DIR }}
+        run: |
+          lftp --env-password -u "$SFTP_USERNAME" "sftp://$SFTP_HOST" -e "
+            set sftp:auto-confirm yes;
+            set net:max-retries 3;
+            set net:timeout 30;
+            mkdir -p -f $REMOTE_DIR;
+            mirror --reverse --delete --parallel=4 --verbose=1 \
+              --exclude-glob .git* --exclude-glob .github/ --exclude-glob .githooks/ \
+              --exclude-glob node_modules/ --exclude-glob tests/ --exclude-glob scripts/ \
+              --exclude-glob docs/ --exclude-glob data/ --exclude-glob .env --exclude-glob .env.* \
+              --include-glob .env.example \
+              --exclude-glob *.md --exclude-glob package.json --exclude-glob package-lock.json \
+              --exclude-glob eslint.config.js --exclude-glob .prettierrc.json --exclude-glob .editorconfig \
+              --exclude-glob .php-cs-fixer.dist.php --exclude-glob phpstan.dist.neon \
+              --exclude-glob phpunit.xml.dist --exclude-glob .phpstan-cache/ --exclude-glob .phpunit.cache/ \
+              ./ $REMOTE_DIR/;
+            bye"
 
       - name: Apply database migrations
         if: steps.config.outputs.ready == 'true'
