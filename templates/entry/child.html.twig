@@ -1,0 +1,109 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ child.publicName() }} · {{ t('workshop.' ~ workshop.id ~ '.name') }}{% endblock %}
+
+{% block content %}
+    {% include 'entry/_nav.html.twig' %}
+    <p><a href="{{ url_for('entry-workshop', {workshop: workshop.id}) }}">← {{ t('entry.other_bib') }}</a></p>
+
+    <div class="check-in-child">
+        <span class="bib">{{ child.bib }}</span>
+        <p class="check-in-first-name">{{ child.publicName() }}</p>
+        <p>{{ label('level.' ~ child.child.level) }} → <strong>{{ event_label(variant) }}</strong></p>
+        <p class="entry-attempt">
+            {% if progress.isFinished() %}<span class="badge muted">{{ t('entry.attempts_finished', {of: variant.attempts}) }}</span>
+            {% else %}{{ t('entry.attempt_number', {number: progress.nextNumber(), of: variant.attempts}) }}{% endif %}
+        </p>
+        {% if progress.best() is not null and variant.attempts > 1 %}<p class="meta">{{ t('entry.best', {result: result(progress.best(), variant)}) }}</p>{% endif %}
+    </div>
+
+    {% if not child.isPresent() %}
+        <div class="notice warning">
+            {{ t('entry.warning.not_present') }}
+            {% if open %}
+                <form method="post" class="inline" data-confirm="{{ t('entry.confirm_present', {name: child.publicName()}) }}">
+                    {{ csrf_field() }}
+                    <input type="hidden" name="op" value="mark_present">
+                    <button type="submit" class="button small secondary">{{ t('entry.mark_present') }}</button>
+                </form>
+            {% endif %}
+        </div>
+    {% endif %}
+
+    {% if open %}
+        {% include 'partials/errors.html.twig' %}
+        <form method="post" class="form entry-form">
+            {{ csrf_field() }}
+            <input type="hidden" name="entry_id" value="{{ form.entry_id }}">
+            {% if correcting %}
+                <input type="hidden" name="op" value="correct">
+                <input type="hidden" name="attempt_id" value="{{ correcting.id }}">
+                <h2>{{ t('entry.correcting') }}</h2>
+            {% else %}
+                <input type="hidden" name="op" value="record">
+            {% endif %}
+
+            {% if warnings is not empty %}
+                <div class="notice warning">
+                    <ul>{% for warning in warnings %}<li>{{ t('entry.warning.' ~ warning, {of: variant.attempts}) }}</li>{% endfor %}</ul>
+                    {{ t('entry.confirm_hint') }}
+                </div>
+                <input type="hidden" name="confirm" value="1">
+            {% endif %}
+
+            <label>{{ t('entry.result') }} <small>{{ t('entry.hint.' ~ (variant.measure.value == 'time' ? 'time_' ~ variant.timeFormat.value|replace({':': '', '.': ''}) : variant.measure.value)) }}</small>
+                <input type="text" name="value" class="result-input" inputmode="numeric" pattern="[0-9]*" maxlength="7" autocomplete="off" value="{{ form.value }}" {% if form.value is empty %}autofocus{% endif %}
+                    data-measure="{{ variant.measure.value }}" data-time-format="{{ variant.timeFormat ? variant.timeFormat.value : '' }}"
+                    data-unit-seconds="{{ t('unit.seconds') }}" data-unit-minutes="{{ t('unit.minutes_seconds') }}" data-unit-metres="{{ t('unit.metres') }}" data-unit-points="{{ t('unit.points') }}"
+                    data-decimal="{{ t('format.decimal_separator') }}" data-invalid="{{ t('entry.error.invalid_value') }}">
+            </label>
+            <output class="interpreted" aria-live="polite">{{ interpreted }}</output>
+
+            {% for modifier in variant.modifiers %}
+                {% set value = form.modifiers[modifier.id] ?? 0 %}
+                {% if modifier.repeatable %}
+                    <label>{{ t('modifier.' ~ modifier.id) }} ({{ modifier.value > 0 ? '+' : '' }}{{ result(modifier.value, variant) }})
+                        <input type="number" name="mod_{{ modifier.id }}" min="0" max="99" inputmode="numeric" value="{{ value }}">
+                    </label>
+                {% else %}
+                    <label class="choice"><input type="checkbox" name="mod_{{ modifier.id }}" value="1" {% if value > 0 %}checked{% endif %}>
+                        {{ t('modifier.' ~ modifier.id) }} ({{ modifier.value > 0 ? '+' : '' }}{{ result(modifier.value, variant) }})</label>
+                {% endif %}
+            {% endfor %}
+
+            <button type="submit" name="kind" value="value" class="button large">{{ warnings is empty ? t('entry.save') : t('entry.save_anyway') }}</button>
+            <button type="submit" name="kind" value="foul" class="button danger">{{ t('entry.foul_button') }}</button>
+            {% if variant.foulMode.value == 'lenient' %}<p class="meta">{{ t('entry.lenient_hint') }}</p>{% endif %}
+            {% if correcting %}<a href="{{ url_for('entry-child', {workshop: workshop.id, bib: child.bib}) }}">{{ t('entry.cancel_correction') }}</a>{% endif %}
+        </form>
+    {% endif %}
+
+    <h2>{{ t('entry.attempts') }}</h2>
+    {% if rows is empty %}
+        <p class="meta">{{ t('entry.no_attempt') }}</p>
+    {% else %}
+        <ul class="history entry-attempts">
+            {% for row in rows %}
+                <li{% if row.latest.deletedAt %} class="deleted"{% endif %}>
+                    <span class="meta">{{ row.number ? t('entry.attempt_label', {number: row.number}) : t('entry.deleted_label') }}{% if not row.counted and row.number %} · {{ t('entry.not_counted') }}{% endif %}</span><br>
+                    {% include 'entry/_attempt.html.twig' with {attempt: row.latest} %}
+                    {% if row.latest.deletedAt %}<br><small class="muted">{{ t('entry.deleted_by', {at: local_time(row.latest.deletedAt), by: row.latest.deletedBy ?? '?'}) }}</small>{% endif %}
+                    {% for old in row.previous|reverse %}
+                        <div class="replaced"><small>{{ t('entry.replaced') }}</small> {% include 'entry/_attempt.html.twig' with {attempt: old} %}</div>
+                    {% endfor %}
+                    {% if open and row.latest.isCurrent() %}
+                        <div class="toolbar">
+                            <a class="button small secondary" href="{{ url_for('entry-child', {workshop: workshop.id, bib: child.bib}) }}?correct={{ row.latest.id }}">{{ t('entry.correct') }}</a>
+                            <form method="post" class="inline" data-confirm="{{ t('entry.confirm_delete') }}">
+                                {{ csrf_field() }}
+                                <input type="hidden" name="op" value="delete">
+                                <input type="hidden" name="attempt_id" value="{{ row.latest.id }}">
+                                <button type="submit" class="button small danger">{{ t('entry.delete') }}</button>
+                            </form>
+                        </div>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+{% endblock %}

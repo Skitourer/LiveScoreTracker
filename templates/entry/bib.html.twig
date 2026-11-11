@@ -1,0 +1,15 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('workshop.' ~ workshop.id ~ '.name') }}{% endblock %}
+
+{% block content %}
+    {% include 'entry/_nav.html.twig' %}
+    <p class="meta">{% for level in levels %}{{ label('level.' ~ level) }}{% if not loop.last %} · {% endif %}{% endfor %}</p>
+    {% if error %}<p class="flash error">{{ t(error, {bib: bib}) }}</p>{% endif %}
+    <form method="get" class="check-in-search">
+        <label>{{ t('entry.bib') }}
+            <input type="text" name="bib" class="bib-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autofocus required>
+        </label>
+        <button type="submit" class="button">{{ t('entry.open') }}</button>
+    </form>
+{% endblock %}

@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.11 — 11 novembre 2026
+> Version 1.12 — 11 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -313,11 +313,20 @@ Pour les épreuves d'adresse (ex. basket) :
 4. Saisie du **résultat** (ou bouton **Essai nul**), cases des **modificateurs**.
 5. **Validation**. Les avertissements éventuels demandent une confirmation, sans bloquer.
 
+Précisions :
+- Après la validation, l'écran revient au champ « dossard » pour l'enfant suivant.
+- La saisie n'est ouverte qu'en phase « en cours » (en préparation, les écrans sont consultables mais le formulaire est masqué).
+- Un résultat enregistré avec un avertissement confirmé est marqué **« à vérifier »** (tableau de bord des contrôles, étape 8).
+- Chaque saisie porte un identifiant unique créé avec le formulaire : un double envoi (double appui, réseau lent) n'enregistre qu'une fois.
+- Un enfant non pointé peut être **marqué présent** depuis l'écran de saisie, après confirmation.
+- Les épreuves à chrono et en mode compteur se saisissent pour l'instant comme un résultat standard (temps mesuré avec un chronomètre externe, total des points) ; le chrono intégré et le compteur arrivent à l'étape 6.
+
 ### 8.3 Correction
 
 - L'arbitre peut **corriger un résultat déjà saisi** sur son atelier (recherche par dossard).
 - Une correction **ne remplace pas** la saisie : elle crée une nouvelle version. L'historique complet (qui, quand, ancienne valeur) est conservé et visible par l'admin.
 - Suppression possible d'un essai saisi par erreur (même principe : marquage, pas d'effacement physique).
+- Sous le formulaire, la liste des essais montre pour chacun le résultat, les modificateurs, l'heure et l'auteur (prénom de l'arbitre), les versions avant correction (barrées) et les essais supprimés.
 
 ### 8.4 Chrono intégré (1 ou 2 dossards)
 

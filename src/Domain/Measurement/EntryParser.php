@@ -41,4 +41,17 @@ final class EntryParser
 
         return ($minutes * 60 + $seconds) * 100 + $hundredths;
     }
+
+    /**
+     * The digits a referee would type for a stored value (to correct it): the reverse of parse().
+     */
+    public static function toDigits(int $value, Measure $measure, ?TimeFormat $timeFormat = null): string
+    {
+        if ($measure !== Measure::Time || $timeFormat !== TimeFormat::Minutes || $value < 6000) {
+            return (string) $value;
+        }
+        $minutes = intdiv($value, 6000);
+
+        return $minutes . str_pad((string) ($value % 6000), 4, '0', STR_PAD_LEFT);
+    }
 }

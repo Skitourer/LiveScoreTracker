@@ -23,6 +23,11 @@ use LiveScoreTracker\Action\Auth\SetupAction;
 use LiveScoreTracker\Action\Auth\TwoFactorChallengeAction;
 use LiveScoreTracker\Action\Auth\TwoFactorSetupAction;
 use LiveScoreTracker\Action\DashboardAction;
+use LiveScoreTracker\Action\Entry\EntryBibAction;
+use LiveScoreTracker\Action\Entry\EntryChildAction;
+use LiveScoreTracker\Action\Entry\RemainingBibsAction;
+use LiveScoreTracker\Action\Entry\WorkshopChoiceAction;
+use LiveScoreTracker\Action\Entry\WorkshopHelpAction;
 use LiveScoreTracker\Action\HealthAction;
 use LiveScoreTracker\Action\HomeAction;
 use LiveScoreTracker\Action\ImportSampleAction;
@@ -55,6 +60,7 @@ use LiveScoreTracker\Infrastructure\Clock;
 use LiveScoreTracker\Infrastructure\Config\ConfigRepository;
 use LiveScoreTracker\Infrastructure\Database\ConnectionFactory;
 use LiveScoreTracker\Infrastructure\Database\Migrator;
+use LiveScoreTracker\Infrastructure\Help\HelpPages;
 use LiveScoreTracker\Infrastructure\I18n\CatalogLoader;
 use LiveScoreTracker\Infrastructure\I18n\Translator;
 use LiveScoreTracker\Infrastructure\Mail\LogMailer;
@@ -172,6 +178,13 @@ final class Kernel
         $app->get('/check-in', CheckInAction::class)->setName('check-in')->add($guard(Permission::CheckInOut));
         $app->map(['GET', 'POST'], '/check-in/{id:[0-9]+}', CheckInCardAction::class)->setName('check-in-card')->add($guard(Permission::CheckInOut));
 
+        // Result entry at the workshops (spec § 8)
+        $app->get('/entry', WorkshopChoiceAction::class)->setName('entry')->add($guard(Permission::EnterResultsChosenEvent));
+        $app->get('/entry/{workshop:[a-z0-9_]+}', EntryBibAction::class)->setName('entry-workshop')->add($guard(Permission::EnterResultsChosenEvent));
+        $app->get('/entry/{workshop:[a-z0-9_]+}/remaining', RemainingBibsAction::class)->setName('entry-remaining')->add($guard(Permission::ViewRemainingBibs));
+        $app->get('/entry/{workshop:[a-z0-9_]+}/help', WorkshopHelpAction::class)->setName('entry-help')->add($guard(Permission::ViewWorkshopHelp));
+        $app->map(['GET', 'POST'], '/entry/{workshop:[a-z0-9_]+}/{bib:[0-9]+}', EntryChildAction::class)->setName('entry-child')->add($guard(Permission::EnterResultsChosenEvent));
+
         // Administration
         // Slim binds group callbacks to itself: the closure must not be static.
         $app->group('/admin', function (RouteCollectorProxyInterface $admin) use ($guard): void {
@@ -205,6 +218,7 @@ final class Kernel
                 self::service($c, Clock::class),
                 $settings->sessionIdleMinutes,
             ),
+            HelpPages::class => static fn(): HelpPages => new HelpPages($settings->dataDir, $settings->rootDir . '/config.example'),
             PdfRenderer::class => static fn(): PdfRenderer => new PdfRenderer(sys_get_temp_dir()),
             Mailer::class => static fn(): Mailer => $settings->mailTransport === 'smtp'
                 ? new SmtpMailer($settings)

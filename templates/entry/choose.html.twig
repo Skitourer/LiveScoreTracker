@@ -1,0 +1,18 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('entry.choose') }}{% endblock %}
+
+{% block content %}
+    <h1>{{ t('entry.choose') }}</h1>
+    <p class="meta">{{ t('entry.choose_intro') }}</p>
+    <ul class="tiles">
+        {% for item in workshops %}
+            <li>
+                <a class="tile" href="{{ url_for('entry-workshop', {workshop: item.workshop.id}) }}">
+                    {{ t('workshop.' ~ item.workshop.id ~ '.name') }}
+                    <small>{% for level in item.levels %}{{ label('level.' ~ level) }}{% if not loop.last %} · {% endif %}{% endfor %}</small>
+                </a>
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

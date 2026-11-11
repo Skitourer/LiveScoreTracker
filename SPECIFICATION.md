@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.11 — 11 November 2026
+> Version 1.12 — 11 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -313,11 +313,20 @@ For skill events (e.g. basketball):
 4. Enter the **result** (or **Foul** button), **modifier** checkboxes.
 5. **Approval**. Any warnings ask for confirmation, without blocking.
 
+Details:
+- After approval, the screen goes back to the "bib" field for the next child.
+- Entry is open only in the "in progress" phase (during preparation the screens can be viewed but the form is hidden).
+- A result saved with a confirmed warning is flagged **"to check"** (checks dashboard, step 8).
+- Each entry carries a unique id created with the form: sending it twice (double tap, slow network) saves it once.
+- A child not checked in can be **marked present** from the entry screen, after confirmation.
+- Timed and counter events are entered as a standard result for now (time measured with an external stopwatch, total points); the built-in timer and the counter come in step 6.
+
 ### 8.3 Correction
 
 - The referee can **correct a result already entered** at their workshop (search by bib).
 - A correction **does not overwrite** the entry: it creates a new version. The full history (who, when, previous value) is kept and visible to the admin.
 - An attempt entered by mistake can be deleted (same principle: flagged, not physically erased).
+- Below the form, the list of attempts shows for each one the result, the modifiers, the time and the author (referee's first name), the versions before correction (struck through) and the deleted attempts.
 
 ### 8.4 Built-in timer (1 or 2 bibs)
 
