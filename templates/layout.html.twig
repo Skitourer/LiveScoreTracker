@@ -1,0 +1,17 @@
+<!doctype html>
+<html lang="{{ lang|default('fr') }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <meta name="robots" content="noindex, nofollow">
+    <title>{% block title %}LiveScoreTracker{% endblock %}</title>
+    <link rel="stylesheet" href="{{ base_path() }}/assets/css/app.css">
+    <script type="module" src="{{ base_path() }}/assets/js/app.js"></script>
+</head>
+<body>
+    <main class="container">
+        {% block content %}{% endblock %}
+    </main>
+</body>
+</html>

@@ -1,3 +1,42 @@
-LiveScoreTracker.code-workspace
-.venv
+# --- Privacy: real data never enters the repository (spec § 25.3) ---
+.env
+.env.*
+!.env.example
+/data/
+*.sqlite
+*.sqlite3
+*.db
+*.xlsx
+*.xls
+*.xlsm
+*.ods
+*.csv
+*.sql.gz
+*.bak
+*.dump
+backup*/
+backups/
+uploads/
+*.log
+# Fictitious fixtures only, explicitly allowed:
+!tests/fixtures/**/*.csv
+!tests/fixtures/**/*.xlsx
 
+# --- Dependencies and build output ---
+/vendor/
+/node_modules/
+/REVISION
+
+# --- Tools ---
+.php-cs-fixer.cache
+.phpunit.cache/
+/coverage/
+.phpstan-cache/
+
+# --- Editors and OS ---
+.idea/
+.vscode/
+*.code-workspace
+.venv/
+.DS_Store
+Thumbs.db

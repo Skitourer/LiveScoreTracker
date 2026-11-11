@@ -1,0 +1,111 @@
+# Quality gate (spec § 26): formatting, static analysis, tests and privacy checks.
+# Runs on pushes to main, on pull requests, and before each deployment
+# (deploy-test.yml calls it for step branches).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_call:
+
+permissions:
+  contents: read
+
+jobs:
+  php:
+    name: PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        php: ['8.2', '8.3']
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: pdo, pdo_sqlite, pdo_mysql, mbstring, intl
+          coverage: none
+      - uses: ramsey/composer-install@v3
+      - name: Code style
+        run: composer cs-check
+      - name: Static analysis
+        run: composer stan
+      - name: Tests
+        run: composer test
+
+  mysql:
+    name: Migrations on MySQL
+    runs-on: ubuntu-latest
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_DATABASE: lst_ci
+          MYSQL_USER: lst
+          MYSQL_PASSWORD: lst
+          MYSQL_ROOT_PASSWORD: root
+        ports: ['3306:3306']
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1"
+          --health-interval=5s --health-timeout=5s --health-retries=20
+    env:
+      DB_DRIVER: mysql
+      DB_HOST: 127.0.0.1
+      DB_PORT: '3306'
+      DB_NAME: lst_ci
+      DB_USER: lst
+      DB_PASSWORD: lst
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: pdo, pdo_mysql
+          coverage: none
+      - uses: ramsey/composer-install@v3
+        with:
+          composer-options: --no-dev
+      - name: Apply migrations twice (second run must be a no-op)
+        run: |
+          php bin/console.php migrate
+          php bin/console.php migrate | grep -q 'Nothing to migrate'
+          php bin/console.php status
+
+  frontend:
+    name: JavaScript and CSS
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+
+  privacy:
+    name: Privacy checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Forbidden files, terms and secrets in tracked files
+        env:
+          FORBIDDEN_TERMS: ${{ secrets.FORBIDDEN_TERMS }}
+        run: scripts/privacy-check.sh --all
+      - name: Forbidden terms in commit messages
+        env:
+          FORBIDDEN_TERMS: ${{ secrets.FORBIDDEN_TERMS }}
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [ -n "$BASE" ] && [ "$BASE" != "0000000000000000000000000000000000000000" ] && git cat-file -e "$BASE" 2>/dev/null; then
+            scripts/privacy-check.sh --commits "$BASE..HEAD"
+          else
+            scripts/privacy-check.sh --commits "origin/main..HEAD"
+          fi
+      - name: Secret scan (gitleaks)
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

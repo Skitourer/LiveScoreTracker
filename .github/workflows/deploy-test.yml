@@ -1,0 +1,112 @@
+# Deploys to the test site after the quality gate passes (spec § 21).
+#
+# Triggered by pushes to step branches (feat/**, fix/**) and the `test` branch,
+# or manually from the Actions tab ("Run workflow", then pick a branch).
+#
+# Required repository secrets:
+#   FTP_SERVER, FTP_USERNAME, FTP_PASSWORD   FTP account of the hosting
+#   TEST_FTP_DIR      remote folder of the test site, ending with "/" (e.g. "test-site/")
+#   TEST_SITE_URL     public URL of the test site, without trailing "/"
+#   TEST_DEPLOY_TOKEN same value as DEPLOY_TOKEN in the test site's .env
+# Optional repository variable:
+#   FTP_PROTOCOL      "ftps" (default) or "ftp"
+name: Deploy test site
+
+on:
+  push:
+    branches: ['feat/**', 'fix/**', 'test']
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-test
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  ci:
+    uses: ./.github/workflows/ci.yml
+    secrets: inherit
+
+  deploy:
+    needs: ci
+    runs-on: ubuntu-latest
+    environment: test
+    env:
+      FTP_SERVER: ${{ secrets.FTP_SERVER }}
+    steps:
+      - name: Check configuration
+        id: config
+        run: |
+          if [ -z "$FTP_SERVER" ]; then
+            echo "::warning::FTP secrets are not configured yet: deployment skipped."
+            echo "ready=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ready=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.config.outputs.ready == 'true'
+
+      - uses: shivammathur/setup-php@v2
+        if: steps.config.outputs.ready == 'true'
+        with:
+          php-version: '8.2'
+          coverage: none
+
+      - name: Install production dependencies
+        if: steps.config.outputs.ready == 'true'
+        run: composer install --no-dev --optimize-autoloader --no-interaction --no-progress
+
+      - name: Record the deployed revision
+        if: steps.config.outputs.ready == 'true'
+        run: printf '%s\n%s\n' "$GITHUB_SHA" "$(date -u '+%Y-%m-%d %H:%M UTC')" > REVISION
+
+      # Only code is sent: .env, data/ and server backups are never overwritten (spec § 25.2).
+      - name: Upload by FTP
+        if: steps.config.outputs.ready == 'true'
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ${{ vars.FTP_PROTOCOL || 'ftps' }}
+          server-dir: ${{ secrets.TEST_FTP_DIR }}
+          exclude: |
+            **/.git*
+            **/.git*/**
+            .github/**
+            .githooks/**
+            node_modules/**
+            tests/**
+            scripts/**
+            docs/**
+            data/**
+            .env
+            .env.*
+            *.md
+            package.json
+            package-lock.json
+            eslint.config.js
+            .prettierrc.json
+            .editorconfig
+            .php-cs-fixer.dist.php
+            phpstan.dist.neon
+            phpunit.xml.dist
+
+      - name: Apply database migrations
+        if: steps.config.outputs.ready == 'true'
+        env:
+          SITE_URL: ${{ secrets.TEST_SITE_URL }}
+          DEPLOY_TOKEN: ${{ secrets.TEST_DEPLOY_TOKEN }}
+        run: |
+          curl --fail-with-body -sS -X POST -H "X-Deploy-Token: $DEPLOY_TOKEN" "$SITE_URL/internal/migrate"
+
+      - name: Health check
+        if: steps.config.outputs.ready == 'true'
+        env:
+          SITE_URL: ${{ secrets.TEST_SITE_URL }}
+        run: |
+          curl --fail-with-body -sS "$SITE_URL/health"
+          curl -sS "$SITE_URL/health" | grep -q "\"revision\":\"${GITHUB_SHA:0:12}\""
