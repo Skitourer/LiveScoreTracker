@@ -93,4 +93,16 @@
         <summary>Sprint 30 m</summary>
         <p class="meta">{{ t('report.bounds', {best: '6,20 s', worst: '9,80 s'}) }}</p>
     </details>
+
+    <h2>{{ t('styleguide.check_in') }}</h2>
+    <div class="check-in-child">
+        <span class="bib">12</span>
+        <p class="check-in-first-name">Zoé</p>
+        <p class="check-in-last-name">Martin</p>
+        <p><span class="badge ok">{{ t('check_in.state_present') }}</span></p>
+    </div>
+    <ul class="check-in-marks">
+        <li><span class="badge ok">✓ {{ t('check_in.mark.checked_in') }}</span> <button type="button" class="button small secondary">{{ t('check_in.undo') }}</button></li>
+        <li><button type="button" class="button large">{{ t('check_in.mark.bib_returned') }}</button></li>
+    </ul>
 {% endblock %}

@@ -1,0 +1,4 @@
+{% if child.status.value != 'registered' %}<span class="badge muted">{{ t('registration.status.' ~ child.status.value) }}</span>
+{% elseif child.hasLeft() %}<span class="badge muted">{{ t('check_in.state_left') }}</span>
+{% elseif child.isPresent() %}<span class="badge ok">{{ t('check_in.state_present') }}</span>
+{% else %}<span class="badge warning">{{ t('check_in.state_absent') }}</span>{% endif %}

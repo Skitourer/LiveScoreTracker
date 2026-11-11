@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="UTF-8">
+<title>{{ t('reception_list.title') }}</title>
+{# PDF only (Dompdf): inline styles are fine here, the page is never served as HTML. #}
+<style>
+    @page { margin: 14mm 12mm 16mm; }
+    body { font-family: "DejaVu Sans", sans-serif; font-size: 13pt; color: #000; }
+    header { position: fixed; top: -10mm; left: 0; right: 0; font-size: 9pt; color: #555; }
+    footer { position: fixed; bottom: -11mm; left: 0; right: 0; font-size: 9pt; color: #555; text-align: right; }
+    footer .page:after { content: counter(page); }
+    h1 { font-size: 20pt; margin: 0 0 2mm; }
+    .intro { margin: 0 0 4mm; font-size: 11pt; }
+    table { width: 100%; border-collapse: collapse; }
+    thead th { font-size: 10pt; text-align: left; border-bottom: 1.5pt solid #000; padding: 1.5mm 2mm; }
+    td { padding: 1.8mm 2mm; border-bottom: 0.5pt solid #bbb; }
+    tr.letter td { padding-top: 4mm; font-size: 15pt; font-weight: bold; border-bottom: 1.5pt solid #000; }
+    tr.even td { background: #f0f0f0; }
+    .first { font-weight: bold; }
+    .last { text-transform: uppercase; }
+    .bib { text-align: right; font-size: 17pt; font-weight: bold; width: 22mm; }
+    .level { width: 22mm; }
+    thead th.bib { font-size: 10pt; }
+</style>
+</head>
+<body>
+<header>{{ edition.name }} — {{ edition.date|date('d/m/Y') }}</header>
+<footer>{{ t('reception_list.printed_at', {at: local_time(printedAt)}) }} · {{ t('reception_list.page') }} <span class="page"></span></footer>
+<h1>{{ t('reception_list.title') }}</h1>
+<p class="intro">{{ t('reception_list.intro', {count: count}) }}</p>
+<table>
+    <thead><tr><th>{{ t('registration.field.first_name') }}</th><th>{{ t('registration.field.last_name') }}</th><th class="level">{{ t('registration.field.level') }}</th><th class="bib">{{ t('check_in.bib') }}</th></tr></thead>
+    <tbody>
+    {% for letter, children in groups %}
+        <tr class="letter"><td colspan="4">{{ letter }}</td></tr>
+        {% for child in children %}
+            <tr{% if loop.index is even %} class="even"{% endif %}>
+                <td class="first">{{ child.child.firstName }}</td>
+                <td class="last">{{ child.child.lastName }}</td>
+                <td class="level">{{ label('level.' ~ child.child.level) }}</td>
+                <td class="bib">{{ child.bib }}</td>
+            </tr>
+        {% endfor %}
+    {% else %}
+        <tr><td colspan="4">{{ t('reception_list.empty') }}</td></tr>
+    {% endfor %}
+    </tbody>
+</table>
+</body>
+</html>

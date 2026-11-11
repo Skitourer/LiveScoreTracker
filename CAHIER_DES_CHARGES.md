@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.10 — 11 novembre 2026
+> Version 1.11 — 11 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -210,7 +210,7 @@ Le règlement interdit officiellement les inscriptions sur place, mais l'applica
 
 ### 6.1 Liste d'accueil imprimable
 
-PDF contenant, pour chaque enfant inscrit : **prénom, nom complet, numéro de dossard** (et classe). **Triée par prénom** (ordre alphabétique). Affichée à l'entrée pour que les enfants trouvent leur numéro.
+PDF contenant, pour chaque enfant inscrit : **prénom, nom complet, numéro de dossard** (et classe). **Triée par prénom** (ordre alphabétique, sans tenir compte des accents), avec un intertitre par lettre et le dossard en gros à droite. Affichée à l'entrée pour que les enfants trouvent leur numéro. Son téléchargement est tracé dans le journal (elle contient les noms complets).
 
 ### 6.2 Vue mobile d'émargement (admin, organisateur)
 
@@ -219,7 +219,15 @@ PDF contenant, pour chaque enfant inscrit : **prénom, nom complet, numéro de d
 3. **Entrée** : case « dossard remis » (vaut présence) — horodatée.
 4. **Sortie** : cases « dossard rendu » et « cadeau + médaille remis » — horodatées.
 
-Compteurs en tête d'écran : présents / inscrits, sorties effectuées.
+Compteurs en tête d'écran : présents / inscrits, dossards rendus, cadeaux remis.
+
+Précisions :
+- La recherche par nom ne porte que sur le prénom et le nom de l'enfant.
+- Après la remise du dossard, ou quand les deux cases de sortie sont cochées, l'écran revient au champ « dossard » pour l'enfant suivant.
+- Une case cochée par erreur peut être décochée (avec confirmation). L'arrivée ne peut pas être annulée tant qu'une case de sortie est cochée. Chaque changement est horodaté et enregistré dans l'historique de la fiche, avec le nom de la personne.
+- Les cases de sortie ne sont proposées qu'à un enfant pointé à l'arrivée ; seul un enfant inscrit peut être pointé.
+- L'émargement s'ouvre en phase « en cours » et reste possible après la clôture (remise des médailles) ; en préparation, l'écran est en lecture seule.
+- Deux listes : les **absents** (inscrits sans dossard remis) et les enfants **pas encore partis** (dossard non rendu ou cadeau non remis), pour récupérer les dossards en fin de journée.
 
 ### 6.3 Statuts de présence
 

@@ -363,6 +363,7 @@ older = "Older"
 "referee.disconnected_all" = "Referee phones disconnected"
 "phase.changed" = "Phase change"
 "setup.first_admin" = "First admin created"
+"reception.list_printed" = "Reception list printed"
 "auth.device_trusted" = "Trusted device added"
 "auth.device_untrusted" = "Trusted device removed"
 "auth.login_blocked_device" = "Login refused: blocked phone"
@@ -423,6 +424,7 @@ If you did not ask for this, ignore this message: your current password still wo
 """
 
 [styleguide]
+check_in = "Reception (check-in)"
 title = "Style guide"
 intro = "Every interface component, to check a theme change at a glance."
 buttons = "Buttons"
@@ -488,6 +490,9 @@ pending = "awaiting verification"
 withdrawn = "withdrawn"
 
 [registration.field]
+checked_in = "Bib handed out"
+bib_returned = "Bib given back"
+gift_given = "Gift + medal handed out"
 bib = "Bib"
 status = "Status"
 last_name = "Last name"
@@ -546,6 +551,7 @@ waitlisted = "Child put on the waiting list."
 withdrawn = "Child unregistered."
 
 [registration.history_action]
+attendance = "Reception"
 created = "Record created"
 updated = "Record corrected"
 status = "Status change"
@@ -617,3 +623,64 @@ disconnect_device = "Disconnect"
 block = "Block"
 unblock = "Unblock"
 forget = "Forget"
+
+[check_in]
+title = "Reception"
+closed = "Check-in opens when the competition is \"in progress\"."
+bib = "Bib"
+child = "Child"
+state = "State"
+find = "Open"
+by_name = "Or search a name"
+search = "Search"
+unknown_bib = "No child with bib {query}."
+no_match = "No registered child matches \"{query}\"."
+state_present = "present"
+state_absent = "absent"
+state_left = "left"
+next_child = "Next child"
+undo = "Undo"
+confirm_undo = "Untick this box?"
+not_registered = "{name} is not registered: cannot be checked in."
+not_present = "{name} was not checked in on arrival."
+undo_exit_first = "First untick {name}'s leaving boxes."
+registration_card = "Registration record"
+open_card = "check-in"
+
+[check_in.counter]
+present = "present"
+bib_returned = "bibs given back"
+gift_given = "gifts handed out"
+
+[check_in.list]
+absent = "Absent ({count})"
+not_left = "Not left yet"
+absent_title = "Registered children without a bib handed out"
+not_left_title = "Present children who have not given their bib back or received their gift"
+empty = "Nobody."
+
+[check_in.step]
+arrival = "Arrival"
+leaving = "Leaving"
+
+[check_in.mark]
+checked_in = "Bib handed out"
+bib_returned = "Bib given back"
+gift_given = "Gift + medal handed out"
+
+[check_in.done]
+checked_in = "{name} ({bib}): bib handed out."
+checked_in_undone = "{name} ({bib}): bib hand-out undone."
+bib_returned = "{name} ({bib}): bib given back."
+bib_returned_undone = "{name} ({bib}): bib return undone."
+gift_given = "{name} ({bib}): gift and medal handed out."
+gift_given_undone = "{name} ({bib}): gift hand-out undone."
+
+[reception_list]
+page = "page"
+download = "Reception list (PDF)"
+title = "Reception list"
+intro = "{count} registered children, sorted by first name. Find your first name: your bib number is on the right."
+empty = "No registered child."
+printed_at = "Printed on {at}"
+file_name = "reception-list"

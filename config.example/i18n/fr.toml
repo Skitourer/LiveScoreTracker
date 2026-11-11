@@ -363,6 +363,7 @@ older = "Plus anciennes"
 "referee.disconnected_all" = "Téléphones des arbitres déconnectés"
 "phase.changed" = "Changement de phase"
 "setup.first_admin" = "Premier admin créé"
+"reception.list_printed" = "Liste d'accueil imprimée"
 "auth.device_trusted" = "Appareil de confiance ajouté"
 "auth.device_untrusted" = "Appareil de confiance retiré"
 "auth.login_blocked_device" = "Connexion refusée : téléphone bloqué"
@@ -423,6 +424,7 @@ Si vous n'êtes pas à l'origine de cette demande, ignorez ce message : votre mo
 """
 
 [styleguide]
+check_in = "Accueil (émargement)"
 title = "Guide de style"
 intro = "Tous les composants de l'interface, pour vérifier un changement d'habillage d'un coup d'œil."
 buttons = "Boutons"
@@ -488,6 +490,9 @@ pending = "en attente de vérification"
 withdrawn = "désistés"
 
 [registration.field]
+checked_in = "Dossard remis"
+bib_returned = "Dossard rendu"
+gift_given = "Cadeau + médaille remis"
 bib = "Dossard"
 status = "Statut"
 last_name = "Nom"
@@ -546,6 +551,7 @@ waitlisted = "Enfant placé en liste d'attente."
 withdrawn = "Enfant désinscrit."
 
 [registration.history_action]
+attendance = "Accueil"
 created = "Fiche créée"
 updated = "Fiche corrigée"
 status = "Changement de statut"
@@ -617,3 +623,64 @@ disconnect_device = "Déconnecter"
 block = "Bloquer"
 unblock = "Débloquer"
 forget = "Oublier"
+
+[check_in]
+title = "Accueil"
+closed = "L'émargement s'ouvre quand la compétition passe « en cours »."
+bib = "Dossard"
+child = "Enfant"
+state = "État"
+find = "Ouvrir"
+by_name = "Ou rechercher un nom"
+search = "Rechercher"
+unknown_bib = "Aucun enfant avec le dossard {query}."
+no_match = "Aucun inscrit ne correspond à « {query} »."
+state_present = "présent"
+state_absent = "absent"
+state_left = "parti"
+next_child = "Enfant suivant"
+undo = "Annuler"
+confirm_undo = "Décocher cette case ?"
+not_registered = "{name} n'est pas inscrit : impossible de le pointer."
+not_present = "{name} n'a pas été pointé à l'arrivée."
+undo_exit_first = "Décochez d'abord la sortie de {name}."
+registration_card = "Fiche d'inscription"
+open_card = "émargement"
+
+[check_in.counter]
+present = "présents"
+bib_returned = "dossards rendus"
+gift_given = "cadeaux remis"
+
+[check_in.list]
+absent = "Absents ({count})"
+not_left = "Pas encore partis"
+absent_title = "Inscrits sans dossard remis"
+not_left_title = "Présents qui n'ont pas rendu leur dossard ou reçu leur cadeau"
+empty = "Personne."
+
+[check_in.step]
+arrival = "Arrivée"
+leaving = "Départ"
+
+[check_in.mark]
+checked_in = "Dossard remis"
+bib_returned = "Dossard rendu"
+gift_given = "Cadeau + médaille remis"
+
+[check_in.done]
+checked_in = "{name} ({bib}) : dossard remis."
+checked_in_undone = "{name} ({bib}) : remise du dossard annulée."
+bib_returned = "{name} ({bib}) : dossard rendu."
+bib_returned_undone = "{name} ({bib}) : retour du dossard annulé."
+gift_given = "{name} ({bib}) : cadeau et médaille remis."
+gift_given_undone = "{name} ({bib}) : remise du cadeau annulée."
+
+[reception_list]
+page = "page"
+download = "Liste d'accueil (PDF)"
+title = "Liste d'accueil"
+intro = "{count} enfants inscrits, classés par prénom. Trouve ton prénom : ton numéro de dossard est à droite."
+empty = "Aucun enfant inscrit."
+printed_at = "Imprimé le {at}"
+file_name = "liste-accueil"

@@ -1,0 +1,52 @@
+{% extends 'layout.html.twig' %}
+
+{% macro mark_form(child, mark, done, label, style) %}
+    <form method="post" class="inline" {% if not done %}data-confirm="{{ t('check_in.confirm_undo') }}"{% endif %}>
+        {{ csrf_field() }}
+        <input type="hidden" name="mark" value="{{ mark.value }}">
+        <input type="hidden" name="done" value="{{ done ? '1' : '0' }}">
+        <button type="submit" class="button {{ style }}">{{ label }}</button>
+    </form>
+{% endmacro %}
+
+{% block title %}{{ t('check_in.title') }}{% endblock %}
+
+{% block content %}
+    {% set c = child.child %}
+    <p><a href="{{ url_for('check-in') }}">← {{ t('check_in.next_child') }}</a></p>
+    <div class="check-in-child">
+        <span class="bib">{{ child.bib ?? '–' }}</span>
+        <p class="check-in-first-name">{{ c.firstName }}</p>
+        <p class="check-in-last-name">{{ c.lastName }}</p>
+        <p>{{ label('level.' ~ c.level) }} · {{ t('gender.' ~ c.gender ~ '.one') }} · {{ c.school }}</p>
+        <p>{% include 'reception/_state.html.twig' %}</p>
+    </div>
+    {% if not open %}<p class="notice">{{ t('check_in.closed') }}</p>{% endif %}
+    {% if child.status.value != 'registered' and not child.isPresent() %}<p class="notice">{{ t('check_in.not_registered', {name: child.fullName()}) }}</p>{% endif %}
+
+    {% for step in ['arrival', 'leaving'] %}
+        <h2>{{ t('check_in.step.' ~ step) }}</h2>
+        <ul class="check-in-marks">
+            {% for mark in marks %}
+                {% if (step == 'leaving') == mark.isExit() %}
+                    {% set at = child.markedAt(mark) %}
+                    <li>
+                        {% if at %}
+                            <span class="badge ok">✓ {{ t('check_in.mark.' ~ mark.value) }}</span>
+                            <small class="muted">{{ local_time(at) }}</small>
+                            {% if open %}{{ _self.mark_form(child, mark, false, t('check_in.undo'), 'small secondary') }}{% endif %}
+                        {% elseif open and (mark.value == 'checked_in' ? child.status.value == 'registered' : child.isPresent()) %}
+                            {{ _self.mark_form(child, mark, true, t('check_in.mark.' ~ mark.value), 'large') }}
+                        {% else %}
+                            <span class="muted">{{ t('check_in.mark.' ~ mark.value) }} : –</span>
+                        {% endif %}
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    {% endfor %}
+
+    {% if can('view_registrations') %}
+        <p><a href="{{ url_for('registration', {id: child.id}) }}">{{ t('check_in.registration_card') }}</a></p>
+    {% endif %}
+{% endblock %}

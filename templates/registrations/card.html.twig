@@ -17,6 +17,10 @@
         <dt>{{ t('registration.guardian') }}</dt><dd>{{ c.guardianName }}<br><a href="tel:{{ c.guardianPhone|replace({' ': ''}) }}">{{ c.guardianPhone }}</a><br><a href="mailto:{{ c.guardianEmail }}">{{ c.guardianEmail }}</a></dd>
         <dt>{{ t('registration.volunteer_short') }}</dt><dd>{{ c.volunteer ? t('registration.yes') : t('registration.no') }}</dd>
         <dt>{{ t('registration.registered_at') }}</dt><dd>{{ local_time(registration.registeredAt) }}</dd>
+        {% if registration.isPresent() or phase() != 'preparation' %}
+            <dt>{{ t('check_in.title') }}</dt>
+            <dd>{% include 'reception/_state.html.twig' with {child: registration} %}{% if can('check_in_out') %} · <a href="{{ url_for('check-in-card', {id: registration.id}) }}">{{ t('check_in.open_card') }}</a>{% endif %}</dd>
+        {% endif %}
     </dl>
 
     {% if transitions is not empty and (can('manage_waiting_list') or can('unregister')) %}

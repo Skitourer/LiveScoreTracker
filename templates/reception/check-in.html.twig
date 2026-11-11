@@ -1,0 +1,51 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('check_in.title') }}{% endblock %}
+
+{% block content %}
+    <h1>{{ t('check_in.title') }}</h1>
+    {% if phase() == 'preparation' %}<p class="notice">{{ t('check_in.closed') }}</p>{% endif %}
+    <ul class="stats">
+        <li><strong>{{ counts.present }}</strong> / {{ counts.registered }} {{ t('check_in.counter.present') }}</li>
+        <li><strong>{{ counts.bib_returned }}</strong> {{ t('check_in.counter.bib_returned') }}</li>
+        <li><strong>{{ counts.gift_given }}</strong> {{ t('check_in.counter.gift_given') }}</li>
+    </ul>
+
+    <form method="get" class="check-in-search" role="search">
+        <label>{{ t('check_in.bib') }}
+            <input type="text" name="q" class="bib-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" {% if query is empty %}autofocus{% endif %} value="{{ query matches '/^[0-9]+$/' ? query : '' }}">
+        </label>
+        <button type="submit" class="button">{{ t('check_in.find') }}</button>
+    </form>
+    <form method="get" class="check-in-search" role="search">
+        <label>{{ t('check_in.by_name') }}
+            <input type="search" name="q" autocomplete="off" value="{{ query matches '/^[0-9]+$/' ? '' : query }}">
+        </label>
+        <button type="submit" class="button secondary">{{ t('check_in.search') }}</button>
+    </form>
+
+    {% if notFound %}
+        <p class="flash error">{{ t(query matches '/^[0-9]+$/' ? 'check_in.unknown_bib' : 'check_in.no_match', {query: query}) }}</p>
+        {% if can('add_on_site') and phase() != 'preparation' %}
+            <p><a class="button secondary" href="{{ url_for('registration-new') }}">{{ t('registration.add') }}</a></p>
+        {% endif %}
+    {% endif %}
+
+    {% if matches is not empty %}
+        {% include 'reception/_children.html.twig' with {children: matches} %}
+    {% endif %}
+
+    <div class="toolbar">
+        <a class="button small {{ list == 'absent' ? '' : 'secondary' }}" href="{{ url_for('check-in') }}?list=absent">{{ t('check_in.list.absent', {count: counts.registered - counts.present}) }}</a>
+        <a class="button small {{ list == 'not_left' ? '' : 'secondary' }}" href="{{ url_for('check-in') }}?list=not_left">{{ t('check_in.list.not_left') }}</a>
+        {% if can('print_documents') %}<a class="button small secondary" href="{{ url_for('reception-list') }}">{{ t('reception_list.download') }}</a>{% endif %}
+    </div>
+    {% if list %}
+        <h2>{{ t('check_in.list.' ~ list ~ '_title') }}</h2>
+        {% if listed is empty %}
+            <p class="meta">{{ t('check_in.list.empty') }}</p>
+        {% else %}
+            {% include 'reception/_children.html.twig' with {children: listed} %}
+        {% endif %}
+    {% endif %}
+{% endblock %}
