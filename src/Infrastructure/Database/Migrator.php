@@ -12,8 +12,10 @@ use Throwable;
  * Applies versioned SQL migrations in filename order and records them.
  *
  * Migration files are named `NNNN_description.sql` and must use SQL that works
- * on both MySQL and SQLite. Statements are separated by a line holding only `;`
- * or by a semicolon at the end of a line.
+ * on both MySQL and SQLite. Statements end with a semicolon at the end of a line.
+ * Two placeholders cover the differences between the two databases:
+ *   {{id}}            auto-incremented primary key column definition
+ *   {{table_options}} table options (engine and character set on MySQL)
  */
 final class Migrator
 {
@@ -41,7 +43,7 @@ final class Migrator
             }
 
             try {
-                foreach (self::splitStatements($sql) as $statement) {
+                foreach (self::splitStatements($this->adaptToDriver($sql)) as $statement) {
                     $this->pdo->exec($statement);
                 }
                 $insert = $this->pdo->prepare(
@@ -111,6 +113,19 @@ final class Migrator
             array_map('trim', $parts),
             static fn(string $part): bool => $part !== '',
         ));
+    }
+
+    /**
+     * Replaces the placeholders with the current database's syntax.
+     */
+    public function adaptToDriver(string $sql): string
+    {
+        $isMysql = $this->pdo->getAttribute(PDO::ATTR_DRIVER_NAME) === 'mysql';
+
+        return strtr($sql, [
+            '{{id}}' => $isMysql ? 'BIGINT UNSIGNED NOT NULL AUTO_INCREMENT PRIMARY KEY' : 'INTEGER PRIMARY KEY AUTOINCREMENT',
+            '{{table_options}}' => $isMysql ? 'ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci' : '',
+        ]);
     }
 
     /**

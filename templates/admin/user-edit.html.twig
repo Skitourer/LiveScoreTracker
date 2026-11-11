@@ -1,0 +1,67 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ account.displayName }}{% endblock %}
+
+{% block content %}
+    <p><a href="{{ url_for('admin-users') }}">← {{ t('admin.users_title') }}</a></p>
+    <h1>{{ account.displayName }}</h1>
+    <dl class="facts">
+        <dt>{{ t('account.username') }}</dt><dd>{{ account.username }}</dd>
+        <dt>{{ t('account.role') }}</dt><dd>{{ t('role.' ~ account.role.value) }}</dd>
+        <dt>{{ t('admin.last_login') }}</dt><dd>{{ local_time(account.lastLoginAt) }}</dd>
+        {% if account.role.requiresTwoFactor() %}
+            <dt>{{ t('two_factor.title') }}</dt>
+            <dd>{{ account.totpEnabled ? t('admin.2fa_active', {count: remainingCodes}) : t('admin.no_2fa_yet') }}</dd>
+        {% endif %}
+        <dt>{{ t('admin.status') }}</dt><dd>{{ account.disabled ? t('admin.disabled') : t('admin.active') }}</dd>
+    </dl>
+    {% include 'partials/errors.html.twig' %}
+
+    <h2>{{ t('admin.profile') }}</h2>
+    <form method="post" class="form">
+        {{ csrf_field() }}
+        <input type="hidden" name="op" value="profile">
+        <label>{{ t('account.display_name') }}
+            <input type="text" name="display_name" value="{{ old.display_name }}" required>
+        </label>
+        <label>{{ t('account.email') }}
+            <input type="email" name="email" value="{{ old.email }}" required>
+        </label>
+        <button type="submit" class="button secondary">{{ t('admin.save') }}</button>
+    </form>
+
+    {% if not isSelf %}
+        <h2>{{ t('admin.temporary_password') }}</h2>
+        <p class="meta">{{ t('admin.temporary_password_hint') }}</p>
+        <form method="post" class="form">
+            {{ csrf_field() }}
+            <input type="hidden" name="op" value="password">
+            <label>{{ t('password.new') }} <small>{{ t('password.rule', {min: min}) }}</small>
+                <input type="text" name="password" autocomplete="off" minlength="{{ min }}" required>
+            </label>
+            <button type="submit" class="button secondary">{{ t('admin.set_temporary_password') }}</button>
+        </form>
+
+        {% if account.role.value == 'admin' and account.totpEnabled %}
+            <h2>{{ t('two_factor.title') }}</h2>
+            <p class="meta">{{ t('admin.reset_2fa_hint') }}</p>
+            <form method="post" class="form">
+                {{ csrf_field() }}
+                <input type="hidden" name="op" value="reset_2fa">
+                <button type="submit" class="button danger">{{ t('admin.reset_2fa') }}</button>
+            </form>
+        {% endif %}
+
+        <h2>{{ t('admin.status') }}</h2>
+        <form method="post" class="form">
+            {{ csrf_field() }}
+            {% if account.disabled %}
+                <input type="hidden" name="op" value="enable">
+                <button type="submit" class="button secondary">{{ t('admin.enable') }}</button>
+            {% else %}
+                <input type="hidden" name="op" value="disable">
+                <button type="submit" class="button danger">{{ t('admin.disable') }}</button>
+            {% endif %}
+        </form>
+    {% endif %}
+{% endblock %}

@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.4 — 11 November 2026
+> Version 1.6 — 11 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -705,12 +705,16 @@ The **anonymous history** of previous editions remains available (year-over-year
 - **Mandatory 2FA for admins**: TOTP codes (authenticator app: Google Authenticator, Microsoft Authenticator…). No SMS.
 - **10 recovery codes** provided when 2FA is enabled. An admin can reset another admin's 2FA.
 - **Forgotten password** (admin, organizer): email link, valid for **1 hour**, single use.
-- **Rate limiting** on all login screens (including bib + date of birth): progressive temporary lockout.
+- **Rate limiting** on all login screens (including bib + date of birth): progressive temporary lockout. A one-minute lockout starts after **5 failures** for an account (counted **per phone** for the shared referee account, so one mistake does not lock every phone) or **20 failures** from one IP address; the delay doubles with each new failure, up to 1 hour.
 - **Shared referee account**:
   - active only during the "in progress" phase;
   - password changed every edition;
   - admin "**log out all phones**" button;
-  - each entry records a device identifier.
+  - each entry records a device identifier;
+  - password of **at least 8 characters** (it is typed on many phones).
+- **Account creation**: the admin creates admin and organizer accounts with a **temporary password**, which must be changed at first login.
+- **First admin**: on a new installation, the `/setup` page creates the first admin account, once, with the `DEPLOY_TOKEN` of the server's `.env` file (shared hosting offers no command line).
+- **Sessions** stored in the database: they expire after **4 hours of inactivity** (configurable) and at the latest **16 hours** after login. The admin sees the phones logged in to the referee account.
 
 ### 19.2 Application
 
@@ -751,7 +755,7 @@ The **anonymous history** of previous editions remains available (year-over-year
 - **PWA**: manifest, service worker, asset caching; **IndexedDB** for offline entries and data cache.
 - **Automatic refresh** of screens by polling the API every few seconds.
 - **Wake Lock** API to keep the screen on; vibration and sound at the end of timers.
-- Light, mobile-first CSS, light/dark theme, high contrast.
+- Light, mobile-first CSS, light/dark theme, high contrast, built on design tokens (§ 20.6).
 
 ### 20.3 Code layout
 
@@ -778,6 +782,17 @@ The **business core** (scoring, fouls, modifiers, tie-breaking, sync) is isolate
 - Target scale: ~150 children, ~15 simultaneous phones, ~2,000 entries over 3 h.
 - Entry response time < 1 s under normal conditions.
 - Monitoring screen refresh: ≤ 10 s.
+
+### 20.6 Visual theme
+
+The look stays **plain** and must be easy to change without touching the screens. The final theme is chosen at the end of development (step 14).
+
+- **Design tokens**: every visual value (accent color, neutrals, success/warning/error colors, font, text sizes, spacing, radii) is a **CSS variable** gathered in a single `tokens.css` file, in light and dark versions. Component styles only use these variables.
+- **Automatic safeguard**: a **Stylelint** check in continuous integration rejects any color or size hard-coded outside the tokens file.
+- **Few, named components** (button, card, table, form, badge, message…), semantic HTML, **no styles written in pages** (the Content-Security-Policy forbids them anyway).
+- **Style guide**: a demo page (not available in production) shows every component in light and dark mode; automatic screenshots of this page compare a theme change before and after, phones included.
+- **Per-installation customization**: a `[theme]` section of `competition.toml` (accent color, logo) overrides the tokens, just as translations override texts. The configuration screen edits it (step 12), with an **automatic contrast check** (WCAG AA level): an unreadable color is rejected.
+- **Plain by design**: a single accent color, system font, no external font or graphics library (faster, GDPR-compliant, works offline).
 
 ---
 
@@ -828,7 +843,7 @@ Each step is delivered on a branch with a pull request, deployed to the test sit
 | **0. Foundation** | Repository cleanup, structure, Slim, database, **conventions and quality tooling**, **confidentiality safeguards** (§ 25.3), automatic deployment to the test site, home page | The "empty" app shows up on the test site |
 | **1. Configuration and business core** | TOML loading, i18n, event model, **scoring and tie-break engine** + automated tests | Computation report on fictitious data (`/demo/report` page, not available in production) |
 | **2. Accounts and security** | Login, roles, admin 2FA, forgotten password, shared account, audit log | Login with each role |
-| **3. Registrations (admin)** | Registrations screen, manual addition, spreadsheet import, bibs | Import of a fictitious test file |
+| **3. Registrations (admin)** | Theme foundations (tokens, Stylelint, style guide, § 20.6), registrations screen, manual addition, spreadsheet import, bibs | Import of a fictitious test file |
 | **4. Check-in** | Check-in list PDF, check-in/check-out | Check-in on a phone |
 | **5. Referee entry** | Workshop choice, standard entry, attempts, fouls, modifiers, correction, remaining bibs, help | Full online entry |
 | **6. Timer and counter** | 1-2 bib timer, counter mode | Trial on a real sprint and a real basketball session |
@@ -837,9 +852,9 @@ Each step is delivered on a branch with a pull request, deployed to the test sit
 | **9. Participant and displays** | Participant page, progress screen, ceremony screen | |
 | **10. Documents and fallbacks** | PDFs (podiums, backup sheets…), backup template and import, exports | |
 | **11. Online registration** | Public form, email verification, waiting list, withdrawal, automatic emails | End-to-end test registration |
-| **12. Online configuration** | Configuration screen, help editor, in-competition safeguards | |
+| **12. Online configuration** | Configuration screen, help editor, theme customization (color, logo), in-competition safeguards | |
 | **13. Backups and yearly cycle** | Backups, encrypted Drive copy, restore, D+30 purge, statistics, new edition | |
-| **14. Dress rehearsal** | Full-scale simulation with volunteers, fixes | Go/no-go for production |
+| **14. Dress rehearsal** | Choice of the final theme, full-scale simulation with volunteers, fixes | Go/no-go for production |
 | **15. Phase 2 — API and Claude** | Documented public API, action proposals, connecting Claude | |
 
 The order may be adjusted.
@@ -903,7 +918,7 @@ Only **fictitious data** is allowed (example configuration, test data sets, demo
   - Static analysis: **PHPStan** at the highest reasonable level.
   - Docblocks for public classes and methods.
 - **JavaScript**: ES2022 modules, **ESLint** + **Prettier**.
-- **CSS**: consistent conventions, CSS variables for colors and themes.
+- **CSS**: only design tokens (CSS variables from `tokens.css`) for colors, sizes and spacing, checked by **Stylelint** (§ 20.6).
 - **Twig**: no business logic in templates.
 - **SQL**: versioned migrations, English `snake_case` names.
 - **Tests**: PHPUnit; business core (scoring, tie-breaking, attempts, sync) covers 100% of meaningful branches.

@@ -1,0 +1,55 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('referee.title') }}{% endblock %}
+
+{% block content %}
+    <h1>{{ t('referee.title') }}</h1>
+    <p>{{ t('referee.intro') }}</p>
+    {% if phase() != 'running' %}<p class="notice">{{ t('referee.inactive_now') }}</p>{% endif %}
+    {% include 'partials/errors.html.twig' %}
+
+    {% if account is null %}
+        <form method="post" class="form">
+            {{ csrf_field() }}
+            <input type="hidden" name="op" value="create">
+            <label>{{ t('account.username') }} <small>{{ t('account.username_rule') }}</small>
+                <input type="text" name="username" value="{{ username }}" autocapitalize="none" spellcheck="false" required>
+            </label>
+            <label>{{ t('referee.password') }} <small>{{ t('password.rule', {min: min}) }}</small>
+                <input type="text" name="password" autocomplete="off" minlength="{{ min }}" required>
+            </label>
+            <button type="submit" class="button">{{ t('referee.create') }}</button>
+        </form>
+    {% else %}
+        <dl class="facts">
+            <dt>{{ t('account.username') }}</dt><dd><code>{{ account.username }}</code></dd>
+        </dl>
+
+        <h2>{{ t('referee.phones', {count: phones|length}) }}</h2>
+        {% if phones is empty %}
+            <p class="meta">{{ t('referee.no_phone') }}</p>
+        {% else %}
+            <ul class="phones">
+                {% for phone in phones %}
+                    <li><code>{{ phone.device_id|slice(0, 6) }}</code> · {{ t('referee.last_seen', {at: local_time(phone.last_seen_at)}) }}<br><small class="muted">{{ phone.user_agent|slice(0, 80) }}</small></li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <form method="post" class="form">
+            {{ csrf_field() }}
+            <input type="hidden" name="op" value="disconnect">
+            <button type="submit" class="button danger">{{ t('referee.disconnect_all') }}</button>
+        </form>
+
+        <h2>{{ t('referee.change_password') }}</h2>
+        <p class="meta">{{ t('referee.change_password_hint') }}</p>
+        <form method="post" class="form">
+            {{ csrf_field() }}
+            <input type="hidden" name="op" value="password">
+            <label>{{ t('referee.password') }} <small>{{ t('password.rule', {min: min}) }}</small>
+                <input type="text" name="password" autocomplete="off" minlength="{{ min }}" required>
+            </label>
+            <button type="submit" class="button secondary">{{ t('referee.save_password') }}</button>
+        </form>
+    {% endif %}
+{% endblock %}

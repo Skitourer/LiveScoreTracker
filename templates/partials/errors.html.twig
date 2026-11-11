@@ -1,0 +1,7 @@
+{% if errors is defined and errors is not empty %}
+    <ul class="form-errors" role="alert">
+        {% for key, params in errors %}
+            <li>{{ t(key, params) }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}

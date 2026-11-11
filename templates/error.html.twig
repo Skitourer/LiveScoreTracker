@@ -1,0 +1,10 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('error.' ~ reason ~ '.title') }}{% endblock %}
+
+{% block content %}
+    <h1>{{ t('error.' ~ reason ~ '.title') }}</h1>
+    <p>{{ t('error.' ~ reason ~ '.text') }}</p>
+    <p><a class="button" href="{{ url_for('home') }}">{{ t('error.back_home') }}</a></p>
+    {% if details %}<pre class="details">{{ details }}</pre>{% endif %}
+{% endblock %}

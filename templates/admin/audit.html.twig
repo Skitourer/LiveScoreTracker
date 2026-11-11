@@ -1,0 +1,38 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('audit.title') }}{% endblock %}
+
+{% block content %}
+    <h1>{{ t('audit.title') }}</h1>
+    <form method="get" class="filters">
+        <label>{{ t('audit.action') }}
+            <select name="action">
+                <option value="">{{ t('audit.all') }}</option>
+                {% for a in actions %}<option value="{{ a }}" {% if a == action %}selected{% endif %}>{{ t('audit.actions.' ~ a) }}</option>{% endfor %}
+            </select>
+        </label>
+        <button type="submit" class="button secondary">{{ t('audit.filter') }}</button>
+    </form>
+    <p class="meta">{{ t('audit.count', {count: total}) }}</p>
+    <div class="table-scroll">
+        <table>
+            <thead><tr><th>{{ t('audit.when') }}</th><th>{{ t('audit.who') }}</th><th>{{ t('audit.action') }}</th><th>{{ t('audit.details') }}</th></tr></thead>
+            <tbody>
+                {% for entry in entries %}
+                    <tr>
+                        <td class="nowrap">{{ local_time(entry.occurred_at) }}</td>
+                        <td>{{ entry.username ?? '–' }}{% if entry.device_id %}<br><small class="muted">{{ t('audit.device') }} {{ entry.device_id|slice(0, 6) }}</small>{% endif %}</td>
+                        <td>{{ t('audit.actions.' ~ entry.action) }}</td>
+                        <td><small>{% for k, v in entry.details %}{{ k }}: {{ v }}{% if not loop.last %} · {% endif %}{% endfor %}{% if entry.ip %}<br><span class="muted">{{ entry.ip }}</span>{% endif %}</small></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% if pages > 1 %}
+        <nav class="toolbar">
+            {% if page > 1 %}<a class="button secondary" href="?page={{ page - 1 }}{% if action %}&amp;action={{ action }}{% endif %}">← {{ t('audit.newer') }}</a>{% endif %}
+            {% if page < pages %}<a class="button secondary" href="?page={{ page + 1 }}{% if action %}&amp;action={{ action }}{% endif %}">{{ t('audit.older') }} →</a>{% endif %}
+        </nav>
+    {% endif %}
+{% endblock %}

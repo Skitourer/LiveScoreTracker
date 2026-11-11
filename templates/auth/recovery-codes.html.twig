@@ -1,0 +1,12 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('two_factor.codes_title') }}{% endblock %}
+
+{% block content %}
+    <h1>{{ t('two_factor.codes_title') }}</h1>
+    <p class="notice">{{ t('two_factor.codes_intro') }}</p>
+    <ul class="codes">
+        {% for code in codes %}<li><code>{{ code }}</code></li>{% endfor %}
+    </ul>
+    <p><a class="button" href="{{ next }}">{{ t('two_factor.codes_continue') }}</a></p>
+{% endblock %}

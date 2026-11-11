@@ -5,12 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark">
     <meta name="robots" content="noindex, nofollow">
-    <title>{% block title %}LiveScoreTracker{% endblock %}</title>
+    <title>{% block title %}{{ t('app.name') }}{% endblock %}</title>
     <link rel="stylesheet" href="{{ base_path() }}/assets/css/app.css">
     <script type="module" src="{{ base_path() }}/assets/js/app.js"></script>
 </head>
 <body>
+    <header class="topbar">
+        <a class="brand" href="{{ logged_in() ? url_for('dashboard') : url_for('home') }}">{{ t('app.name') }}</a>
+        <nav class="topbar-nav">
+            {% set me = current_user() %}
+            {% if me %}
+                <a href="{{ url_for('account') }}" class="who">{{ me.displayName }} <small>· {{ t('role.' ~ me.role.value) }}</small></a>
+            {% endif %}
+            {% if logged_in() %}
+                <form method="post" action="{{ url_for('logout') }}" class="inline">
+                    {{ csrf_field() }}
+                    <button type="submit" class="link">{{ t('nav.logout') }}</button>
+                </form>
+            {% else %}
+                <a href="{{ url_for('login') }}">{{ t('nav.login') }}</a>
+            {% endif %}
+        </nav>
+    </header>
     <main class="container">
+        {% for flash in flashes() %}
+            <p class="flash {{ flash.type }}" role="status">{{ t(flash.key, flash.params) }}</p>
+        {% endfor %}
         {% block content %}{% endblock %}
     </main>
 </body>

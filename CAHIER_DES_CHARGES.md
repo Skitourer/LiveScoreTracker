@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.4 — 11 novembre 2026
+> Version 1.6 — 11 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -705,12 +705,16 @@ L'**historique anonyme** des éditions précédentes reste consultable (comparai
 - **2FA obligatoire pour les admins** : codes TOTP (application d'authentification : Google Authenticator, Microsoft Authenticator…). Pas de SMS.
 - **10 codes de secours** fournis à l'activation de la 2FA. Un admin peut réinitialiser la 2FA d'un autre admin.
 - **Mot de passe oublié** (admin, organisateur) : lien par email, valable **1 heure**, à usage unique.
-- **Limitation des tentatives** sur tous les écrans de connexion (y compris dossard + date de naissance) : blocage temporaire progressif.
+- **Limitation des tentatives** sur tous les écrans de connexion (y compris dossard + date de naissance) : blocage temporaire progressif. Blocage d'une minute dès **5 échecs** pour un compte (comptés **par téléphone** pour le compte partagé des arbitres, pour qu'une fausse manipulation ne bloque pas tous les téléphones) ou **20 échecs** pour une même adresse IP ; la durée double à chaque nouvel échec, jusqu'à 1 h.
 - **Compte partagé des arbitres** :
   - actif uniquement en phase « en cours » ;
   - mot de passe changé à chaque édition ;
   - bouton admin « **déconnecter tous les téléphones** » ;
-  - chaque saisie enregistre un identifiant d'appareil.
+  - chaque saisie enregistre un identifiant d'appareil ;
+  - mot de passe de **8 caractères minimum** (il est saisi sur de nombreux téléphones).
+- **Création des comptes** : l'admin crée les comptes admin et organisateur avec un **mot de passe provisoire**, à changer obligatoirement à la première connexion.
+- **Premier admin** : sur une nouvelle installation, la page `/setup` permet de créer le premier compte admin, une seule fois, avec le jeton `DEPLOY_TOKEN` du fichier `.env` du serveur (l'hébergement mutualisé n'offre pas de ligne de commande).
+- **Sessions** enregistrées en base de données : elles expirent après **4 h d'inactivité** (réglable) et au plus tard **16 h** après la connexion. L'admin voit les téléphones connectés au compte des arbitres.
 
 ### 19.2 Application
 
@@ -751,7 +755,7 @@ L'**historique anonyme** des éditions précédentes reste consultable (comparai
 - **PWA** : manifeste, *service worker*, cache des ressources ; **IndexedDB** pour les saisies hors ligne et le cache des données.
 - **Rafraîchissement automatique** des écrans par interrogation de l'API toutes les quelques secondes (*polling*).
 - API **Wake Lock** pour garder l'écran allumé ; vibration et son pour les fins de chrono.
-- CSS léger, mobile d'abord, compatible thème clair/sombre, contrastes élevés.
+- CSS léger, mobile d'abord, compatible thème clair/sombre, contrastes élevés, construit sur des jetons graphiques (§ 20.6).
 
 ### 20.3 Organisation du code
 
@@ -778,6 +782,17 @@ Le **cœur métier** (barème, essais nuls, modificateurs, départage, synchroni
 - Échelle visée : ~150 enfants, ~15 téléphones simultanés, ~2 000 saisies sur 3 h.
 - Temps de réponse d'une saisie < 1 s en conditions normales.
 - Rafraîchissement des écrans de suivi : ≤ 10 s.
+
+### 20.6 Habillage graphique
+
+L'apparence reste **sobre** et doit pouvoir être modifiée facilement, sans toucher aux écrans. L'habillage définitif est choisi en fin de développement (étape 14).
+
+- **Jetons graphiques** : toutes les valeurs visuelles (couleur d'accent, neutres, couleurs d'état succès/alerte/erreur, police, tailles de texte, espacements, arrondis) sont des **variables CSS** regroupées dans un seul fichier `tokens.css`, en version claire et sombre. Les styles des composants n'utilisent que ces variables.
+- **Garde-fou automatique** : un contrôle **Stylelint** dans l'intégration continue refuse toute couleur ou taille écrite en dur hors du fichier de jetons.
+- **Composants peu nombreux et nommés** (bouton, carte, tableau, formulaire, badge, message…), HTML sémantique, **aucun style écrit dans les pages** (la politique de sécurité CSP l'interdit de toute façon).
+- **Guide de style** : une page de démonstration (absente en production) affiche tous les composants en mode clair et sombre ; des captures automatiques de cette page permettent de comparer l'avant et l'après d'un changement d'habillage, y compris sur téléphone.
+- **Personnalisation par installation** : une section `[theme]` de `competition.toml` (couleur d'accent, logo) surcharge les jetons, comme les traductions surchargent les textes. L'écran de configuration la modifie (étape 12), avec une **vérification automatique du contraste** (niveau WCAG AA) : une couleur illisible est refusée.
+- **Sobriété par construction** : une seule couleur d'accent, police du système, aucune police ni bibliothèque graphique externe (plus rapide, conforme au RGPD, compatible avec le mode hors ligne).
 
 ---
 
@@ -828,7 +843,7 @@ Chaque étape est livrée sur une branche avec une *pull request*, déployée su
 | **0. Socle** | Nettoyage du dépôt, structure, Slim, base de données, **conventions et outils qualité**, **garde-fous de confidentialité** (§ 25.3), déploiement automatique sur le site d'essai, page d'accueil | L'appli « vide » s'affiche sur le site d'essai |
 | **1. Configuration et cœur métier** | Lecture du TOML, i18n, modèle des épreuves, **moteur de barème et de départage** + tests automatiques | Rapport de calcul sur des données fictives (page `/demo/report`, absente en production) |
 | **2. Comptes et sécurité** | Connexion, rôles, 2FA admin, mot de passe oublié, compte partagé, journal d'audit | Connexion avec chaque rôle |
-| **3. Inscriptions (admin)** | Écran inscriptions, ajout manuel, import Excel, dossards | Import d'un fichier de test fictif |
+| **3. Inscriptions (admin)** | Fondations de l'habillage (jetons, Stylelint, guide de style, § 20.6), écran inscriptions, ajout manuel, import Excel, dossards | Import d'un fichier de test fictif |
 | **4. Accueil** | Liste d'accueil PDF, émargement entrée/sortie | Émargement sur téléphone |
 | **5. Saisie arbitre** | Choix d'atelier, saisie standard, essais, nuls, modificateurs, correction, dossards restants, aide | Saisie complète en ligne |
 | **6. Chrono et compteur** | Chrono 1-2 dossards, mode compteur | Essai sur un vrai sprint et un vrai basket |
@@ -837,9 +852,9 @@ Chaque étape est livrée sur une branche avec une *pull request*, déployée su
 | **9. Participant et affichages** | Page participant, écran d'avancement, écran de cérémonie | |
 | **10. Documents et secours** | PDF (podiums, feuilles de secours…), modèle et import Excel de secours, exports | |
 | **11. Inscriptions en ligne** | Formulaire public, vérification email, liste d'attente, désistement, emails automatiques | Inscription test de bout en bout |
-| **12. Configuration en ligne** | Écran de configuration, éditeur d'aide, garde-fous en cours de compétition | |
+| **12. Configuration en ligne** | Écran de configuration, éditeur d'aide, personnalisation de l'habillage (couleur, logo), garde-fous en cours de compétition | |
 | **13. Sauvegardes et cycle annuel** | Sauvegardes, Drive chiffré, restauration, purge J+30, statistiques, nouvelle édition | |
-| **14. Répétition générale** | Simulation grandeur nature avec des bénévoles, corrections | Go/no-go pour la production |
+| **14. Répétition générale** | Choix de l'habillage final, simulation grandeur nature avec des bénévoles, corrections | Go/no-go pour la production |
 | **15. Phase 2 — API et Claude** | API publique documentée, propositions d'action, branchement de Claude | |
 
 L'ordre pourra être ajusté.
@@ -903,7 +918,7 @@ Seules des **données fictives** sont autorisées (exemples de configuration, je
   - Analyse statique : **PHPStan** au niveau maximal raisonnable.
   - Docblocks pour les classes et méthodes publiques.
 - **JavaScript** : ES2022 en modules, **ESLint** + **Prettier**.
-- **CSS** : conventions cohérentes, variables CSS pour les couleurs et thèmes.
+- **CSS** : uniquement des jetons graphiques (variables CSS de `tokens.css`) pour les couleurs, tailles et espacements, vérifié par **Stylelint** (§ 20.6).
 - **Twig** : pas de logique métier dans les gabarits.
 - **SQL** : migrations versionnées, noms en `snake_case` anglais.
 - **Tests** : PHPUnit ; cœur métier (barème, départage, essais, synchronisation) couvert à 100 % des branches significatives.

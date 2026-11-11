@@ -34,6 +34,17 @@ final class Settings
         public readonly string $dbPassword,
         public readonly string $sqlitePath,
         public readonly string $deployToken,
+        public readonly string $appUrl = '',
+        public readonly int $sessionIdleMinutes = 240,
+        public readonly string $mailTransport = 'log',
+        public readonly string $mailHost = '',
+        public readonly int $mailPort = 465,
+        public readonly string $mailEncryption = 'ssl',
+        public readonly string $mailUser = '',
+        public readonly string $mailPassword = '',
+        public readonly string $mailFrom = '',
+        public readonly string $mailFromName = '',
+        public readonly string $timezone = 'Europe/Paris',
     ) {
         if (!\in_array($dbDriver, [self::DRIVER_SQLITE, self::DRIVER_MYSQL], true)) {
             throw new InvalidArgumentException(\sprintf('Unsupported DB_DRIVER "%s".', $dbDriver));
@@ -68,6 +79,17 @@ final class Settings
             dbPassword: $read('DB_PASSWORD'),
             sqlitePath: self::absolutePath($dataDir, $read('DB_SQLITE_PATH', 'app.sqlite')),
             deployToken: $read('DEPLOY_TOKEN'),
+            appUrl: rtrim($read('APP_URL'), '/'),
+            sessionIdleMinutes: max(5, (int) $read('SESSION_IDLE_MINUTES', '240')),
+            mailTransport: strtolower($read('MAIL_TRANSPORT', 'log')),
+            mailHost: $read('MAIL_HOST'),
+            mailPort: (int) $read('MAIL_PORT', '465'),
+            mailEncryption: strtolower($read('MAIL_ENCRYPTION', 'ssl')),
+            mailUser: $read('MAIL_USER'),
+            mailPassword: $read('MAIL_PASSWORD'),
+            mailFrom: $read('MAIL_FROM'),
+            mailFromName: $read('MAIL_FROM_NAME', 'LiveScoreTracker'),
+            timezone: \in_array($read('APP_TIMEZONE', 'Europe/Paris'), timezone_identifiers_list(), true) ? $read('APP_TIMEZONE', 'Europe/Paris') : 'UTC',
         );
     }
 
