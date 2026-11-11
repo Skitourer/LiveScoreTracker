@@ -11,6 +11,7 @@
         <label>{{ t('two_factor.code') }}
             <input type="text" name="code" inputmode="numeric" autocomplete="one-time-code" autocapitalize="none" maxlength="12" required autofocus>
         </label>
+        <label class="choice"><input type="checkbox" name="trust_device" value="1"> {{ t('two_factor.trust_device', {days: 30}) }}</label>
         <button type="submit" class="button">{{ t('two_factor.submit') }}</button>
     </form>
     <p class="meta">{{ t('two_factor.recovery_hint') }}</p>

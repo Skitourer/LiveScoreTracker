@@ -11,7 +11,11 @@ use LiveScoreTracker\Domain\Security\Role;
 use LiveScoreTracker\Domain\Security\User;
 use LiveScoreTracker\Http\AuthState;
 use LiveScoreTracker\Http\Middleware\Authorize;
+use LiveScoreTracker\Http\Middleware\SessionMiddleware;
+use LiveScoreTracker\Http\RequestContext;
+use LiveScoreTracker\Infrastructure\Persistence\RefereeDeviceRepository;
 use LiveScoreTracker\Infrastructure\Persistence\Throttle;
+use LiveScoreTracker\Infrastructure\Persistence\TrustedDeviceRepository;
 use LiveScoreTracker\Infrastructure\Persistence\UserRepository;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -32,6 +36,8 @@ final class LoginAction
         private readonly Responder $responder,
         private readonly UserRepository $users,
         private readonly Throttle $throttle,
+        private readonly TrustedDeviceRepository $trustedDevices,
+        private readonly RefereeDeviceRepository $refereeDevices,
     ) {}
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
@@ -70,21 +76,41 @@ final class LoginAction
         if (!AccessPolicy::roleActiveIn($user->role, $context->phase)) {
             return $this->form($response, $next, $username, ['login.referee_inactive' => []], 403);
         }
+        if ($user->role === Role::Referee && $this->refereeDevices->isBlocked($context->deviceId)) {
+            $this->responder->audit('auth.login_blocked_device', [], $user);
+
+            return $this->form($response, $next, $username, ['login.device_blocked' => []], 403);
+        }
 
         $this->throttle->clear($accountKey);
         if (password_needs_rehash($user->passwordHash, \defined('PASSWORD_ARGON2ID') ? PASSWORD_ARGON2ID : PASSWORD_DEFAULT)) {
             $this->users->setPasswordHashOnly($user->id, PasswordPolicy::hash($password));
         }
 
-        $context->session()->logIn($user, secondFactorDone: !$user->role->requiresTwoFactor());
+        $cookies = $request->getCookieParams();
+        $trustToken = \is_string($cookies[SessionMiddleware::TRUST_COOKIE] ?? null) ? $cookies[SessionMiddleware::TRUST_COOKIE] : null;
+        $trusted = $user->role->requiresTwoFactor() && $user->totpEnabled
+            && $this->trustedDevices->isTrusted($user->id, $context->deviceId, $trustToken);
+
+        $context->session()->logIn($user, secondFactorDone: !$user->role->requiresTwoFactor() || $trusted);
         $context->session()->set('login_next', Authorize::isLocalPath($next) ? $next : '/dashboard');
         $this->users->touchLogin($user->id);
 
-        if ($user->role->requiresTwoFactor()) {
+        if ($user->role->requiresTwoFactor() && !$trusted) {
             return $this->responder->redirect($response, $user->totpEnabled ? '/login/2fa' : '/account/2fa');
         }
 
-        $this->responder->audit('auth.login', [], $user);
+        if ($user->role === Role::Referee) {
+            // The shared account: a known phone finds its referee; otherwise ask who is holding it.
+            $device = $this->refereeDevices->find($context->deviceId);
+            if ($device === null) {
+                return $this->responder->redirect($response, '/referee/name');
+            }
+            $context->session()->set(RequestContext::REFEREE_NAME, $device['referee_name']);
+            $this->refereeDevices->touch($context->deviceId);
+        }
+
+        $this->responder->audit('auth.login', $trusted ? ['second_factor' => 'trusted_device'] : [], $user);
 
         return $this->responder->redirect($response, self::takeNext($context->session()));
     }

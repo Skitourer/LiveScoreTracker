@@ -17,6 +17,9 @@ use LogicException;
  */
 final class RequestContext
 {
+    /** Session key holding the first name typed by a referee on the shared account. */
+    public const REFEREE_NAME = 'referee_name';
+
     private ?Session $session = null;
 
     public ?User $user = null;
@@ -54,6 +57,19 @@ final class RequestContext
         $permission = $permission instanceof Permission ? $permission : Permission::tryFrom($permission);
 
         return $permission !== null && AccessPolicy::allows($this->user->role, $permission);
+    }
+
+    /**
+     * First name of the referee using the shared account, or null.
+     */
+    public function refereeName(): ?string
+    {
+        if ($this->session === null) {
+            return null;
+        }
+        $name = $this->session->get(self::REFEREE_NAME);
+
+        return \is_string($name) ? $name : null;
     }
 
     /**

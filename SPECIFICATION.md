@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.6 — 11 November 2026
+> Version 1.10 — 11 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -138,7 +138,7 @@ Accessible without an account, on the application website. Fields:
 
 **GDPR information notice** displayed below the form (see § 15).
 
-Checks: required fields, email and phone format, date of birth / grade consistency (warning), probable duplicate (same last name + first name + date of birth: rejected with a message).
+Checks: required fields, format of the email (full address with a domain) and of the phone (10 digits starting with 0, or international format "+33 6…"; a leading zero lost by a spreadsheet is restored), checked in the browser and on the server, date of birth / grade consistency (warning), probable duplicate (same last name + first name + date of birth: rejected with a message).
 
 Anti-bot protection **without any third-party service**: invisible honeypot field, minimum fill-in time, rate limiting per IP address.
 
@@ -159,12 +159,13 @@ A parent can register **several children** (siblings): after one registration, o
    - Otherwise: status **waitlisted**, "you are on the waiting list" email, admin notification.
 4. A registration not verified within 48 h **expires**. Only verified registrations count toward the quota. The admin can manually approve a pending registration.
 
-Registration statuses: `pending_verification` → `registered` | `waitlisted` → `registered` | `withdrawn` | `expired`.
+Registration statuses: `pending_verification` → `registered` | `waitlisted` → `registered` | `withdrawn` | `expired`. A withdrawn child can be **registered again** by the admin (or put back on the waiting list).
 
 ### 5.4 Waiting list
 
 - Handled **manually by the admin**: they move a child from the waiting list to "registered", including beyond the quota.
 - The move triggers the "your registration is confirmed" email.
+- **Confirmation email**: the same email is sent whatever the origin of the registration (public form, admin or organizer; box ticked by default for a manual entry, unticked by default for an import). It recalls the bib, date, venue, welcome time and the adult's responsibility, and **thanks volunteers** for offering to run a stand. The admin can send it again from the child's record.
 
 ### 5.5 Withdrawal
 
@@ -176,9 +177,10 @@ In both cases the admin is notified, so they can approve a child from the waitin
 
 ### 5.6 Bibs
 
-- Assigned **in the order children reach the "registered" status**, starting from 1 (or a configurable starting number).
-- A number is **never reassigned** within an edition, even after a withdrawal.
-- On-site additions (§ 5.8) get the next number.
+- Assigned **in the order children reach the "registered" status**, starting from 1 (or a configurable starting number): each newly registered child gets the **lowest free number**.
+- **During preparation**, a withdrawn child **gives their bib back**, and it goes to the next registered child: the stock of paper bibs is limited. If registered again, they get the first free number.
+- **Once the competition has started**, a withdrawn child **keeps their bib**: it is never given to another child. If registered again, they get their bib back.
+- On-site additions (§ 5.8) get the first free number.
 
 ### 5.7 Spreadsheet import (fallback and migration)
 
@@ -703,12 +705,17 @@ The **anonymous history** of previous editions remains available (year-over-year
 
 - Passwords **hashed** (`password_hash`, Argon2id), **12 characters minimum** for individual accounts.
 - **Mandatory 2FA for admins**: TOTP codes (authenticator app: Google Authenticator, Microsoft Authenticator…). No SMS.
+- **Trusted device**: when typing the code, the admin can tick "trust this device". The code is then no longer asked on that browser for **30 days** (the password still is). Trust is tied to the browser (secret cookie, hashed in the database): a cookie copied to another device is not enough. Each admin sees their trusted devices and can remove them; a password change, a 2FA reset or disabling the account removes them all.
 - **10 recovery codes** provided when 2FA is enabled. An admin can reset another admin's 2FA.
 - **Forgotten password** (admin, organizer): email link, valid for **1 hour**, single use.
 - **Rate limiting** on all login screens (including bib + date of birth): progressive temporary lockout. A one-minute lockout starts after **5 failures** for an account (counted **per phone** for the shared referee account, so one mistake does not lock every phone) or **20 failures** from one IP address; the delay doubles with each new failure, up to 1 hour.
 - **Shared referee account**:
   - active only during the "in progress" phase;
   - password changed every edition;
+  - after logging in, each referee **types their first name**, recorded with each of their actions and entries;
+  - each phone is **remembered with its referee's first name**: after being logged out, a referee who logs in again on the same phone gets their first name back without typing it;
+  - the admin sees **the known phones** (first name, phone, last activity, connected or not) and can **log out one referee**, **block a phone for good** (misuse, e.g. a child changing results), unblock it, or forget it;
+  - blocking relies on the device identifier (cookie): clearing cookies gets around it. Against a determined person who knows the password, the answer is to **change the referee password**, which logs out every phone;
   - admin "**log out all phones**" button;
   - each entry records a device identifier;
   - password of **at least 8 characters** (it is typed on many phones).
@@ -1133,6 +1140,7 @@ help = "basketball.md"
 [import.columns]
 last_name = "Child last name"
 first_name = "Child first name"
+birth_date = "Child birth date"
 gender = "Gender"
 school = "School"
 level = "Class"

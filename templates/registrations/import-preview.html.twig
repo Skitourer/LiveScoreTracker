@@ -1,0 +1,54 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('import.preview_title') }}{% endblock %}
+
+{% block content %}
+    <p><a href="{{ url_for('registration-import') }}">← {{ t('import.title') }}</a></p>
+    <h1>{{ t('import.preview_title') }}</h1>
+    <p class="meta">{{ fileName }}</p>
+
+    {% if plan.missing_columns is not empty %}
+        <p class="notice error">{{ t('import.missing_columns', {columns: plan.missing_columns|map(f => t('registration.field.' ~ f))|join(', ')}) }}</p>
+    {% else %}
+        <ul class="stats">
+            <li><strong>{{ plan.counts.new }}</strong> {{ t('import.state.new') }}</li>
+            <li><strong>{{ plan.counts.known }}</strong> {{ t('import.state.known') }}</li>
+            <li><strong>{{ plan.counts.error }}</strong> {{ t('import.state.error') }}</li>
+            <li><strong>{{ plan.counts.duplicate }}</strong> {{ t('import.state.duplicate') }}</li>
+        </ul>
+        {% if overQuota %}<p class="notice warning">{{ t('import.over_quota', {quota: quota}) }}</p>{% endif %}
+
+        {% if plan.counts.new > 0 %}
+            <form method="post" action="{{ url_for('registration-import') }}" class="form" data-confirm="{{ t('import.confirm_question', {count: plan.counts.new}) }}">
+                {{ csrf_field() }}
+                <input type="hidden" name="op" value="confirm">
+                <label class="choice"><input type="checkbox" name="send_emails" value="1"> {{ t('import.send_emails') }}</label>
+                <button type="submit" class="button">{{ t('import.confirm', {count: plan.counts.new}) }}</button>
+            </form>
+        {% else %}
+            <p class="notice">{{ t('import.nothing_new') }}</p>
+        {% endif %}
+
+        <div class="table-scroll">
+            <table>
+                <thead><tr><th class="num">{{ t('import.line') }}</th><th>{{ t('registration.child') }}</th><th>{{ t('import.result') }}</th></tr></thead>
+                <tbody>
+                    {% for line in plan.lines %}
+                        <tr{% if line.state == 'error' %} class="highlight"{% endif %}>
+                            <td class="num">{{ line.line }}</td>
+                            <td>
+                                {% if line.data %}{{ line.data.first_name }} {{ line.data.last_name }}<br><small class="muted">{{ label('level.' ~ line.data.level) }} · {{ t('gender.' ~ line.data.gender ~ '.one') }}{% if line.data.birth_date %} · {{ line.data.birth_date|date('d/m/Y') }}{% endif %}</small>{% else %}{{ line.name }}{% endif %}
+                            </td>
+                            <td>
+                                <span class="badge {{ {new: 'ok', known: 'muted', error: 'error', duplicate: 'warning'}[line.state] }}">{{ t('import.state.' ~ line.state) }}</span>
+                                {% if line.state == 'known' and line.bib %}<small class="muted">{{ t('import.known_bib', {bib: line.bib}) }}</small>{% endif %}
+                                {% for key, params in line.errors %}<br><small class="foul">{{ t(key, params) }}</small>{% endfor %}
+                                {% for key, params in line.warnings %}<br><small>{{ t(key, params) }}</small>{% endfor %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+{% endblock %}

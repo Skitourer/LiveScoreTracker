@@ -1,0 +1,76 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ registration.fullName() }}{% endblock %}
+
+{% block content %}
+    {% set c = registration.child %}
+    <p><a href="{{ url_for('registrations') }}">← {{ t('registration.title') }}</a></p>
+    <h1>{% if registration.bib %}<span class="bib">{{ registration.bib }}</span> {% endif %}{{ c.firstName }} {{ c.lastName }}</h1>
+    <p>
+        <span class="badge {{ registration.status.value == 'registered' ? 'ok' : (registration.status.value == 'waitlisted' ? 'warning' : 'muted') }}">{{ t('registration.status.' ~ registration.status.value) }}</span>
+        <span class="badge muted">{{ t('registration.source.' ~ registration.source.value) }}</span>
+    </p>
+    <dl class="facts">
+        <dt>{{ t('registration.field.birth_date') }}</dt><dd>{{ c.birthDate ? c.birthDate|date('d/m/Y') : '–' }}</dd>
+        <dt>{{ t('registration.field.level') }}</dt><dd>{{ label('level.' ~ c.level) }} · {{ t('gender.' ~ c.gender ~ '.one') }}</dd>
+        <dt>{{ t('registration.field.school') }}</dt><dd>{{ c.school }}</dd>
+        <dt>{{ t('registration.guardian') }}</dt><dd>{{ c.guardianName }}<br><a href="tel:{{ c.guardianPhone|replace({' ': ''}) }}">{{ c.guardianPhone }}</a><br><a href="mailto:{{ c.guardianEmail }}">{{ c.guardianEmail }}</a></dd>
+        <dt>{{ t('registration.volunteer_short') }}</dt><dd>{{ c.volunteer ? t('registration.yes') : t('registration.no') }}</dd>
+        <dt>{{ t('registration.registered_at') }}</dt><dd>{{ local_time(registration.registeredAt) }}</dd>
+    </dl>
+
+    {% if transitions is not empty and (can('manage_waiting_list') or can('unregister')) %}
+        <h2>{{ t('registration.status_title') }}</h2>
+        <div class="toolbar">
+            {% for target in transitions %}
+                {% if (target.value == 'withdrawn' and can('unregister')) or (target.value != 'withdrawn' and can('manage_waiting_list')) %}
+                    {# Bibs (spec § 5.6): given back on withdrawal only during preparation. #}
+                    {% set confirmKey = target.value == 'withdrawn'
+                        ? (registration.bib is null ? 'withdrawn' : (phase() == 'preparation' ? 'withdrawn_free' : 'withdrawn_keep'))
+                        : (target.value == 'registered' and registration.bib is not null ? 'registered_keep' : target.value) %}
+                    <form method="post" class="inline" data-confirm="{{ t('registration.confirm_status.' ~ confirmKey, {bib: registration.bib}) }}">
+                        {{ csrf_field() }}
+                        <input type="hidden" name="op" value="status">
+                        <input type="hidden" name="status" value="{{ target.value }}">
+                        {% if target.value == 'registered' %}<input type="hidden" name="send_email" value="1">{% endif %}
+                        <button type="submit" class="button {{ target.value == 'withdrawn' ? 'danger' : 'secondary' }}">{{ t('registration.action.' ~ (registration.status.value == 'withdrawn' and target.value == 'registered' ? 'reinstate' : target.value)) }}</button>
+                    </form>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% if can('edit_registration') and registration.status.value == 'registered' %}
+        <form method="post" class="inline" data-confirm="{{ t('registration.confirm_resend', {email: c.guardianEmail}) }}">
+            {{ csrf_field() }}
+            <input type="hidden" name="op" value="resend_email">
+            <button type="submit" class="button small secondary">{{ t('registration.resend_email') }}</button>
+        </form>
+    {% endif %}
+
+    {% if can('edit_registration') %}
+        <details class="card" {% if errors is not empty or warnings is not empty %}open{% endif %}>
+            <summary>{{ t('registration.edit') }}</summary>
+            {% include 'partials/errors.html.twig' %}
+            <form method="post" class="form wide-form">
+                {{ csrf_field() }}
+                <input type="hidden" name="op" value="update">
+                {% include 'registrations/_fields.html.twig' with {birthOptional: registration.source.value == 'on_site' or c.birthDate is null} %}
+                <button type="submit" class="button">{{ t('registration.save') }}</button>
+            </form>
+        </details>
+    {% endif %}
+
+    <h2>{{ t('registration.history') }}</h2>
+    <ul class="history">
+        {% for entry in history %}
+            <li>
+                <span class="meta">{{ local_time(entry.occurred_at) }} · {{ entry.username ?? t('registration.system') }}</span><br>
+                {{ t('registration.history_action.' ~ entry.action) }}
+                {% for field, change in entry.changes %}
+                    <br><small>{{ t('registration.field.' ~ field) }} : {{ change[0] is same as(true) ? t('registration.yes') : (change[0] is same as(false) ? t('registration.no') : change[0] ?? '–') }} → {{ change[1] is same as(true) ? t('registration.yes') : (change[1] is same as(false) ? t('registration.no') : change[1] ?? '–') }}</small>
+                {% endfor %}
+            </li>
+        {% endfor %}
+    </ul>
+{% endblock %}

@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.6 — 11 novembre 2026
+> Version 1.10 — 11 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -138,7 +138,7 @@ Accessible sans compte, sur le site de l'application. Champs :
 
 **Notice d'information RGPD** affichée sous le formulaire (cf. § 15).
 
-Contrôles : champs obligatoires, format de l'email et du téléphone, cohérence date de naissance / classe (avertissement), doublon probable (même nom + prénom + date de naissance : refus avec message).
+Contrôles : champs obligatoires, format de l'email (adresse complète avec domaine) et du téléphone (10 chiffres commençant par 0, ou format international « +33 6… » ; un zéro initial perdu par un tableur est rétabli), vérifiés dans le navigateur et sur le serveur, cohérence date de naissance / classe (avertissement), doublon probable (même nom + prénom + date de naissance : refus avec message).
 
 Protection anti-robots **sans service tiers** : champ piège invisible, délai minimal de remplissage, limitation du nombre d'envois par adresse IP.
 
@@ -159,12 +159,13 @@ Un parent peut inscrire **plusieurs enfants** (fratrie) : après une inscription
    - Sinon : statut **en liste d'attente**, email « vous êtes en liste d'attente », notification à l'admin.
 4. Une inscription non vérifiée sous 48 h **expire**. Seules les inscriptions vérifiées comptent dans le quota. L'admin peut valider manuellement une inscription en suspens.
 
-Statuts d'une inscription : `pending_verification` → `registered` | `waitlisted` → `registered` | `withdrawn` | `expired`.
+Statuts d'une inscription : `pending_verification` → `registered` | `waitlisted` → `registered` | `withdrawn` | `expired`. Un enfant désinscrit peut être **réinscrit** par l'admin (ou remis en liste d'attente).
 
 ### 5.4 Liste d'attente
 
 - Gérée **manuellement par l'admin** : il fait passer un enfant de la liste d'attente à « inscrit », y compris au-delà du quota.
 - Le passage déclenche l'email « votre inscription est validée ».
+- **Email de confirmation** : le même email est envoyé quelle que soit l'origine de l'inscription (formulaire public, admin ou organisateur ; case cochée par défaut pour une saisie manuelle, décochée par défaut pour un import). Il rappelle le dossard, la date, le lieu, l'heure d'accueil et la responsabilité de l'adulte, et **remercie les volontaires** de s'être proposés pour tenir un stand. L'admin peut le renvoyer depuis la fiche de l'enfant.
 
 ### 5.5 Désistement
 
@@ -176,9 +177,10 @@ Dans les deux cas, l'admin est notifié, pour éventuellement valider un enfant 
 
 ### 5.6 Dossards
 
-- Attribués **dans l'ordre de passage au statut « inscrit »**, à partir de 1 (ou d'un numéro de départ configurable).
-- Un numéro n'est **jamais réattribué** au sein d'une édition, même après un désistement.
-- Les ajouts sur place (§ 5.8) reçoivent le numéro suivant.
+- Attribués **dans l'ordre de passage au statut « inscrit »**, à partir de 1 (ou d'un numéro de départ configurable) : chaque nouvel inscrit reçoit le **plus petit numéro libre**.
+- **En phase de préparation**, un enfant désinscrit **libère son dossard**, qui est donné au prochain inscrit : le stock de dossards papier est limité. S'il est réinscrit, il reçoit le premier numéro libre.
+- **Une fois la compétition commencée**, un enfant désinscrit **garde son dossard** : il n'est plus jamais donné à un autre enfant. S'il est réinscrit, il retrouve son dossard.
+- Les ajouts sur place (§ 5.8) reçoivent le premier numéro libre.
 
 ### 5.7 Import Excel (secours et migration)
 
@@ -703,12 +705,17 @@ L'**historique anonyme** des éditions précédentes reste consultable (comparai
 
 - Mots de passe **hachés** (`password_hash`, Argon2id), **12 caractères minimum** pour les comptes individuels.
 - **2FA obligatoire pour les admins** : codes TOTP (application d'authentification : Google Authenticator, Microsoft Authenticator…). Pas de SMS.
+- **Appareil de confiance** : en saisissant le code, l'admin peut cocher « faire confiance à cet appareil ». Le code n'est alors plus demandé sur ce navigateur pendant **30 jours** (le mot de passe reste demandé). La confiance est liée au navigateur (cookie secret, haché en base) : un cookie copié sur un autre appareil ne suffit pas. Chaque admin voit ses appareils de confiance et peut les retirer ; un changement de mot de passe, une réinitialisation de la 2FA ou une désactivation du compte les retire tous.
 - **10 codes de secours** fournis à l'activation de la 2FA. Un admin peut réinitialiser la 2FA d'un autre admin.
 - **Mot de passe oublié** (admin, organisateur) : lien par email, valable **1 heure**, à usage unique.
 - **Limitation des tentatives** sur tous les écrans de connexion (y compris dossard + date de naissance) : blocage temporaire progressif. Blocage d'une minute dès **5 échecs** pour un compte (comptés **par téléphone** pour le compte partagé des arbitres, pour qu'une fausse manipulation ne bloque pas tous les téléphones) ou **20 échecs** pour une même adresse IP ; la durée double à chaque nouvel échec, jusqu'à 1 h.
 - **Compte partagé des arbitres** :
   - actif uniquement en phase « en cours » ;
   - mot de passe changé à chaque édition ;
+  - après la connexion, chaque arbitre **indique son prénom**, enregistré avec chacune de ses actions et de ses saisies ;
+  - chaque téléphone est **mémorisé avec le prénom** de son arbitre : après une déconnexion, l'arbitre qui se reconnecte sur le même téléphone retrouve son prénom sans le ressaisir ;
+  - l'admin voit **les téléphones connus** (prénom, téléphone, dernière activité, connecté ou non) et peut **déconnecter un arbitre** en particulier, **bloquer définitivement un téléphone** (usage abusif, par exemple un enfant qui modifie des résultats), le débloquer, ou l'oublier ;
+  - le blocage repose sur l'identifiant d'appareil (cookie) : effacer les cookies le contourne. Face à une personne déterminée qui connaît le mot de passe, la parade est de **changer le mot de passe des arbitres**, ce qui déconnecte tous les téléphones ;
   - bouton admin « **déconnecter tous les téléphones** » ;
   - chaque saisie enregistre un identifiant d'appareil ;
   - mot de passe de **8 caractères minimum** (il est saisi sur de nombreux téléphones).
@@ -1133,6 +1140,7 @@ help = "basketball.md"
 [import.columns]
 last_name = "Child last name"
 first_name = "Child first name"
+birth_date = "Child birth date"
 gender = "Gender"
 school = "School"
 level = "Class"

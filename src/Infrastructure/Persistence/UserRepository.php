@@ -113,6 +113,7 @@ final class UserRepository
             'must_change_password' => $mustChange ? 1 : 0,
         ]);
         $this->bumpSessionVersion($id);
+        $this->revokeTrustedDevices($id);
     }
 
     /**
@@ -126,6 +127,7 @@ final class UserRepository
     public function setPendingTotpSecret(int $id, ?string $secret): void
     {
         $this->update($id, ['totp_secret' => $secret, 'totp_enabled_at' => null]);
+        $this->revokeTrustedDevices($id);
     }
 
     public function enableTotp(int $id): void
@@ -138,6 +140,7 @@ final class UserRepository
         $this->update($id, ['disabled_at' => $disabled ? $this->clock->stamp() : null]);
         if ($disabled) {
             $this->bumpSessionVersion($id);
+            $this->revokeTrustedDevices($id);
         }
     }
 
@@ -153,6 +156,14 @@ final class UserRepository
     public function touchLogin(int $id): void
     {
         $this->update($id, ['last_login_at' => $this->clock->stamp()]);
+    }
+
+    /**
+     * Two-factor "trusted devices" end with any change of password, 2FA or status.
+     */
+    private function revokeTrustedDevices(int $id): void
+    {
+        $this->pdo->prepare('DELETE FROM trusted_devices WHERE user_id = :u')->execute(['u' => $id]);
     }
 
     public static function normalize(string $username): string

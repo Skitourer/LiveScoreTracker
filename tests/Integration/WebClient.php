@@ -11,7 +11,10 @@ use LiveScoreTracker\Infrastructure\Mail\Mailer;
 use LiveScoreTracker\Infrastructure\Settings;
 use LiveScoreTracker\Kernel;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\UploadedFileInterface;
 use Slim\Psr7\Factory\ServerRequestFactory;
+use Slim\Psr7\Factory\StreamFactory;
+use Slim\Psr7\UploadedFile;
 
 /**
  * Minimal browser for integration tests: keeps cookies between requests,
@@ -87,6 +90,23 @@ final class WebClient
     }
 
     /**
+     * Submits a form with a file (multipart upload).
+     *
+     * @param array<string, string> $form
+     */
+    public function upload(string $path, string $field, string $file, string $clientName, array $form = []): ResponseInterface
+    {
+        if ($this->csrf === null) {
+            $this->get($path);
+        }
+        $form['_csrf'] ??= (string) $this->csrf;
+        $stream = (new StreamFactory())->createStreamFromFile($file);
+        $uploaded = new UploadedFile($stream, $clientName, null, (int) filesize($file), UPLOAD_ERR_OK);
+
+        return $this->request('POST', $path, $form, [$field => $uploaded]);
+    }
+
+    /**
      * Follows a redirect response with a GET.
      */
     public function follow(ResponseInterface $response): ResponseInterface
@@ -95,15 +115,17 @@ final class WebClient
     }
 
     /**
-     * @param array<string, string> $form
+     * @param array<string, string>                $form
+     * @param array<string, UploadedFileInterface> $files
      */
-    public function request(string $method, string $path, array $form = []): ResponseInterface
+    public function request(string $method, string $path, array $form = [], array $files = []): ResponseInterface
     {
         $request = (new ServerRequestFactory())->createServerRequest($method, 'https://lst.example.test' . $path, ['REMOTE_ADDR' => $this->ip]);
         parse_str((string) parse_url($path, PHP_URL_QUERY), $query);
         $request = $request->withQueryParams($query)->withCookieParams($this->cookies)->withHeader('User-Agent', 'WebClient test');
         if ($method === 'POST') {
-            $request = $request->withParsedBody($form)->withHeader('Content-Type', 'application/x-www-form-urlencoded');
+            $request = $request->withParsedBody($form)->withUploadedFiles($files)
+                ->withHeader('Content-Type', $files === [] ? 'application/x-www-form-urlencoded' : 'multipart/form-data; boundary=test');
         }
 
         $response = Kernel::createApp($this->settings(), [Mailer::class => $this->mailer])->handle($request);

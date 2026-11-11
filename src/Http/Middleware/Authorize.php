@@ -40,6 +40,7 @@ final class Authorize implements MiddlewareInterface
                 AuthState::Anonymous => '/login?next=' . rawurlencode(self::safeNext($request)),
                 AuthState::TwoFactorChallenge => '/login/2fa',
                 AuthState::TwoFactorSetup => '/account/2fa',
+                AuthState::RefereeNameRequired => '/referee/name',
                 AuthState::MustChangePassword => '/account/password',
                 AuthState::Authenticated => '/dashboard',
             });

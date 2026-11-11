@@ -47,6 +47,10 @@ final class Responder
      */
     public function audit(string $action, array $details = [], ?\LiveScoreTracker\Domain\Security\User $actor = null): void
     {
+        $referee = $this->context->refereeName();
+        if ($referee !== null) {
+            $details = ['referee' => $referee, ...$details];
+        }
         $this->audit->record($action, $actor ?? $this->context->user, $details, $this->context->ip, $this->context->deviceId);
     }
 

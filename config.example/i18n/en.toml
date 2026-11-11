@@ -140,6 +140,7 @@ admin_hint = "full access, two-factor authentication required"
 organizer_hint = "registrations, check-in, result entry, monitoring"
 
 [login]
+device_blocked = "This phone has been blocked by the administrator."
 title = "Log in"
 username = "Username"
 password = "Password"
@@ -150,6 +151,7 @@ blocked = "Too many attempts. Try again in {minutes} min."
 referee_inactive = "The referee account only works while the competition is running."
 
 [two_factor]
+trust_device = "Trust this device for {days} days (not on a shared computer)"
 title = "Two-factor authentication"
 prompt = "Type the 6-digit code shown by your authenticator app."
 code = "Code"
@@ -203,6 +205,16 @@ wrong_token = "Wrong installation token."
 done = "Admin account created. Log in to set up two-factor authentication."
 
 [account]
+trusted_devices = "Trusted devices"
+trusted_devices_intro = "On these devices, the two-factor code is not asked again for {days} days. A password change revokes them all."
+no_trusted_device = "No trusted device."
+trusted_until = "Trusted until"
+this_device = "this device"
+revoke = "Remove"
+revoke_all = "Stop trusting every device"
+revoke_all_confirm = "Stop trusting all your devices?"
+device_revoked = "Device removed."
+devices_revoked = "No trusted device any more."
 title = "My account"
 username = "Username"
 username_rule = "3 to 32 characters: lowercase letters, digits, . _ -"
@@ -283,6 +295,23 @@ enable = "Enable the account"
 disable = "Disable the account"
 
 [referee]
+devices_intro = "Each phone finds its referee at the next login. A blocked phone can no longer log in to the referee account."
+blocked = "blocked"
+online = "connected"
+block_limit = "Blocking stops the misuse of a phone. If someone knows the password and insists with another browser, change the referee password: every phone is then disconnected."
+confirm_block = "Block {name}'s phone for good?"
+device_disconnect_device = "{name} is disconnected."
+device_block = "{name}'s phone is blocked."
+device_unblock = "{name}'s phone is unblocked."
+device_forget = "{name}'s phone is forgotten."
+name_title = "Who are you?"
+name_intro = "Type your first name: it is recorded with every result you enter on this phone."
+name_submit = "Continue"
+name_invalid = "Type a first name of 2 to {max} characters."
+who = "Referee"
+phone = "Phone"
+no_name_yet = "(first name not typed yet)"
+renamed = "First name saved."
 title = "Referee account"
 intro = "All table referees log in with the same username and password. Change the password for each edition."
 inactive_now = "This account only works during the \"competition running\" phase."
@@ -334,6 +363,22 @@ older = "Older"
 "referee.disconnected_all" = "Referee phones disconnected"
 "phase.changed" = "Phase change"
 "setup.first_admin" = "First admin created"
+"auth.device_trusted" = "Trusted device added"
+"auth.device_untrusted" = "Trusted device removed"
+"auth.login_blocked_device" = "Login refused: blocked phone"
+"referee.device_disconnect_device" = "Referee disconnected"
+"referee.device_block" = "Referee phone blocked"
+"referee.device_unblock" = "Referee phone unblocked"
+"referee.device_forget" = "Referee phone forgotten"
+"registration.email_sent" = "Confirmation email sent"
+"registration.email_failed" = "Confirmation email failed"
+"registration.emails_sent" = "Import confirmation emails"
+"referee.renamed" = "Referee: first name changed"
+"registration.created" = "Child registered"
+"registration.updated" = "Child record corrected"
+"registration.status_changed" = "Registration status changed"
+"registration.imported" = "Registrations import"
+"registration.exported" = "Registrations export"
 
 [error.csrf]
 title = "Page expired"
@@ -376,3 +421,199 @@ To choose a new password, open this link (valid for one hour, single use):
 
 If you did not ask for this, ignore this message: your current password still works.
 """
+
+[styleguide]
+title = "Style guide"
+intro = "Every interface component, to check a theme change at a glance."
+buttons = "Buttons"
+messages = "Messages"
+badges = "Badges, filters and counters"
+table = "Table"
+forms = "Form"
+cards = "Tiles, facts and cards"
+checkbox = "Checkbox"
+
+# ---------- Registrations ----------
+
+[registration]
+send_email = "Send the confirmation email to the responsible adult"
+email_sent = "Confirmation email sent to {email}."
+email_failed = "The confirmation email could not be sent to {email}: the registration is saved anyway."
+resend_email = "Send the confirmation email again"
+confirm_resend = "Send the confirmation email to {email} again?"
+title = "Registrations"
+guardian = "Responsible adult present on the day"
+optional = "optional"
+volunteer_label = "Volunteers to help run a stand"
+volunteer_short = "Volunteer"
+confirm_warnings = "I have checked: save anyway"
+add = "Add a child"
+export = "Export (Excel)"
+search = "Search"
+search_hint = "name, bib, school, parent…"
+active_statuses = "Current (without withdrawn)"
+all_statuses = "All"
+volunteers_only = "Volunteers only"
+shown = "{count} child(ren) shown"
+child = "Child"
+none = "No child matches."
+on_site_notice = "Competition running: on-site addition, no quota limit. The birth date is optional."
+save = "Save"
+save_and_another = "Save and add another"
+registered_at = "Registered on"
+status_title = "Status"
+edit = "Correct the record"
+history = "History"
+system = "application"
+yes = "yes"
+no = "no"
+date_invalid = "Invalid birth date: \"{value}\"."
+gender_unknown = "Unknown gender: \"{value}\"."
+level_unknown = "Unknown class: \"{value}\"."
+school_unknown = "School not in the list: \"{value}\"."
+phone_invalid = "Invalid phone number: \"{value}\" (10 digits starting with 0, or international format +33 6…)."
+phone_format = "10 digits starting with 0, or international format (+33 6…)"
+email_format = "Full email address, for example first.last@example.org"
+email_invalid = "Invalid email address: \"{value}\"."
+age_unusual = "Unusual birth date for a {level} child (usually born in {year})."
+duplicate = "This child is already registered: bib {bib}, {name}."
+created = "Child registered: bib {bib}, {name}."
+over_quota = "Warning: the number of registered children is above the quota ({quota})."
+updated = "Record corrected."
+
+[registration.counter]
+registered = "registered"
+waitlisted = "on the waiting list"
+pending = "awaiting verification"
+withdrawn = "withdrawn"
+
+[registration.field]
+bib = "Bib"
+status = "Status"
+last_name = "Last name"
+first_name = "First name"
+birth_date = "Birth date"
+gender = "Gender"
+level = "Class"
+school = "School"
+guardian_name = "Adult's name"
+guardian_phone = "Phone"
+guardian_email = "Email"
+volunteer = "Volunteer"
+source = "Origin"
+
+[registration.status]
+pending_verification = "to verify"
+registered = "registered"
+waitlisted = "waiting list"
+withdrawn = "withdrawn"
+expired = "expired"
+
+[registration.source]
+online = "online"
+manual = "manual entry"
+on_site = "on site"
+import = "import"
+
+[registration.required]
+last_name = "The last name is required."
+first_name = "The first name is required."
+birth_date = "The birth date is required."
+gender = "The gender is required."
+school = "The school is required."
+level = "The class is required."
+guardian_name = "The adult's name is required."
+guardian_phone = "The phone number is required."
+guardian_email = "The email is required."
+
+[registration.action]
+registered = "Confirm the registration"
+waitlisted = "Put on the waiting list"
+withdrawn = "Unregister"
+reinstate = "Register again"
+
+[registration.confirm_status]
+registered = "Confirm this registration? The child will get the first free bib and the family a confirmation email."
+registered_keep = "Register this child again? They get their bib {bib} back and the family receives a confirmation email."
+waitlisted = "Put this child on the waiting list?"
+withdrawn = "Unregister this child?"
+withdrawn_free = "Unregister this child? Their bib {bib} will be freed and given to the next registered child."
+withdrawn_keep = "Unregister this child? The competition has started: they keep their bib {bib}, which will not be given to anyone else."
+
+[registration.status_changed_to]
+registered = "Registration confirmed."
+waitlisted = "Child put on the waiting list."
+withdrawn = "Child unregistered."
+
+[registration.history_action]
+created = "Record created"
+updated = "Record corrected"
+status = "Status change"
+bib = "Bib given"
+bib_freed = "Bib freed"
+
+[import]
+send_emails = "Send the confirmation email to each new child (avoid it if families were already told)"
+emails_sent = "Confirmation emails: {sent} sent, {failed} failed."
+title = "Import a file"
+intro = "Import registrations collected elsewhere (external form, HelloAsso…). Only new children are added; existing bibs do not change. A preview is shown before any change."
+file = "File"
+formats = ".xlsx or .csv, 5 MB maximum"
+preview = "Show the preview"
+columns_title = "Expected columns"
+columns_intro = "Mapping set in the configuration ([import.columns] section)."
+field = "Information"
+column = "Column title in the file"
+not_mapped = "not used"
+sample = "Download a test file (fictitious data)"
+preview_title = "Import preview"
+missing_columns = "Mandatory columns not found in the file: {columns}."
+over_quota = "After the import, the number of registered children will be above the quota ({quota})."
+confirm_question = "Add {count} child(ren)?"
+confirm = "Add the {count} new children"
+nothing_new = "No new child to add."
+line = "Line"
+result = "Result"
+known_bib = "bib {bib}"
+duplicate_in_file = "Same child as line {line}."
+probable_duplicate = "Probable duplicate of bib {bib} ({name})."
+done = "{count} child(ren) added."
+unsupported_format = "Unsupported format: use an .xlsx or .csv file."
+unreadable = "The file could not be read."
+too_many_rows = "The file has too many lines ({max} maximum)."
+empty = "The file is empty."
+no_file = "Choose a file."
+too_big = "The file is too big (5 MB maximum)."
+
+[import.state]
+new = "new"
+known = "already registered"
+error = "error"
+duplicate = "duplicate"
+
+[email.registration_confirmed]
+subject = "{edition}: {first_name}'s registration confirmed"
+volunteer = """
+You offered to help run a stand: thank you! The organizing team will contact you before the event.
+"""
+body = """
+Hello {guardian},
+
+The registration of {child} ({level}) for {edition} is confirmed.
+Bib number: {bib}.
+
+See you on {date} at {venue}, welcome from {start}.
+{volunteer}
+Reminder: the child remains under the full responsibility of the accompanying adult throughout the event.
+
+For any question, or to cancel the registration: {contact}
+
+See you soon,
+{organizer}
+"""
+
+[referee.action]
+disconnect_device = "Disconnect"
+block = "Block"
+unblock = "Unblock"
+forget = "Forget"

@@ -21,6 +21,7 @@ final class SessionMiddleware implements MiddlewareInterface
 {
     public const SESSION_COOKIE = 'lst_session';
     public const DEVICE_COOKIE = 'lst_device';
+    public const TRUST_COOKIE = 'lst_trust';
     private const DEVICE_LIFETIME = 400 * 86400;
 
     public function __construct(
@@ -70,7 +71,7 @@ final class SessionMiddleware implements MiddlewareInterface
         return $response;
     }
 
-    private static function cookie(string $name, string $value, ?int $maxAge, bool $secure): string
+    public static function cookie(string $name, string $value, ?int $maxAge, bool $secure): string
     {
         $parts = [$name . '=' . $value, 'Path=/', 'HttpOnly', 'SameSite=Lax'];
         if ($maxAge !== null) {
@@ -83,7 +84,7 @@ final class SessionMiddleware implements MiddlewareInterface
         return implode('; ', $parts);
     }
 
-    private static function isHttps(ServerRequestInterface $request): bool
+    public static function isHttps(ServerRequestInterface $request): bool
     {
         return $request->getUri()->getScheme() === 'https'
             || strtolower($request->getHeaderLine('X-Forwarded-Proto')) === 'https';

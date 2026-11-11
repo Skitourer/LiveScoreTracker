@@ -140,6 +140,7 @@ admin_hint = "accès complet, double authentification obligatoire"
 organizer_hint = "inscriptions, accueil, saisie, suivi"
 
 [login]
+device_blocked = "Ce téléphone a été bloqué par l'administrateur."
 title = "Connexion"
 username = "Identifiant"
 password = "Mot de passe"
@@ -150,6 +151,7 @@ blocked = "Trop de tentatives. Réessayez dans {minutes} min."
 referee_inactive = "Le compte des arbitres ne fonctionne que pendant la compétition."
 
 [two_factor]
+trust_device = "Faire confiance à cet appareil pendant {days} jours (pas sur un ordinateur partagé)"
 title = "Double authentification"
 prompt = "Saisissez le code à 6 chiffres affiché par votre application d'authentification."
 code = "Code"
@@ -203,6 +205,16 @@ wrong_token = "Jeton d'installation incorrect."
 done = "Compte admin créé. Connectez-vous pour activer la double authentification."
 
 [account]
+trusted_devices = "Appareils de confiance"
+trusted_devices_intro = "Sur ces appareils, le code de double authentification n'est pas redemandé pendant {days} jours. Un changement de mot de passe les révoque tous."
+no_trusted_device = "Aucun appareil de confiance."
+trusted_until = "Confiance jusqu'au"
+this_device = "cet appareil"
+revoke = "Retirer"
+revoke_all = "Retirer la confiance à tous les appareils"
+revoke_all_confirm = "Retirer la confiance à tous vos appareils ?"
+device_revoked = "Appareil retiré."
+devices_revoked = "Plus aucun appareil de confiance."
 title = "Mon compte"
 username = "Identifiant"
 username_rule = "3 à 32 caractères : lettres minuscules, chiffres, . _ -"
@@ -283,6 +295,23 @@ enable = "Réactiver le compte"
 disable = "Désactiver le compte"
 
 [referee]
+devices_intro = "Chaque téléphone retrouve son arbitre à la connexion suivante. Un téléphone bloqué ne peut plus se connecter au compte des arbitres."
+blocked = "bloqué"
+online = "connecté"
+block_limit = "Le blocage arrête les usages abusifs d'un téléphone. Si quelqu'un connaît le mot de passe et insiste avec un autre navigateur, changez le mot de passe des arbitres : tous les téléphones sont alors déconnectés."
+confirm_block = "Bloquer définitivement le téléphone de {name} ?"
+device_disconnect_device = "{name} est déconnecté."
+device_block = "Le téléphone de {name} est bloqué."
+device_unblock = "Le téléphone de {name} est débloqué."
+device_forget = "Le téléphone de {name} est oublié."
+name_title = "Qui êtes-vous ?"
+name_intro = "Indiquez votre prénom : il est enregistré avec chaque résultat que vous saisissez sur ce téléphone."
+name_submit = "Continuer"
+name_invalid = "Indiquez un prénom de 2 à {max} caractères."
+who = "Arbitre"
+phone = "Téléphone"
+no_name_yet = "(prénom pas encore saisi)"
+renamed = "Prénom enregistré."
 title = "Compte des arbitres"
 intro = "Tous les arbitres de table se connectent avec le même identifiant et le même mot de passe. Changez le mot de passe à chaque édition."
 inactive_now = "Ce compte ne fonctionne que pendant la phase « compétition en cours »."
@@ -334,6 +363,22 @@ older = "Plus anciennes"
 "referee.disconnected_all" = "Téléphones des arbitres déconnectés"
 "phase.changed" = "Changement de phase"
 "setup.first_admin" = "Premier admin créé"
+"auth.device_trusted" = "Appareil de confiance ajouté"
+"auth.device_untrusted" = "Appareil de confiance retiré"
+"auth.login_blocked_device" = "Connexion refusée : téléphone bloqué"
+"referee.device_disconnect_device" = "Arbitre déconnecté"
+"referee.device_block" = "Téléphone d'arbitre bloqué"
+"referee.device_unblock" = "Téléphone d'arbitre débloqué"
+"referee.device_forget" = "Téléphone d'arbitre oublié"
+"registration.email_sent" = "Email de confirmation envoyé"
+"registration.email_failed" = "Échec d'envoi d'un email de confirmation"
+"registration.emails_sent" = "Emails de confirmation de l'import"
+"referee.renamed" = "Arbitre : prénom changé"
+"registration.created" = "Enfant inscrit"
+"registration.updated" = "Fiche enfant corrigée"
+"registration.status_changed" = "Statut d'inscription changé"
+"registration.imported" = "Import d'inscriptions"
+"registration.exported" = "Export des inscriptions"
 
 [error.csrf]
 title = "Page expirée"
@@ -376,3 +421,199 @@ Pour choisir un nouveau mot de passe, ouvrez ce lien (valable une heure, une seu
 
 Si vous n'êtes pas à l'origine de cette demande, ignorez ce message : votre mot de passe actuel reste valable.
 """
+
+[styleguide]
+title = "Guide de style"
+intro = "Tous les composants de l'interface, pour vérifier un changement d'habillage d'un coup d'œil."
+buttons = "Boutons"
+messages = "Messages"
+badges = "Badges, filtres et compteurs"
+table = "Tableau"
+forms = "Formulaire"
+cards = "Tuiles, fiches et cartes"
+checkbox = "Case à cocher"
+
+# ---------- Inscriptions ----------
+
+[registration]
+send_email = "Envoyer l'email de confirmation à l'adulte responsable"
+email_sent = "Email de confirmation envoyé à {email}."
+email_failed = "L'email de confirmation n'a pas pu être envoyé à {email} : l'inscription est bien enregistrée."
+resend_email = "Renvoyer l'email de confirmation"
+confirm_resend = "Renvoyer l'email de confirmation à {email} ?"
+title = "Inscriptions"
+guardian = "Adulte responsable présent le jour J"
+optional = "facultatif"
+volunteer_label = "Volontaire pour aider à tenir un stand"
+volunteer_short = "Volontaire"
+confirm_warnings = "J'ai vérifié : enregistrer quand même"
+add = "Ajouter un enfant"
+export = "Exporter (Excel)"
+search = "Recherche"
+search_hint = "nom, dossard, école, parent…"
+active_statuses = "En cours (sans désistés)"
+all_statuses = "Tous"
+volunteers_only = "Volontaires seulement"
+shown = "{count} enfant(s) affiché(s)"
+child = "Enfant"
+none = "Aucun enfant ne correspond."
+on_site_notice = "Compétition en cours : ajout sur place, sans limite de quota. La date de naissance est facultative."
+save = "Enregistrer"
+save_and_another = "Enregistrer et ajouter un autre"
+registered_at = "Inscrit le"
+status_title = "Statut"
+edit = "Corriger la fiche"
+history = "Historique"
+system = "application"
+yes = "oui"
+no = "non"
+date_invalid = "Date de naissance invalide : « {value} »."
+gender_unknown = "Genre non reconnu : « {value} »."
+level_unknown = "Classe non reconnue : « {value} »."
+school_unknown = "École absente de la liste : « {value} »."
+phone_invalid = "Numéro de téléphone invalide : « {value} » (10 chiffres commençant par 0, ou format international +33 6…)."
+phone_format = "10 chiffres commençant par 0, ou format international (+33 6…)"
+email_format = "Adresse email complète, par exemple prenom.nom@exemple.fr"
+email_invalid = "Adresse email invalide : « {value} »."
+age_unusual = "Date de naissance inhabituelle pour un enfant de {level} (né en {year} en général)."
+duplicate = "Cet enfant est déjà inscrit : dossard {bib}, {name}."
+created = "Enfant inscrit : dossard {bib}, {name}."
+over_quota = "Attention : le nombre d'inscrits dépasse le quota ({quota})."
+updated = "Fiche corrigée."
+
+[registration.counter]
+registered = "inscrits"
+waitlisted = "en liste d'attente"
+pending = "en attente de vérification"
+withdrawn = "désistés"
+
+[registration.field]
+bib = "Dossard"
+status = "Statut"
+last_name = "Nom"
+first_name = "Prénom"
+birth_date = "Date de naissance"
+gender = "Genre"
+level = "Classe"
+school = "École"
+guardian_name = "Nom de l'adulte"
+guardian_phone = "Téléphone"
+guardian_email = "Email"
+volunteer = "Volontaire"
+source = "Origine"
+
+[registration.status]
+pending_verification = "à vérifier"
+registered = "inscrit"
+waitlisted = "liste d'attente"
+withdrawn = "désisté"
+expired = "expiré"
+
+[registration.source]
+online = "en ligne"
+manual = "saisie manuelle"
+on_site = "sur place"
+import = "import"
+
+[registration.required]
+last_name = "Le nom est obligatoire."
+first_name = "Le prénom est obligatoire."
+birth_date = "La date de naissance est obligatoire."
+gender = "Le genre est obligatoire."
+school = "L'école est obligatoire."
+level = "La classe est obligatoire."
+guardian_name = "Le nom de l'adulte est obligatoire."
+guardian_phone = "Le téléphone est obligatoire."
+guardian_email = "L'email est obligatoire."
+
+[registration.action]
+registered = "Valider l'inscription"
+waitlisted = "Mettre en liste d'attente"
+withdrawn = "Désinscrire"
+reinstate = "Réinscrire"
+
+[registration.confirm_status]
+registered = "Valider cette inscription ? L'enfant recevra le premier dossard libre et la famille un email de confirmation."
+registered_keep = "Réinscrire cet enfant ? Il retrouve son dossard {bib} et la famille reçoit un email de confirmation."
+waitlisted = "Mettre cet enfant en liste d'attente ?"
+withdrawn = "Désinscrire cet enfant ?"
+withdrawn_free = "Désinscrire cet enfant ? Son dossard {bib} sera libéré et donné au prochain inscrit."
+withdrawn_keep = "Désinscrire cet enfant ? La compétition a commencé : il garde son dossard {bib}, qui ne sera donné à personne d'autre."
+
+[registration.status_changed_to]
+registered = "Inscription validée."
+waitlisted = "Enfant placé en liste d'attente."
+withdrawn = "Enfant désinscrit."
+
+[registration.history_action]
+created = "Fiche créée"
+updated = "Fiche corrigée"
+status = "Changement de statut"
+bib = "Dossard attribué"
+bib_freed = "Dossard libéré"
+
+[import]
+send_emails = "Envoyer l'email de confirmation à chaque nouvel inscrit (à éviter si les familles ont déjà été prévenues)"
+emails_sent = "Emails de confirmation : {sent} envoyé(s), {failed} échec(s)."
+title = "Importer un fichier"
+intro = "Importez des inscriptions recueillies ailleurs (formulaire externe, HelloAsso…). Seuls les nouveaux enfants sont ajoutés ; les dossards existants ne changent pas. Un aperçu s'affiche avant toute modification."
+file = "Fichier"
+formats = ".xlsx ou .csv, 5 Mo maximum"
+preview = "Voir l'aperçu"
+columns_title = "Colonnes attendues"
+columns_intro = "Correspondance réglée dans la configuration (section [import.columns])."
+field = "Information"
+column = "Titre de colonne dans le fichier"
+not_mapped = "non utilisée"
+sample = "Télécharger un fichier d'essai (données fictives)"
+preview_title = "Aperçu de l'import"
+missing_columns = "Colonnes obligatoires introuvables dans le fichier : {columns}."
+over_quota = "Après l'import, le nombre d'inscrits dépassera le quota ({quota})."
+confirm_question = "Ajouter {count} enfant(s) ?"
+confirm = "Ajouter les {count} nouveaux enfants"
+nothing_new = "Aucun nouvel enfant à ajouter."
+line = "Ligne"
+result = "Résultat"
+known_bib = "dossard {bib}"
+duplicate_in_file = "Même enfant qu'à la ligne {line}."
+probable_duplicate = "Doublon probable avec le dossard {bib} ({name})."
+done = "{count} enfant(s) ajouté(s)."
+unsupported_format = "Format non pris en charge : utilisez un fichier .xlsx ou .csv."
+unreadable = "Le fichier n'a pas pu être lu."
+too_many_rows = "Le fichier contient trop de lignes ({max} maximum)."
+empty = "Le fichier est vide."
+no_file = "Choisissez un fichier."
+too_big = "Le fichier est trop volumineux (5 Mo maximum)."
+
+[import.state]
+new = "nouveau"
+known = "déjà inscrit"
+error = "erreur"
+duplicate = "doublon"
+
+[email.registration_confirmed]
+subject = "{edition} : inscription de {first_name} confirmée"
+volunteer = """
+Vous vous êtes proposé(e) comme volontaire pour aider à tenir un stand : merci ! L'équipe d'organisation reviendra vers vous avant la manifestation.
+"""
+body = """
+Bonjour {guardian},
+
+L'inscription de {child} ({level}) à {edition} est confirmée.
+Numéro de dossard : {bib}.
+
+Rendez-vous le {date} à {venue}, accueil à partir de {start}.
+{volunteer}
+Rappel : l'enfant reste sous l'entière responsabilité de l'adulte qui l'accompagne pendant toute la manifestation.
+
+Pour toute question, ou pour annuler l'inscription : {contact}
+
+À bientôt,
+{organizer}
+"""
+
+[referee.action]
+disconnect_device = "Déconnecter"
+block = "Bloquer"
+unblock = "Débloquer"
+forget = "Oublier"

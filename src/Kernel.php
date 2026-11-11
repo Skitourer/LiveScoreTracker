@@ -17,6 +17,7 @@ use LiveScoreTracker\Action\Auth\ChangePasswordAction;
 use LiveScoreTracker\Action\Auth\ForgotPasswordAction;
 use LiveScoreTracker\Action\Auth\LoginAction;
 use LiveScoreTracker\Action\Auth\LogoutAction;
+use LiveScoreTracker\Action\Auth\RefereeNameAction;
 use LiveScoreTracker\Action\Auth\ResetPasswordAction;
 use LiveScoreTracker\Action\Auth\SetupAction;
 use LiveScoreTracker\Action\Auth\TwoFactorChallengeAction;
@@ -24,9 +25,18 @@ use LiveScoreTracker\Action\Auth\TwoFactorSetupAction;
 use LiveScoreTracker\Action\DashboardAction;
 use LiveScoreTracker\Action\HealthAction;
 use LiveScoreTracker\Action\HomeAction;
+use LiveScoreTracker\Action\ImportSampleAction;
 use LiveScoreTracker\Action\MigrateAction;
+use LiveScoreTracker\Action\Registration\RegistrationCardAction;
+use LiveScoreTracker\Action\Registration\RegistrationExportAction;
+use LiveScoreTracker\Action\Registration\RegistrationImportAction;
+use LiveScoreTracker\Action\Registration\RegistrationNewAction;
+use LiveScoreTracker\Action\Registration\RegistrationsAction;
 use LiveScoreTracker\Action\ScoringReportAction;
+use LiveScoreTracker\Action\StyleguideAction;
+use LiveScoreTracker\Domain\Config\CompetitionConfig;
 use LiveScoreTracker\Domain\Config\InvalidConfig;
+use LiveScoreTracker\Domain\Registration\ValueMatcher;
 use LiveScoreTracker\Domain\Security\Permission;
 use LiveScoreTracker\Http\AppErrorHandler;
 use LiveScoreTracker\Http\AuthState;
@@ -124,6 +134,7 @@ final class Kernel
         $app->get('/health', HealthAction::class)->setName('health');
         $app->post('/internal/migrate', MigrateAction::class)->setName('migrate');
         $app->get('/demo/report', ScoringReportAction::class)->setName('demo-report');
+        $app->get('/demo/styleguide', StyleguideAction::class)->setName('demo-styleguide');
 
         // Login and passwords
         $app->map(['GET', 'POST'], '/setup', SetupAction::class)->setName('setup');
@@ -131,6 +142,8 @@ final class Kernel
         $app->map(['GET', 'POST'], '/login/2fa', TwoFactorChallengeAction::class)->setName('login-2fa')
             ->add($guard(null, AuthState::TwoFactorChallenge));
         $app->post('/logout', LogoutAction::class)->setName('logout');
+        $app->map(['GET', 'POST'], '/referee/name', RefereeNameAction::class)->setName('referee-name')
+            ->add($guard(null, AuthState::RefereeNameRequired, AuthState::Authenticated));
         $app->map(['GET', 'POST'], '/password/forgot', ForgotPasswordAction::class)->setName('password-forgot');
         $app->map(['GET', 'POST'], '/password/reset/{token}', ResetPasswordAction::class)->setName('password-reset');
 
@@ -141,6 +154,14 @@ final class Kernel
             ->add($guard(null, AuthState::Authenticated, AuthState::MustChangePassword));
         $app->map(['GET', 'POST'], '/account/2fa', TwoFactorSetupAction::class)->setName('account-2fa')
             ->add($guard(null, AuthState::TwoFactorSetup, AuthState::Authenticated));
+
+        // Registrations (spec § 5)
+        $app->get('/registrations', RegistrationsAction::class)->setName('registrations')->add($guard(Permission::ViewRegistrations));
+        $app->map(['GET', 'POST'], '/registrations/new', RegistrationNewAction::class)->setName('registration-new')->add($guard(Permission::AddOnSite));
+        $app->map(['GET', 'POST'], '/registrations/import', RegistrationImportAction::class)->setName('registration-import')->add($guard(Permission::ImportSpreadsheets));
+        $app->get('/registrations/export', RegistrationExportAction::class)->setName('registration-export')->add($guard(Permission::ViewRegistrations));
+        $app->map(['GET', 'POST'], '/registrations/{id:[0-9]+}', RegistrationCardAction::class)->setName('registration')->add($guard(Permission::ViewRegistrations));
+        $app->get('/demo/import-sample.xlsx', ImportSampleAction::class)->setName('demo-import-sample')->add($guard(Permission::ImportSpreadsheets));
 
         // Administration
         // Slim binds group callbacks to itself: the closure must not be static.
@@ -194,6 +215,17 @@ final class Kernel
                 ]);
 
                 return $loader->translator($locale);
+            },
+            CompetitionConfig::class => static fn(ContainerInterface $c): CompetitionConfig => self::service($c, ConfigRepository::class)->get(),
+            ValueMatcher::class => static function (ContainerInterface $c): ValueMatcher {
+                $config = self::service($c, CompetitionConfig::class);
+                $translator = self::service($c, Translator::class);
+                $labels = [];
+                foreach ($config->genders as $gender) {
+                    $labels[$gender] = [$translator->trans("gender.{$gender}.one"), $translator->trans("gender.{$gender}.many")];
+                }
+
+                return new ValueMatcher($config, $labels);
             },
             ResultFormatter::class => static fn(ContainerInterface $c): ResultFormatter => new ResultFormatter(
                 self::service($c, Translator::class),

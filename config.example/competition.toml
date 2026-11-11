@@ -203,6 +203,7 @@ help = "basketball.md"
 [import.columns]
 last_name = "Child last name"
 first_name = "Child first name"
+birth_date = "Child birth date"
 gender = "Gender"
 school = "School"
 level = "Class"

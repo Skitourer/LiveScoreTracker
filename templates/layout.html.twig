@@ -6,6 +6,7 @@
     <meta name="color-scheme" content="light dark">
     <meta name="robots" content="noindex, nofollow">
     <title>{% block title %}{{ t('app.name') }}{% endblock %}</title>
+    <link rel="stylesheet" href="{{ base_path() }}/assets/css/tokens.css">
     <link rel="stylesheet" href="{{ base_path() }}/assets/css/app.css">
     <script type="module" src="{{ base_path() }}/assets/js/app.js"></script>
 </head>
@@ -15,7 +16,11 @@
         <nav class="topbar-nav">
             {% set me = current_user() %}
             {% if me %}
-                <a href="{{ url_for('account') }}" class="who">{{ me.displayName }} <small>· {{ t('role.' ~ me.role.value) }}</small></a>
+                {% if me.role.value == 'referee' %}
+                    <a href="{{ url_for('referee-name') }}" class="who">{{ referee_name() }} <small>· {{ t('role.referee') }}</small></a>
+                {% else %}
+                    <a href="{{ url_for('account') }}" class="who">{{ me.displayName }} <small>· {{ t('role.' ~ me.role.value) }}</small></a>
+                {% endif %}
             {% endif %}
             {% if logged_in() %}
                 <form method="post" action="{{ url_for('logout') }}" class="inline">

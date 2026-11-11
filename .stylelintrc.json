@@ -1,0 +1,58 @@
+{
+  "rules": {
+    "color-no-hex": [
+      true,
+      {
+        "message": "Use a color token from tokens.css (spec \u00a7 20.6)."
+      }
+    ],
+    "color-named": [
+      "never",
+      {
+        "message": "Use a color token from tokens.css (spec \u00a7 20.6)."
+      }
+    ],
+    "function-disallowed-list": [
+      [
+        "rgb",
+        "rgba",
+        "hsl",
+        "hsla",
+        "hwb",
+        "lab",
+        "lch",
+        "oklab",
+        "oklch",
+        "color"
+      ],
+      {
+        "message": "Use a color token from tokens.css (spec \u00a7 20.6)."
+      }
+    ],
+    "declaration-property-value-allowed-list": [
+      {
+        "/^(font-size|margin|margin-.*|padding|padding-.*|gap|row-gap|column-gap|border-radius|border-.*-radius)$/": [
+          "/^(0|auto|inherit|-?var\\(--[a-z0-9-]+\\))( (0|auto|inherit|-?var\\(--[a-z0-9-]+\\)))*$/"
+        ]
+      },
+      {
+        "message": "Sizes, spacing and radii must use tokens from tokens.css (spec \u00a7 20.6)."
+      }
+    ],
+    "declaration-no-important": true,
+    "selector-max-id": 0
+  },
+  "overrides": [
+    {
+      "files": [
+        "public/assets/css/tokens.css"
+      ],
+      "rules": {
+        "color-no-hex": null,
+        "color-named": null,
+        "function-disallowed-list": null,
+        "declaration-property-value-allowed-list": null
+      }
+    }
+  ]
+}

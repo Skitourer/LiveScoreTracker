@@ -20,7 +20,7 @@ final class DashboardAction
      */
     private const TILES = [
         ['dashboard.results_entry', null, Permission::EnterResultsChosenEvent],
-        ['dashboard.registrations', null, Permission::ViewRegistrations],
+        ['dashboard.registrations', '/registrations', Permission::ViewRegistrations],
         ['dashboard.check_in', null, Permission::CheckInOut],
         ['dashboard.monitoring', null, Permission::ViewMonitoring],
         ['dashboard.rankings', null, Permission::ViewResultsAndRankings],
