@@ -1,0 +1,48 @@
+{
+    "name": "livescoretracker/livescoretracker",
+    "description": "Mobile-first PWA for multi-sport competitions: offline score entry, automatic points scoring and live rankings by category.",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": "^8.2",
+        "ext-pdo": "*",
+        "php-di/php-di": "^7.1",
+        "slim/psr7": "^1.8",
+        "slim/slim": "^4.15",
+        "slim/twig-view": "^3.4",
+        "vlucas/phpdotenv": "^5.8"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3",
+        "phpstan/phpstan": "^2",
+        "phpunit/phpunit": "^11"
+    },
+    "autoload": {
+        "psr-4": {
+            "LiveScoreTracker\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "LiveScoreTracker\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "platform": {
+            "php": "8.2.0"
+        },
+        "sort-packages": true
+    },
+    "scripts": {
+        "cs-check": "php-cs-fixer fix --dry-run --diff",
+        "cs-fix": "php-cs-fixer fix",
+        "stan": "phpstan analyse --memory-limit=512M",
+        "test": "phpunit",
+        "migrate": "php bin/console.php migrate",
+        "qa": [
+            "@cs-check",
+            "@stan",
+            "@test"
+        ]
+    }
+}

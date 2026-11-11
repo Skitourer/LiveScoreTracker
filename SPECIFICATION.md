@@ -783,8 +783,8 @@ The **business core** (scoring, fouls, modifiers, tie-breaking, sync) is isolate
 
 - **Production**: dedicated subdomain of the organizer's website (e.g. `competition.example.org`), **OVH Perso** hosting (PHP + MySQL), SSL certificate.
 - **Test site**: test subdomain (e.g. `test.competition.example.org`), with **its own database**, to test each step in real conditions (real phones, 4G) without touching production.
-- **Automated deployment** with **GitHub Actions**: install dependencies, run tests, then upload via **FTP** to OVH. Test branch → test site; approved release → production.
-- Deployment **only uploads code**: the server's data directory, `.env` and backups are never overwritten (§ 25). FTP credentials and server addresses are **GitHub secrets**.
+- **Automated deployment** with **GitHub Actions**: install dependencies, run tests, then upload via **SFTP** to OVH (the Perso plan offers SFTP but no SSH access), and apply database migrations through a token-protected call. Step branches and the test branch → test site; approved release → production.
+- Deployment **only uploads code**: the server's data directory, `.env` and backups are never overwritten (§ 25). SFTP credentials and server addresses are **GitHub secrets**.
 - **Step-by-step installation guide** for the organizer (OVH setup, subdomains, database, PHP, GitHub secrets) and for any other organizer.
 - PHP version set by the OVH configuration file (`.ovhconfig`).
 
@@ -872,7 +872,7 @@ Only **fictitious data** is allowed (example configuration, test data sets, demo
 |---|---|---|
 | Real configuration (name, venue, schools, contacts, help) | **Production server** data directory | Repository |
 | Registrations, results, logs | **Production database** | Repository, test site |
-| Secrets (database, SMTP, API, Drive, FTP) | Server `.env`; **encrypted GitHub secrets** for deployment | Versioned files |
+| Secrets (database, SMTP, API, Drive, SFTP) | Server `.env`; **encrypted GitHub secrets** for deployment | Versioned files |
 | Backups | Production server + **encrypted** copy on Drive | Repository |
 | Imported files (spreadsheets) | Processed in memory then deleted | Repository, disk after import |
 

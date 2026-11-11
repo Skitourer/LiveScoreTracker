@@ -1,0 +1,24 @@
+{% extends 'layout.html.twig' %}
+
+{# Temporary texts: the interface moves to the i18n files in step 1. #}
+{% block content %}
+    <h1>LiveScoreTracker</h1>
+    <p class="lead">Le socle de l'application est en place.</p>
+
+    <ul class="status" aria-label="État du système">
+        <li class="{{ status.database ? 'ok' : 'error' }}">
+            Base de données : {{ status.database ? 'connectée' : 'inaccessible' }}
+        </li>
+        {% if status.database %}
+            <li class="{{ status.pendingMigrations == 0 ? 'ok' : 'warning' }}">
+                Schéma : {{ status.pendingMigrations == 0 ? 'à jour' : status.pendingMigrations ~ ' migration(s) en attente' }}
+            </li>
+        {% endif %}
+    </ul>
+
+    <p class="meta">
+        Version {{ build.version }} · révision <code>{{ build.revision }}</code>
+        {% if build.builtAt %} · déployée le {{ build.builtAt }}{% endif %}
+        · environnement <code>{{ environment }}</code>
+    </p>
+{% endblock %}

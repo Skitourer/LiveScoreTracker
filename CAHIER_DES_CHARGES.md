@@ -783,8 +783,8 @@ Le **cœur métier** (barème, essais nuls, modificateurs, départage, synchroni
 
 - **Production** : sous-domaine dédié du site de l'organisateur (ex. `competition.example.org`), hébergement **OVH Perso** (PHP + MySQL), certificat SSL.
 - **Site d'essai** : sous-domaine de test (ex. `test.competition.example.org`), avec **sa propre base de données**, pour tester chaque étape en conditions réelles (vrais téléphones, 4G) sans toucher à la production.
-- **Déploiement automatisé** via **GitHub Actions** : installation des dépendances, exécution des tests, puis envoi par **FTP** vers OVH. Branche de test → site d'essai ; version validée → production.
-- Le déploiement **n'envoie que le code** : le dossier de données, le `.env` et les sauvegardes du serveur ne sont jamais écrasés (§ 25). Les identifiants FTP et les adresses des serveurs sont des **secrets GitHub**.
+- **Déploiement automatisé** via **GitHub Actions** : installation des dépendances, exécution des tests, puis envoi par **SFTP** vers OVH (l'offre Perso propose le SFTP, pas l'accès SSH), et application des migrations de la base par un appel protégé par jeton. Branches d'étape et branche de test → site d'essai ; version validée → production.
+- Le déploiement **n'envoie que le code** : le dossier de données, le `.env` et les sauvegardes du serveur ne sont jamais écrasés (§ 25). Les identifiants SFTP et les adresses des serveurs sont des **secrets GitHub**.
 - **Documentation d'installation pas à pas** pour l'organisateur (configuration OVH, sous-domaines, base de données, PHP, secrets GitHub) et pour tout autre organisateur.
 - Version de PHP fixée par le fichier de configuration OVH (`.ovhconfig`).
 
@@ -872,7 +872,7 @@ Seules des **données fictives** sont autorisées (exemples de configuration, je
 |---|---|---|
 | Configuration réelle (nom, lieu, écoles, contacts, aides) | Dossier de données du **serveur de production** | Dépôt |
 | Inscriptions, résultats, journaux | **Base de données de production** | Dépôt, site d'essai |
-| Secrets (base, SMTP, API, Drive, FTP) | `.env` du serveur ; **secrets chiffrés GitHub** pour le déploiement | Fichiers versionnés |
+| Secrets (base, SMTP, API, Drive, SFTP) | `.env` du serveur ; **secrets chiffrés GitHub** pour le déploiement | Fichiers versionnés |
 | Sauvegardes | Serveur de production + copie **chiffrée** sur Drive | Dépôt |
 | Fichiers importés (Excel) | Traités en mémoire puis supprimés | Dépôt, disque après import |
 
