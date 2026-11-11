@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace LiveScoreTracker\Infrastructure\Persistence;
 
+use LiveScoreTracker\Domain\Registration\AttendanceMark;
 use LiveScoreTracker\Domain\Registration\ChildData;
 use LiveScoreTracker\Domain\Registration\Registration;
 use LiveScoreTracker\Domain\Registration\RegistrationSource;
@@ -102,7 +103,7 @@ final class RegistrationRepository
     }
 
     /**
-     * @param array{q?: string, statuses?: list<RegistrationStatus>, school?: string, level?: string, gender?: string, volunteer?: bool} $filters
+     * @param array{q?: string, names_only?: bool, statuses?: list<RegistrationStatus>, school?: string, level?: string, gender?: string, volunteer?: bool} $filters
      *
      * @return list<Registration> by bib, then children without a bib by registration date
      */
@@ -140,12 +141,18 @@ final class RegistrationRepository
         }
 
         // Free search on bib, names, school and guardian (small lists: done in PHP, accent-insensitive).
-        return array_values(array_filter($registrations, static function (Registration $r) use ($query): bool {
+        $namesOnly = $filters['names_only'] ?? false;
+
+        return array_values(array_filter($registrations, static function (Registration $r) use ($query, $namesOnly): bool {
             $c = $r->child;
             if ((string) $r->bib === $query) {
                 return true;
             }
-            foreach ([$c->lastName . $c->firstName, $c->firstName . $c->lastName, $c->school, $c->guardianName, $c->guardianEmail] as $text) {
+            $texts = [$c->lastName . $c->firstName, $c->firstName . $c->lastName];
+            if (!$namesOnly) {
+                array_push($texts, $c->school, $c->guardianName, $c->guardianEmail);
+            }
+            foreach ($texts as $text) {
                 if (str_contains(TextCleaner::key($text), $query)) {
                     return true;
                 }
@@ -153,6 +160,58 @@ final class RegistrationRepository
 
             return false;
         }));
+    }
+
+    public function findByBib(int $bib): ?Registration
+    {
+        $statement = $this->pdo->prepare('SELECT * FROM registrations WHERE bib = :bib');
+        $statement->execute(['bib' => $bib]);
+        $rows = Row::all($statement);
+
+        return $rows === [] ? null : self::hydrate($rows[0]);
+    }
+
+    /**
+     * Ticks or unticks a reception box (spec § 6.2), timestamped and kept in the history.
+     *
+     * @return bool false when the box was already in that state (another phone was quicker)
+     */
+    public function setAttendance(int $id, AttendanceMark $mark, bool $done, ?User $actor): bool
+    {
+        $column = $mark->column();
+        $statement = $this->pdo->prepare(
+            "UPDATE registrations SET {$column} = :at WHERE id = :id AND {$column} IS " . ($done ? 'NULL' : 'NOT NULL'),
+        );
+        $statement->execute(['at' => $done ? $this->clock->stamp() : null, 'id' => $id]);
+        if ($statement->rowCount() === 0) {
+            return false;
+        }
+        $this->addHistory($id, 'attendance', [$mark->value => [!$done, $done]], $actor);
+
+        return true;
+    }
+
+    /**
+     * Reception counters (spec § 6.2), among registered children.
+     *
+     * @return array{registered: int, present: int, bib_returned: int, gift_given: int}
+     */
+    public function attendanceCounts(): array
+    {
+        $statement = $this->pdo->prepare(
+            'SELECT COUNT(*) AS registered, COUNT(checked_in_at) AS present,
+                COUNT(bib_returned_at) AS bib_returned, COUNT(gift_given_at) AS gift_given
+             FROM registrations WHERE status = :s',
+        );
+        $statement->execute(['s' => RegistrationStatus::Registered->value]);
+        $row = Row::all($statement)[0] ?? [];
+
+        return [
+            'registered' => Row::int($row, 'registered'),
+            'present' => Row::int($row, 'present'),
+            'bib_returned' => Row::int($row, 'bib_returned'),
+            'gift_given' => Row::int($row, 'gift_given'),
+        ];
     }
 
     /**
@@ -377,6 +436,9 @@ final class RegistrationRepository
             createdAt: Row::string($row, 'created_at'),
             registeredAt: Row::nullableString($row, 'registered_at'),
             withdrawnAt: Row::nullableString($row, 'withdrawn_at'),
+            checkedInAt: Row::nullableString($row, 'checked_in_at'),
+            bibReturnedAt: Row::nullableString($row, 'bib_returned_at'),
+            giftGivenAt: Row::nullableString($row, 'gift_given_at'),
         );
     }
 }

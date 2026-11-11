@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.10 — 11 November 2026
+> Version 1.11 — 11 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -210,7 +210,7 @@ The rules officially forbid on-site registration, but the application lets an **
 
 ### 6.1 Printable check-in list
 
-PDF containing, for each registered child: **first name, full last name, bib number** (and grade). **Sorted by first name** (alphabetical). Displayed at the entrance so children can find their number.
+PDF containing, for each registered child: **first name, full last name, bib number** (and grade). **Sorted by first name** (alphabetical, ignoring accents), with a heading per letter and the bib in large type on the right. Displayed at the entrance so children can find their number. Its download is recorded in the audit log (it holds full names).
 
 ### 6.2 Mobile check-in view (admin, organizer)
 
@@ -219,7 +219,15 @@ PDF containing, for each registered child: **first name, full last name, bib num
 3. **Check-in**: "bib handed out" box (counts as present) — timestamped.
 4. **Check-out**: "bib returned" and "gift + medal handed out" boxes — timestamped.
 
-Counters at the top of the screen: present / registered, check-outs done.
+Counters at the top of the screen: present / registered, bibs returned, gifts handed out.
+
+Details:
+- The name search only looks at the child's first and last names.
+- After the bib is handed out, or once both check-out boxes are ticked, the screen goes back to the "bib" field for the next child.
+- A box ticked by mistake can be unticked (with confirmation). Check-in cannot be undone while a check-out box is ticked. Every change is timestamped and recorded in the record's history, with the person's name.
+- Check-out boxes are only offered for a child checked in on arrival; only a registered child can be checked in.
+- Check-in opens in the "in progress" phase and remains possible after closing (medal ceremony); during preparation the screen is read-only.
+- Two lists: **absent** children (registered, no bib handed out) and children **not left yet** (bib not returned or gift not handed out), to collect the bibs at the end of the day.
 
 ### 6.3 Attendance statuses
 

@@ -14,6 +14,7 @@
         {% if can('add_on_site') %}<a class="button" href="{{ url_for('registration-new') }}">{{ t('registration.add') }}</a>{% endif %}
         {% if can('import_spreadsheets') %}<a class="button secondary" href="{{ url_for('registration-import') }}">{{ t('import.title') }}</a>{% endif %}
         <a class="button secondary" href="{{ url_for('registration-export') }}">{{ t('registration.export') }}</a>
+        {% if can('print_documents') %}<a class="button secondary" href="{{ url_for('reception-list') }}">{{ t('reception_list.download') }}</a>{% endif %}
     </div>
 
     <form method="get" class="filters" role="search">

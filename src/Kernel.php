@@ -27,6 +27,9 @@ use LiveScoreTracker\Action\HealthAction;
 use LiveScoreTracker\Action\HomeAction;
 use LiveScoreTracker\Action\ImportSampleAction;
 use LiveScoreTracker\Action\MigrateAction;
+use LiveScoreTracker\Action\Reception\CheckInAction;
+use LiveScoreTracker\Action\Reception\CheckInCardAction;
+use LiveScoreTracker\Action\Reception\ReceptionListAction;
 use LiveScoreTracker\Action\Registration\RegistrationCardAction;
 use LiveScoreTracker\Action\Registration\RegistrationExportAction;
 use LiveScoreTracker\Action\Registration\RegistrationImportAction;
@@ -57,6 +60,7 @@ use LiveScoreTracker\Infrastructure\I18n\Translator;
 use LiveScoreTracker\Infrastructure\Mail\LogMailer;
 use LiveScoreTracker\Infrastructure\Mail\Mailer;
 use LiveScoreTracker\Infrastructure\Mail\SmtpMailer;
+use LiveScoreTracker\Infrastructure\Pdf\PdfRenderer;
 use LiveScoreTracker\Infrastructure\Session\SessionStore;
 use LiveScoreTracker\Infrastructure\Settings;
 use LiveScoreTracker\Presentation\ResultFormatter;
@@ -163,6 +167,11 @@ final class Kernel
         $app->map(['GET', 'POST'], '/registrations/{id:[0-9]+}', RegistrationCardAction::class)->setName('registration')->add($guard(Permission::ViewRegistrations));
         $app->get('/demo/import-sample.xlsx', ImportSampleAction::class)->setName('demo-import-sample')->add($guard(Permission::ImportSpreadsheets));
 
+        // Reception on the competition day (spec § 6)
+        $app->get('/reception-list.pdf', ReceptionListAction::class)->setName('reception-list')->add($guard(Permission::PrintDocuments));
+        $app->get('/check-in', CheckInAction::class)->setName('check-in')->add($guard(Permission::CheckInOut));
+        $app->map(['GET', 'POST'], '/check-in/{id:[0-9]+}', CheckInCardAction::class)->setName('check-in-card')->add($guard(Permission::CheckInOut));
+
         // Administration
         // Slim binds group callbacks to itself: the closure must not be static.
         $app->group('/admin', function (RouteCollectorProxyInterface $admin) use ($guard): void {
@@ -196,6 +205,7 @@ final class Kernel
                 self::service($c, Clock::class),
                 $settings->sessionIdleMinutes,
             ),
+            PdfRenderer::class => static fn(): PdfRenderer => new PdfRenderer(sys_get_temp_dir()),
             Mailer::class => static fn(): Mailer => $settings->mailTransport === 'smtp'
                 ? new SmtpMailer($settings)
                 : new LogMailer($settings->dataDir . '/logs/mail.log'),

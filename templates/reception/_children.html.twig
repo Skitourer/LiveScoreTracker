@@ -1,0 +1,15 @@
+<div class="table-scroll">
+    <table>
+        <thead><tr><th class="num">{{ t('check_in.bib') }}</th><th>{{ t('check_in.child') }}</th><th>{{ t('registration.field.level') }}</th><th>{{ t('check_in.state') }}</th></tr></thead>
+        <tbody>
+            {% for child in children %}
+                <tr>
+                    <td class="num"><span class="bib">{{ child.bib ?? '–' }}</span></td>
+                    <td><a href="{{ url_for('check-in-card', {id: child.id}) }}"><strong>{{ child.child.firstName }}</strong> {{ child.child.lastName }}</a></td>
+                    <td>{{ label('level.' ~ child.child.level) }}</td>
+                    <td>{% include 'reception/_state.html.twig' %}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>

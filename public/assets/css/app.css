@@ -122,6 +122,12 @@ pre {
   border-color: var(--color-error);
 }
 
+.button.large {
+  min-width: 100%;
+  min-height: calc(var(--touch-target) * 1.5);
+  font-size: var(--font-size-lg);
+}
+
 .button.small {
   min-height: auto;
   padding: var(--space-1) var(--space-3);
@@ -529,4 +535,63 @@ pre.details {
 
 .history li {
   margin-bottom: var(--space-2);
+}
+
+/* ---------- Reception (check-in on a phone) ---------- */
+.check-in-search {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+}
+
+.check-in-search label {
+  flex: 1 1 12rem;
+}
+
+.check-in-search input {
+  width: 100%;
+}
+
+.bib-input {
+  font-size: var(--font-size-xxl);
+  font-variant-numeric: tabular-nums;
+}
+
+.check-in-child {
+  margin: var(--space-4) 0;
+  padding: var(--space-4);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  text-align: center;
+}
+
+.check-in-child p {
+  margin: var(--space-1) 0;
+}
+
+.check-in-child .bib {
+  color: var(--color-text);
+  font-size: var(--font-size-xxl);
+  font-weight: var(--font-weight-heavy);
+}
+
+.check-in-first-name {
+  font-size: var(--font-size-display);
+  font-weight: var(--font-weight-heavy);
+  line-height: 1.1;
+}
+
+.check-in-last-name {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-strong);
+  text-transform: uppercase;
+}
+
+.check-in-marks {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0;
+  list-style: none;
 }
