@@ -1,0 +1,224 @@
+# Example configuration with FICTITIOUS data (spec annex A).
+# Copy it to the private data folder and adapt it: real data never goes into the repository.
+# Values are in seconds (times), metres (distances) or points.
+
+[edition]
+name = "Multisport Games 2027"
+organizer = "Springfield School Sports Club"
+date = 2027-06-06
+start = 09:00:00
+end = 12:00:00
+venue = "Springfield Municipal Stadium"
+contact_email = "contact@example.org"
+default_locale = "fr"
+
+[participants]
+levels = ["CP", "CE1", "CE2", "CM1", "CM2"]
+genders = ["girl", "boy"]
+schools = ["Springfield Elementary", "Shelbyville Elementary"]
+
+[level_groups]
+junior = ["CP", "CE1"]
+senior = ["CE2", "CM1", "CM2"]
+
+[registration]
+opens_at = 2027-03-15T08:00:00
+closes_at = 2027-05-30T23:59:00
+quota = 100
+first_bib = 1
+
+[scoring]
+max_score = 1000
+floor = 100
+foul_score = 1
+dnf_score = 0
+tie_breakers = ["first_places", "top3_places", "youngest"]
+
+# ---------- Workshops ----------
+
+[[workshops]]
+id = "sprint"
+help = "sprint.md"
+
+  [[workshops.variants]]
+  group = "junior"
+  label = "30 m"
+  measure = "time"
+  time_format = "ss.cc"
+  better = "lower"
+  attempts = 1
+  foul_mode = "strict"
+  plausible_range = [4.00, 12.00]
+  built_in_timer = false
+  bibs_per_timer = 2
+
+  [[workshops.variants]]
+  group = "senior"
+  label = "40 m"
+  measure = "time"
+  time_format = "ss.cc"
+  better = "lower"
+  attempts = 1
+  foul_mode = "strict"
+  plausible_range = [5.00, 14.00]
+  built_in_timer = false
+  bibs_per_timer = 2
+
+[[workshops]]
+id = "hurdles"
+help = "hurdles.md"
+
+  [[workshops.variants]]
+  group = "junior"
+  label = "30 m"
+  measure = "time"
+  time_format = "ss.cc"
+  better = "lower"
+  attempts = 1
+  foul_mode = "strict"
+  plausible_range = [5.00, 15.00]
+  bibs_per_timer = 2
+
+  [[workshops.variants]]
+  group = "senior"
+  label = "40 m"
+  measure = "time"
+  time_format = "ss.cc"
+  better = "lower"
+  attempts = 1
+  foul_mode = "strict"
+  plausible_range = [6.00, 18.00]
+  bibs_per_timer = 2
+
+[[workshops]]
+id = "vortex_throw"
+help = "vortex_throw.md"
+
+  [[workshops.variants]]
+  group = "junior"
+  measure = "distance"
+  better = "higher"
+  attempts = 2
+  foul_mode = "strict"
+  plausible_range = [1.00, 50.00]
+
+  [[workshops.variants]]
+  group = "senior"
+  measure = "distance"
+  better = "higher"
+  attempts = 2
+  foul_mode = "strict"
+  plausible_range = [2.00, 80.00]
+
+[[workshops]]
+id = "hockey"
+help = "hockey.md"
+
+  [[workshops.variants]]
+  group = "junior"
+  measure = "time"
+  time_format = "ss.cc"
+  better = "lower"
+  attempts = 2
+  foul_mode = "strict"
+  plausible_range = [5.00, 60.00]
+  built_in_timer = true
+  bibs_per_timer = 1
+  modifiers = [ { id = "goal_scored", value = -3.00 } ]
+
+  [[workshops.variants]]
+  group = "senior"
+  measure = "time"
+  time_format = "ss.cc"
+  better = "lower"
+  attempts = 2
+  foul_mode = "strict"
+  plausible_range = [5.00, 60.00]
+  built_in_timer = true
+  bibs_per_timer = 1
+  modifiers = [ { id = "goal_scored", value = -3.00 } ]
+
+[[workshops]]
+id = "football"
+help = "football.md"
+
+  [[workshops.variants]]
+  group = "junior"
+  measure = "time"
+  time_format = "m:ss.cc"
+  better = "lower"
+  attempts = 1
+  foul_mode = "strict"
+  plausible_range = [10.00, 180.00]
+  built_in_timer = true
+  bibs_per_timer = 1
+
+[[workshops]]
+id = "obstacle_course"
+help = "obstacle_course.md"
+
+  [[workshops.variants]]
+  group = "junior"
+  measure = "time"
+  time_format = "m:ss.cc"
+  better = "lower"
+  attempts = 1
+  foul_mode = "strict"
+  plausible_range = [10.00, 180.00]
+  built_in_timer = true
+  bibs_per_timer = 1
+
+[[workshops]]
+id = "long_jump"
+help = "long_jump.md"
+
+  [[workshops.variants]]
+  group = "senior"
+  measure = "distance"
+  better = "higher"
+  attempts = 2
+  foul_mode = "lenient"
+  plausible_range = [0.50, 5.00]
+
+[[workshops]]
+id = "basketball"
+help = "basketball.md"
+
+  [[workshops.variants]]
+  group = "senior"
+  measure = "counter"
+  better = "higher"
+  attempts = 1
+  limit = { type = "duration", value = "1:30" }
+  actions = [
+    { id = "basket", points = 3 },
+    { id = "rim",    points = 2 },
+    { id = "board",  points = 1 },
+  ]
+  max_value = 60
+
+# ---------- Spreadsheet import ----------
+# Maps internal fields to the column headers of the source file.
+
+[import.columns]
+last_name = "Child last name"
+first_name = "Child first name"
+gender = "Gender"
+school = "School"
+level = "Class"
+guardian_name = "Guardian full name"
+guardian_phone = "Guardian phone"
+guardian_email = "Contact email"
+volunteer = "Volunteer"
+
+# ---------- Contacts shown on help pages ----------
+
+[[contacts]]
+role = "data_entry"
+name = "Jane Doe"
+phone = "+33 6 00 00 00 01"
+
+[[contacts]]
+role = "general"
+name = "John Smith"
+phone = "+33 6 00 00 00 02"

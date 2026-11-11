@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.3 — 10 November 2026
+> Version 1.4 — 11 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -395,7 +395,7 @@ The score is **rounded to the nearest integer**. For a "lower is better" event t
 - Only one child with a valid performance, or all performances identical: **1000 points** for everyone.
 - No child with a valid performance in the category: no scale. Fouls get `foul_score`.
 
-**Note**: with `floor = 1`, you get the historical scale (1 to 1000). Then set `foul_score = 0` to distinguish a foul from the worst performance.
+**Note**: with `floor = 1`, you get the historical scale (1 to 1000). Then set `foul_score = 0` to distinguish a foul from the worst performance. The configuration is **rejected** if `foul_score` is not strictly lower than `floor`, or if `dnf_score` is higher than `foul_score`.
 
 **Example** (`floor` 100, higher is better): best = 68 m, worst = 8 m, v = 45 m
 → progression = 37/60 = 0.6167 → score = 100 + 0.6167 × 900 = **655 points**.
@@ -425,6 +425,8 @@ Criteria applied **in order** until the tie is broken:
 1. Highest **number of 1st places** in events;
 2. Highest **number of top-3 places** in events;
 3. The **youngest** (most recent date of birth).
+
+Only events with a **valid performance** count as places (a foul or a DNF is never a 1st place). The "youngest" criterion only applies when every tied child has a date of birth.
 
 If the tie persists (twins, missing date of birth), the application reports it to the admin, who **decides manually** before closing.
 
@@ -541,7 +543,7 @@ config.example/                      data/
     en/…                             .env                 (secrets)
 ```
 
-- On first launch, the application **copies** `config.example/` into the data directory, then the admin adapts it through the configuration screen.
+- As long as the data directory holds no `competition.toml`, the application uses the **fictitious example** from `config.example/` (shown as such on the home page). The configuration screen **copies** it there on the first save, then the admin adapts it. This way the test site always follows the up-to-date example.
 - **Generic translations** (`i18n/`) are versioned in the repository. The data directory can **override** them key by key (e.g. the organizer's name in an email).
 - **Secrets** (database access, SMTP, API keys, Google Drive access) are in a per-installation `.env` file, never versioned.
 
@@ -824,7 +826,7 @@ Each step is delivered on a branch with a pull request, deployed to the test sit
 | Step | Content | Testable outcome |
 |---|---|---|
 | **0. Foundation** | Repository cleanup, structure, Slim, database, **conventions and quality tooling**, **confidentiality safeguards** (§ 25.3), automatic deployment to the test site, home page | The "empty" app shows up on the test site |
-| **1. Configuration and business core** | TOML loading, i18n, event model, **scoring and tie-break engine** + automated tests | Computation report on fictitious data |
+| **1. Configuration and business core** | TOML loading, i18n, event model, **scoring and tie-break engine** + automated tests | Computation report on fictitious data (`/demo/report` page, not available in production) |
 | **2. Accounts and security** | Login, roles, admin 2FA, forgotten password, shared account, audit log | Login with each role |
 | **3. Registrations (admin)** | Registrations screen, manual addition, spreadsheet import, bibs | Import of a fictitious test file |
 | **4. Check-in** | Check-in list PDF, check-in/check-out | Check-in on a phone |

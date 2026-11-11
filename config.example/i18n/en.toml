@@ -1,0 +1,127 @@
+# Generic English texts. Any key can be overridden by the i18n/en.toml file
+# of the installation's data folder.
+
+[app]
+name = "LiveScoreTracker"
+
+[format]
+decimal_separator = "."
+
+[unit]
+seconds = "{value} s"
+minutes_seconds = "{minutes} min {seconds} s"
+metres = "{value} m"
+points = "{value} pts"
+
+[home]
+lead = "The application foundation is up and running."
+system_status = "System status"
+database_ok = "Database: connected"
+database_error = "Database: unreachable"
+schema_ok = "Schema: up to date"
+schema_pending = "Schema: {count} pending migration(s)"
+version = "Version {version} · revision {revision}"
+deployed_at = "deployed on {date}"
+environment = "environment {environment}"
+config_ok = "Configuration: valid ({events} events, {categories} categories)"
+config_example = "fictitious example"
+config_error = "Configuration: invalid"
+report_link = "See the scoring report on fictitious data"
+
+[level]
+CP = "Year 1"
+CE1 = "Year 2"
+CE2 = "Year 3"
+CM1 = "Year 4"
+CM2 = "Year 5"
+
+[gender.girl]
+one = "Girl"
+many = "Girls"
+
+[gender.boy]
+one = "Boy"
+many = "Boys"
+
+[category]
+label = "{gender} {level}"
+
+[workshop.sprint]
+name = "Sprint"
+
+[workshop.hurdles]
+name = "Hurdles"
+
+[workshop.vortex_throw]
+name = "Vortex throw"
+
+[workshop.hockey]
+name = "Hockey"
+
+[workshop.football]
+name = "Football"
+
+[workshop.obstacle_course]
+name = "Obstacle course"
+
+[workshop.long_jump]
+name = "Long jump"
+
+[workshop.basketball]
+name = "Basketball"
+
+[modifier]
+goal_scored = "Goal scored"
+
+[action]
+basket = "Basket"
+rim = "Rim"
+board = "Backboard"
+miss = "Miss"
+
+[contact]
+data_entry = "Data entry"
+general = "Other issues"
+
+[status]
+valid = "Valid"
+foul = "Foul"
+dnf = "Not done"
+pending = "To do"
+absent = "Absent"
+
+[tie_breaker]
+first_places = "1st places"
+top3_places = "top-3 places"
+youngest = "youngest"
+
+[report]
+title = "Scoring report"
+fictitious = "All data on this page is fictitious and generated automatically: {count} children, draw no. {seed}."
+another_draw = "Another draw"
+competition_running = "Competition running"
+competition_closed = "Competition closed"
+show_running = "Show while running"
+show_closed = "Show after closing"
+category = "Category"
+overall = "Overall ranking"
+rank = "Rank"
+bib = "Bib"
+child = "Child"
+total = "Total"
+first_places = "1st"
+top3_places = "Top 3"
+decided_by = "decided by: {criterion}"
+tie_unresolved = "tie to settle"
+incomplete = "events pending"
+absent_children = "Absent: {bibs}"
+event = "Event"
+attempts = "Attempts"
+result = "Result"
+status = "Status"
+points = "Points"
+bounds = "Best performance: {best} · worst: {worst}"
+no_bounds = "No valid performance: no scale."
+scale = "Scale: {floor} to {max} points · foul: {foul} · not done: {dnf}"
+foul = "foul"
+config_invalid = "The configuration has errors:"

@@ -1,24 +1,35 @@
 {% extends 'layout.html.twig' %}
 
-{# Temporary texts: the interface moves to the i18n files in step 1. #}
 {% block content %}
-    <h1>LiveScoreTracker</h1>
-    <p class="lead">Le socle de l'application est en place.</p>
+    <h1>{{ t('app.name') }}</h1>
+    <p class="lead">{{ t('home.lead') }}</p>
 
-    <ul class="status" aria-label="État du système">
+    <ul class="status" aria-label="{{ t('home.system_status') }}">
         <li class="{{ status.database ? 'ok' : 'error' }}">
-            Base de données : {{ status.database ? 'connectée' : 'inaccessible' }}
+            {{ status.database ? t('home.database_ok') : t('home.database_error') }}
         </li>
         {% if status.database %}
             <li class="{{ status.pendingMigrations == 0 ? 'ok' : 'warning' }}">
-                Schéma : {{ status.pendingMigrations == 0 ? 'à jour' : status.pendingMigrations ~ ' migration(s) en attente' }}
+                {{ status.pendingMigrations == 0 ? t('home.schema_ok') : t('home.schema_pending', {count: status.pendingMigrations}) }}
             </li>
+        {% endif %}
+        {% if config.valid %}
+            <li class="ok">
+                {{ t('home.config_ok', {events: config.events, categories: config.categories}) }}
+                {% if config.example %}<span class="badge muted">{{ t('home.config_example') }}</span>{% endif %}
+            </li>
+        {% else %}
+            <li class="error">{{ t('home.config_error') }}</li>
         {% endif %}
     </ul>
 
+    {% if showReport %}
+        <p><a class="button" href="{{ url_for('demo-report') }}">{{ t('home.report_link') }}</a></p>
+    {% endif %}
+
     <p class="meta">
-        Version {{ build.version }} · révision <code>{{ build.revision }}</code>
-        {% if build.builtAt %} · déployée le {{ build.builtAt }}{% endif %}
-        · environnement <code>{{ environment }}</code>
+        {{ t('home.version', {version: build.version, revision: build.revision}) }}
+        {% if build.builtAt %} · {{ t('home.deployed_at', {date: build.builtAt}) }}{% endif %}
+        · {{ t('home.environment', {environment: environment}) }}
     </p>
 {% endblock %}
