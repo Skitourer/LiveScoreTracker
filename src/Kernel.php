@@ -46,6 +46,7 @@ use LiveScoreTracker\Action\Registration\RegistrationExportAction;
 use LiveScoreTracker\Action\Registration\RegistrationImportAction;
 use LiveScoreTracker\Action\Registration\RegistrationNewAction;
 use LiveScoreTracker\Action\Registration\RegistrationsAction;
+use LiveScoreTracker\Action\Results\CeremonyAction;
 use LiveScoreTracker\Action\Results\ChecksAction;
 use LiveScoreTracker\Action\Results\MissingEventsAction;
 use LiveScoreTracker\Action\Results\ProgressAction;
@@ -160,6 +161,8 @@ final class Kernel
         $app->map(['GET', 'POST'], '/participant', ParticipantAction::class)->setName('participant');
         $app->get('/avancement', ProgressAction::class)->setName('progress');
         $app->get('/progress', ProgressAction::class)->setName('progress-detail')->add($guard(Permission::ViewMonitoring));
+        $app->get('/ceremony', CeremonyAction::class)->setName('ceremony')->add($guard(Permission::ViewMonitoring));
+        $app->map(['GET', 'POST'], '/ceremony/control', CeremonyAction::class)->setName('ceremony-control')->add($guard(Permission::ViewMonitoring));
         $app->post('/internal/migrate', MigrateAction::class)->setName('migrate');
         $app->get('/demo/report', ScoringReportAction::class)->setName('demo-report');
         $app->get('/demo/styleguide', StyleguideAction::class)->setName('demo-styleguide');

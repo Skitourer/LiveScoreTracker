@@ -28,6 +28,7 @@ final class DashboardAction
         ['dashboard.missing_events', '/missing', Permission::ViewMonitoring],
         ['dashboard.checks', '/checks', Permission::ViewMonitoring],
         ['dashboard.monitoring', '/progress', Permission::ViewMonitoring],
+        ['dashboard.ceremony', '/ceremony/control', Permission::ViewMonitoring],
         ['dashboard.phase_tile', '/admin/phase', Permission::ChangePhase],
         ['dashboard.accounts', '/admin/users', Permission::ManageAccounts],
         ['dashboard.referee_account', '/admin/referee', Permission::ManageAccounts],

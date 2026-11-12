@@ -1,0 +1,44 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('ceremony.title') }}{% endblock %}
+{# For a projector: nothing but the podium. #}
+{% block topbar_nav %}{% endblock %}
+{# Messages meant for the person who acted, not for the audience. #}
+{% block flashes %}{% endblock %}
+{% block main_class %} wide{% endblock %}
+
+{% block content %}
+    <div class="ceremony-screen" data-live="2">
+        {% if not finished %}
+            <h1>{{ t('ceremony.title') }}</h1>
+            <p class="lead">{{ t('ceremony.not_finished') }}</p>
+        {% elseif state.category is null %}
+            <h1>{{ t('ceremony.title') }}</h1>
+        {% else %}
+            <p class="ceremony-progress">{{ t('ceremony.position', {n: state.index + 1, count: state.order|length}) }}</p>
+            <h1 class="ceremony-category">{{ category_label(state.category) }}</h1>
+            {% if state.steps is empty %}
+                <p class="lead">{{ t('ceremony.empty') }}</p>
+            {% else %}
+                <div class="podium">
+                    {# Steps are in the order of the reveal: the 3rd place first. #}
+                    {% for step in state.steps %}
+                        {% set shown = loop.index <= state.revealed %}
+                        <section class="podium-place place-{{ step[0].rank }}{{ shown ? ' shown' : '' }}{{ loop.index == state.revealed ? ' latest' : '' }}">
+                            <p class="podium-rank">{{ t('ceremony.rank_' ~ step[0].rank) }}</p>
+                            {% if shown %}
+                                {% for winner in step %}
+                                    <p class="podium-name">{{ winner.name }}</p>
+                                    <p class="podium-total">{{ t('participant.points', {total: winner.total}) }}</p>
+                                {% endfor %}
+                            {% else %}
+                                <p class="podium-name">?</p>
+                            {% endif %}
+                        </section>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endif %}
+    </div>
+    <p class="meta ceremony-hint"><button type="button" class="button small secondary fullscreen-toggle">{{ t('ceremony.fullscreen') }}</button> {{ t('ceremony.screen_hint') }}</p>
+{% endblock %}

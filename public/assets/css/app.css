@@ -1073,3 +1073,135 @@ pre.details {
   font-weight: var(--font-weight-strong);
   background: var(--color-highlight);
 }
+
+/* ---------- Award ceremony (spec § 13.2) ---------- */
+.ceremony-screen {
+  text-align: center;
+}
+
+.ceremony-progress {
+  color: var(--color-muted);
+}
+
+.ceremony-category {
+  font-size: var(--font-size-display);
+}
+
+.podium {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-4);
+  align-items: end;
+  margin-top: var(--space-6);
+}
+
+.podium-place {
+  padding: var(--space-4) var(--space-2);
+  border-radius: var(--radius-md) var(--radius-md) 0 0;
+  background: var(--color-surface);
+}
+
+/* 2nd on the left, 1st in the middle, 3rd on the right; higher steps for better places. */
+.podium-place.place-1 {
+  grid-column: 2;
+  grid-row: 1;
+  min-height: calc(var(--space-6) * 8);
+  background: var(--color-highlight);
+}
+
+.podium-place.place-2 {
+  grid-column: 1;
+  grid-row: 1;
+  min-height: calc(var(--space-6) * 6);
+}
+
+.podium-place.place-3 {
+  grid-column: 3;
+  grid-row: 1;
+  min-height: calc(var(--space-6) * 5);
+}
+
+.podium-rank {
+  margin: 0;
+  color: var(--color-muted);
+}
+
+.podium-name {
+  margin: var(--space-2) 0 0;
+  font-size: var(--font-size-xxl);
+  font-weight: var(--font-weight-strong);
+}
+
+.podium-total {
+  margin: 0;
+}
+
+.podium-place.latest {
+  animation: podium-reveal 0.8s ease-out;
+}
+
+@keyframes podium-reveal {
+  from {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .podium-place.latest {
+    animation: none;
+  }
+}
+
+@media (min-width: 64rem) {
+  .podium-name {
+    font-size: var(--font-size-display);
+  }
+}
+
+.ceremony-screen + .live-stamp {
+  display: none;
+}
+
+.ceremony-hint {
+  text-align: center;
+}
+
+:fullscreen .ceremony-hint,
+:fullscreen .topbar {
+  display: none;
+}
+
+.ceremony-steps {
+  padding-left: 0;
+  list-style: none;
+}
+
+.ceremony-steps .shown {
+  color: var(--color-muted);
+}
+
+.ceremony-main .button {
+  width: 100%;
+}
+
+.ceremony-order li {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+  align-items: center;
+  margin-bottom: var(--space-1);
+}
+
+.ceremony-order li span {
+  flex: 1;
+}
+
+.ceremony-order .current span {
+  font-weight: var(--font-weight-strong);
+}

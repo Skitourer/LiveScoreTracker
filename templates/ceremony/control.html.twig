@@ -1,0 +1,72 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('ceremony.control_title') }}{% endblock %}
+
+{% block content %}
+    <h1>{{ t('ceremony.control_title') }}</h1>
+    {% if not finished %}
+        <p class="lead">{{ t('ceremony.not_finished') }}</p>
+    {% else %}
+        <p class="meta">{{ t('ceremony.control_hint') }} <a href="{{ url_for('ceremony') }}">{{ t('ceremony.screen_link') }}</a></p>
+        {% if state.category %}
+            <section class="card ceremony-current">
+                <p class="meta">{{ t('ceremony.position', {n: state.index + 1, count: state.order|length}) }}</p>
+                <h2>{{ category_label(state.category) }}</h2>
+                <ul class="ceremony-steps">
+                    {% for step in state.steps %}
+                        <li class="{{ loop.index <= state.revealed ? 'shown' : '' }}">
+                            <strong>{{ t('ceremony.rank_' ~ step[0].rank) }}</strong> :
+                            {% for winner in step %}{{ winner.name }} ({{ winner.total }}){% if not loop.last %}, {% endif %}{% endfor %}
+                            {% if loop.index <= state.revealed %}<span class="badge ok">{{ t('ceremony.shown') }}</span>{% endif %}
+                        </li>
+                    {% else %}
+                        <li>{{ t('ceremony.empty') }}</li>
+                    {% endfor %}
+                </ul>
+                {% set ops = state.revealed < state.steps|length
+                    ? [['reveal', 'button large', t('ceremony.reveal', {rank: t('ceremony.rank_' ~ state.steps[state.revealed][0].rank)})]]
+                    : (state.index + 1 < state.order|length ? [['next', 'button large', t('ceremony.next')]] : []) %}
+                {% for op in ops %}
+                    <form method="post" class="ceremony-main">
+                        {{ csrf_field() }}
+                        <input type="hidden" name="op" value="{{ op[0] }}">
+                        <button type="submit" class="{{ op[1] }}">{{ op[2] }}</button>
+                    </form>
+                {% endfor %}
+                <div class="toolbar">
+                    {% for op in ['hide', 'previous', 'next'] %}
+                        {% if (op == 'hide' and state.revealed > 0) or (op == 'previous' and state.index > 0) or (op == 'next' and state.index + 1 < state.order|length and state.revealed < state.steps|length) %}
+                            <form method="post" class="inline">
+                                {{ csrf_field() }}
+                                <input type="hidden" name="op" value="{{ op }}">
+                                <button type="submit" class="button small secondary">{{ t('ceremony.' ~ op) }}</button>
+                            </form>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </section>
+        {% endif %}
+
+        <details class="card">
+            <summary>{{ t('ceremony.order') }}</summary>
+            <ol class="ceremony-order">
+                {% for category in state.order %}
+                    <li class="{{ loop.index0 == state.index ? 'current' : '' }}">
+                        <span>{{ category_label(category) }}</span>
+                        {% for op in ['up', 'down', 'go'] %}
+                            {% if (op == 'up' and not loop.parent.loop.first) or (op == 'down' and not loop.parent.loop.last) or (op == 'go' and loop.parent.loop.index0 != state.index) %}
+                                <form method="post" class="inline">
+                                    {{ csrf_field() }}
+                                    <input type="hidden" name="op" value="{{ op }}">
+                                    <input type="hidden" name="category" value="{{ category.id() }}">
+                                    <input type="hidden" name="index" value="{{ loop.parent.loop.index0 }}">
+                                    <button type="submit" class="button small secondary" aria-label="{{ t('ceremony.' ~ op ~ '_label', {category: category_label(category)}) }}">{{ t('ceremony.' ~ op) }}</button>
+                                </form>
+                            {% endif %}
+                        {% endfor %}
+                    </li>
+                {% endfor %}
+            </ol>
+        </details>
+    {% endif %}
+{% endblock %}
