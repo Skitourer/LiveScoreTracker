@@ -11,7 +11,8 @@ use LiveScoreTracker\Infrastructure\Persistence\AppState;
 /**
  * Award ceremony (spec § 13.2), after the closing: a big screen shows the
  * podium of one category at a time, revealed from the 3rd place to the 1st,
- * as first name + initial with the total of points. A phone of an admin or
+ * with the children's full names (they are called over the microphone) and
+ * the total of points. A phone of an admin or
  * organizer drives it: next place, previous, next category, order of the
  * categories. The state is kept in the database so that the screen and the
  * phone share it.
@@ -99,7 +100,9 @@ final class Ceremony
                 continue;
             }
             $child = $standings['children'][(int) $line->bib] ?? null;
-            $places[$line->rank][] = ['rank' => $line->rank, 'name' => $child?->publicName() ?? $line->bib, 'total' => $line->total];
+            // Full name: the children are called to the podium over the microphone.
+            $name = $child === null ? $line->bib : trim($child->child->firstName . ' ' . $child->child->lastName);
+            $places[$line->rank][] = ['rank' => $line->rank, 'name' => $name, 'total' => $line->total];
         }
         krsort($places);
 

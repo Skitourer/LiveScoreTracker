@@ -695,7 +695,7 @@ At the site's address (`/`), **without login**, readable on a phone, **with no p
 
 - Available **only after closing**.
 - Shown on a big screen, **driven from the phone** of an admin or organizer: "next category", "reveal next place".
-- For each category: reveal **3rd, then 2nd, then 1st**, as **first name + initial** with total points.
+- For each category: reveal **3rd, then 2nd, then 1st**, with **full first and last names** (the children are called over the microphone; requested in step 9c) and total points, on the screen and on the control page.
 - Configurable category order.
 - Details (step 9c):
   - **Screen** `/ceremony`: on the computer connected to the projector, **logged in as admin or organizer** (no public link). It follows the state every 2 seconds; no menu nor messages; "Full screen" button. Stepped podium (2nd on the left, 1st in the middle, 3rd on the right), a place not revealed shows "?", the last place revealed is animated (unless the device asks for less motion).

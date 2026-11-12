@@ -62,24 +62,24 @@ final class CeremonyTest extends TestCase
         $screen->get('/ceremony');
         self::assertStringContainsString('<h1 class="ceremony-category">Filles CM1</h1>', $screen->lastBody);
         self::assertStringContainsString('data-live="2"', $screen->lastBody);
-        self::assertStringNotContainsString('Iris M.', $screen->lastBody, 'Nothing revealed yet.');
+        self::assertStringNotContainsString('Iris MARTIN', $screen->lastBody, 'Nothing revealed yet.');
 
         $phone->get('/ceremony/control');
         self::assertStringContainsString('Révéler la 3e place', $phone->lastBody);
         $phone->post('/ceremony/control', ['op' => 'reveal']);
         $screen->get('/ceremony');
-        self::assertStringContainsString('Iris M.', $screen->lastBody, '3rd place first.');
-        self::assertStringNotContainsString('Zoé M.', $screen->lastBody);
+        self::assertStringContainsString('Iris MARTIN', $screen->lastBody, '3rd place first.');
+        self::assertStringNotContainsString('Zoé MARTIN', $screen->lastBody);
 
         $phone->post('/ceremony/control', ['op' => 'reveal']);
         $phone->post('/ceremony/control', ['op' => 'reveal']);
         $screen->get('/ceremony');
-        self::assertMatchesRegularExpression('#place-1 shown latest">\s*<p class="podium-rank">1re place</p>\s*<p class="podium-name">Léa M.</p>#', $screen->lastBody);
-        self::assertStringNotContainsString('Anna M.', $screen->lastBody, 'Only the podium.');
+        self::assertMatchesRegularExpression('#place-1 shown latest">\s*<p class="podium-rank">1re place</p>\s*<p class="podium-name">Léa MARTIN</p>#', $screen->lastBody);
+        self::assertStringNotContainsString('Anna MARTIN', $screen->lastBody, 'Only the podium.');
 
         $phone->post('/ceremony/control', ['op' => 'hide']);
         $screen->get('/ceremony');
-        self::assertStringNotContainsString('Léa M.', $screen->lastBody);
+        self::assertStringNotContainsString('Léa MARTIN', $screen->lastBody);
 
         // Order: moving a category does not lose the current one.
         $phone->post('/ceremony/control', ['op' => 'up', 'category' => 'CM1-girl']);

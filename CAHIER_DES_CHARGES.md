@@ -695,7 +695,7 @@ Sujets et corps de tous les emails dans les fichiers de traduction, avec des var
 
 - Disponible **uniquement après la clôture**.
 - Affiché sur un grand écran, **piloté depuis le téléphone** d'un admin ou d'un organisateur : « catégorie suivante », « révéler la place suivante ».
-- Pour chaque catégorie : révélation du **3e, puis du 2e, puis du 1er**, en **prénom + initiale** avec le total de points.
+- Pour chaque catégorie : révélation du **3e, puis du 2e, puis du 1er**, en **prénom et nom complets** (les enfants sont appelés au micro ; demande de Boris, étape 9c) avec le total de points, sur l'écran comme sur la page de pilotage.
 - Ordre des catégories configurable.
 - Précisions (étape 9c) :
   - **Écran** `/ceremony` : sur l'ordinateur relié au vidéoprojecteur, **connecté en admin ou organisateur** (pas de lien public). Il suit l'état toutes les 2 secondes ; ni menu ni messages ; bouton « Plein écran ». Podium en marches (2e à gauche, 1er au centre, 3e à droite), place non révélée affichée « ? », dernière place révélée animée (sauf si l'appareil demande moins d'animations).
