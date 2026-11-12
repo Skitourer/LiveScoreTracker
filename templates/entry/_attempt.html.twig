@@ -1,5 +1,6 @@
-{# One version of an attempt: result or foul, modifiers, who and when. #}
+{# One version of an attempt: result or foul, modifiers or counter detail, how it was timed, who and when. #}
 {% if attempt.isFoul() %}<strong>{{ t('entry.foul') }}</strong>{% else %}<strong>{{ result(attempt.result(), variant) }}</strong>{% endif %}
 {% if attempt.modifierTotal != 0 %} <small>({{ result(attempt.measured, variant) }}{% for id, count in attempt.modifiers %}, {{ t('modifier.' ~ id) }}{% if count > 1 %} ×{{ count }}{% endif %}{% endfor %})</small>{% endif %}
-<br><small class="muted">{{ local_time(attempt.enteredAt) }} · {{ attempt.author() }}</small>
+{% if attempt.details.actions is defined %} <small>({% for id, count in attempt.details.actions %}{{ t('action.' ~ id) }} ×{{ count }}{% if not loop.last %}, {% endif %}{% endfor %}{% if attempt.details.missed is defined %}{% if attempt.details.actions is not empty %}, {% endif %}{{ t('entry.counter.missed') }} ×{{ attempt.details.missed }}{% endif %})</small>{% endif %}
+<br><small class="muted">{{ local_time(attempt.enteredAt) }} · {{ attempt.author() }}{% if attempt.source() in ['timer', 'timer_edited'] %} · {{ t('entry.source.' ~ attempt.source()) }}{% endif %}</small>
 {% if attempt.warnings is not empty %}<span class="badge warning">{{ t('entry.to_check') }}</span>{% endif %}

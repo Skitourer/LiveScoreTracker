@@ -51,28 +51,32 @@
                 <input type="hidden" name="confirm" value="1">
             {% endif %}
 
-            <label>{{ t('entry.result') }} <small>{{ t('entry.hint.' ~ (variant.measure.value == 'time' ? 'time_' ~ variant.timeFormat.value|replace({':': '', '.': ''}) : variant.measure.value)) }}</small>
-                <input type="text" name="value" class="result-input" inputmode="numeric" pattern="[0-9]*" maxlength="7" autocomplete="off" value="{{ form.value }}" {% if form.value is empty %}autofocus{% endif %}
-                    data-measure="{{ variant.measure.value }}" data-time-format="{{ variant.timeFormat ? variant.timeFormat.value : '' }}"
-                    data-unit-seconds="{{ t('unit.seconds') }}" data-unit-minutes="{{ t('unit.minutes_seconds') }}" data-unit-metres="{{ t('unit.metres') }}" data-unit-points="{{ t('unit.points') }}"
-                    data-decimal="{{ t('format.decimal_separator') }}" data-invalid="{{ t('entry.error.invalid_value') }}">
-            </label>
-            <output class="interpreted" aria-live="polite">{{ interpreted }}</output>
+            {% if variant.measure.value == 'counter' %}
+                {% include 'entry/_counter.html.twig' %}
+            {% else %}
+                <label>{{ t('entry.result') }} <small>{{ t('entry.hint.' ~ (variant.measure.value == 'time' ? 'time_' ~ variant.timeFormat.value|replace({':': '', '.': ''}) : variant.measure.value)) }}</small>
+                    <input type="text" name="value" class="result-input" inputmode="numeric" pattern="[0-9]*" maxlength="7" autocomplete="off" value="{{ form.value }}" {% if form.value is empty %}autofocus{% endif %}
+                        data-measure="{{ variant.measure.value }}" data-time-format="{{ variant.timeFormat ? variant.timeFormat.value : '' }}"
+                        data-unit-seconds="{{ t('unit.seconds') }}" data-unit-minutes="{{ t('unit.minutes_seconds') }}" data-unit-metres="{{ t('unit.metres') }}" data-unit-points="{{ t('unit.points') }}"
+                        data-decimal="{{ t('format.decimal_separator') }}" data-invalid="{{ t('entry.error.invalid_value') }}">
+                </label>
+                <output class="interpreted" aria-live="polite">{{ interpreted }}</output>
 
-            {% for modifier in variant.modifiers %}
-                {% set value = form.modifiers[modifier.id] ?? 0 %}
-                {% if modifier.repeatable %}
-                    <label>{{ t('modifier.' ~ modifier.id) }} ({{ modifier.value > 0 ? '+' : '' }}{{ result(modifier.value, variant) }})
-                        <input type="number" name="mod_{{ modifier.id }}" min="0" max="99" inputmode="numeric" value="{{ value }}">
-                    </label>
-                {% else %}
-                    <label class="choice"><input type="checkbox" name="mod_{{ modifier.id }}" value="1" {% if value > 0 %}checked{% endif %}>
-                        {{ t('modifier.' ~ modifier.id) }} ({{ modifier.value > 0 ? '+' : '' }}{{ result(modifier.value, variant) }})</label>
-                {% endif %}
-            {% endfor %}
+                {% for modifier in variant.modifiers %}
+                    {% set value = form.modifiers[modifier.id] ?? 0 %}
+                    {% if modifier.repeatable %}
+                        <label>{{ t('modifier.' ~ modifier.id) }} ({{ modifier.value > 0 ? '+' : '' }}{{ result(modifier.value, variant) }})
+                            <input type="number" name="mod_{{ modifier.id }}" min="0" max="99" inputmode="numeric" value="{{ value }}">
+                        </label>
+                    {% else %}
+                        <label class="choice"><input type="checkbox" name="mod_{{ modifier.id }}" value="1" {% if value > 0 %}checked{% endif %}>
+                            {{ t('modifier.' ~ modifier.id) }} ({{ modifier.value > 0 ? '+' : '' }}{{ result(modifier.value, variant) }})</label>
+                    {% endif %}
+                {% endfor %}
 
-            <button type="submit" name="kind" value="value" class="button large">{{ warnings is empty ? t('entry.save') : t('entry.save_anyway') }}</button>
-            <button type="submit" name="kind" value="foul" class="button danger">{{ t('entry.foul_button') }}</button>
+                <button type="submit" name="kind" value="value" class="button large">{{ warnings is empty ? t('entry.save') : t('entry.save_anyway') }}</button>
+                <button type="submit" name="kind" value="foul" class="button danger">{{ t('entry.foul_button') }}</button>
+            {% endif %}
             {% if variant.foulMode.value == 'lenient' %}<p class="meta">{{ t('entry.lenient_hint') }}</p>{% endif %}
             {% if correcting %}<a href="{{ url_for('entry-child', {workshop: workshop.id, bib: child.bib}) }}">{{ t('entry.cancel_correction') }}</a>{% endif %}
         </form>

@@ -14,6 +14,9 @@ use Slim\Exception\HttpNotFoundException;
 /**
  * Workshop entry screen, step 1 (spec § 8.2): type the bib. Unknown bibs and
  * children of another level group are refused here (spec § 10.1).
+ *
+ * On a time workshop the screen starts a race of 1 or 2 children instead
+ * (spec § 8.4); a single bib still opens a child's attempts, to correct them.
  */
 final class EntryBibAction
 {
@@ -51,6 +54,10 @@ final class EntryBibAction
             'levels' => $this->desk->levels($workshop),
             'bib' => $bib,
             'error' => $error,
+            // Time events: a race of 1 or 2 children (spec § 8.4).
+            'timed' => $this->desk->isTimed($workshop),
+            'bibs_per_race' => $this->desk->bibsPerRace($workshop),
+            'timer_first' => $this->desk->defaultsToTimer($workshop),
         ], $error === null ? 200 : 422);
     }
 }

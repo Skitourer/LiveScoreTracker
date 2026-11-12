@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.12 — 11 novembre 2026
+> Version 1.13 — 12 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -319,7 +319,7 @@ Précisions :
 - Un résultat enregistré avec un avertissement confirmé est marqué **« à vérifier »** (tableau de bord des contrôles, étape 8).
 - Chaque saisie porte un identifiant unique créé avec le formulaire : un double envoi (double appui, réseau lent) n'enregistre qu'une fois.
 - Un enfant non pointé peut être **marqué présent** depuis l'écran de saisie, après confirmation.
-- Les épreuves à chrono et en mode compteur se saisissent pour l'instant comme un résultat standard (temps mesuré avec un chronomètre externe, total des points) ; le chrono intégré et le compteur arrivent à l'étape 6.
+- Les épreuves à temps se saisissent par **course** (§ 8.4) et les épreuves en mode compteur avec le **compteur** (§ 8.5). L'écran d'un seul enfant reste disponible pour consulter et corriger ses essais.
 
 ### 8.3 Correction
 
@@ -349,6 +349,16 @@ Le chrono tourne **dans le téléphone** et fonctionne hors ligne. Le bouton Arr
 
 Les deux modes sont toujours disponibles. La configuration définit le mode proposé par défaut.
 
+Précisions :
+- Sur un atelier à temps, l'écran « dossard » propose les champs de la course (le 2ᵉ dossard est facultatif) et deux boutons, **Chrono intégré** et **Chrono classique**, le mode par défaut en premier. Un champ à part ouvre les essais d'un dossard pour les consulter ou les corriger.
+- Contrôles avant le départ : dossard inconnu, pas du bon niveau ou saisi deux fois → refusé. Deux enfants de variantes différentes (ex. un CP sur 30 m et un CM1 sur 40 m) → possible, avec un message bien visible.
+- Le temps est pris **au moment du toucher** sur le bouton (et non au relâchement), puis arrondi au centième inférieur, comme sur un chronomètre.
+- Le premier temps va au premier dossard saisi ; **Inverser** échange les deux temps. Avec un « N'a pas fini », le seul temps va à l'autre enfant.
+- La course est validée **en bloc** : rien n'est enregistré tant que les deux temps ne sont pas lisibles et les avertissements (§ 10.1) confirmés.
+- Chaque temps garde la trace de son origine : **chrono intégré**, ou **chrono intégré, temps modifié à la main** si l'arbitre l'a changé avant de valider (visible dans l'historique des essais).
+- Quitter la page pendant une course demande une confirmation.
+- Sans JavaScript, l'écran fonctionne comme le mode chrono classique.
+
 ### 8.5 Saisie en mode compteur
 
 1. Saisie du dossard, contrôle.
@@ -358,6 +368,14 @@ Les deux modes sont toujours disponibles. La configuration définit le mode prop
 5. Récapitulatif détaillé, puis validation.
 
 Saisie directe du total possible en secours.
+
+Précisions :
+- Un bouton **Terminer maintenant** arrête le comptage avant la fin (incident).
+- Le récapitulatif montre le nombre de chaque action dans des champs **modifiables**, avec le total recalculé ; c'est aussi l'écran de correction.
+- Le résultat enregistré est le total des points, avec le **détail des actions** (ex. « Panier ×3, Cercle ×2, Cadre ×1 »), affiché dans l'historique des essais.
+- Plus de tirs que le nombre autorisé → avertissement (§ 10.1).
+- Le son et la vibration dépendent du téléphone (pas de vibration sur iPhone ; pas de son si le téléphone est en silencieux).
+- Sans JavaScript, l'arbitre tape directement le nombre de chaque action.
 
 ### 8.6 Dossards restants
 
@@ -476,6 +494,8 @@ Les vérifications sont des **avertissements non bloquants**, sauf mention contr
 | Valeur très éloignée de la médiane de la catégorie (une fois quelques résultats disponibles) | Avertissement |
 | **Mauvaise distance probable** : temps plus proche de la distribution de l'autre variante (ex. temps d'un CE1 typique du 40 m) | Avertissement « Distance correcte ? » |
 | Doublon probable (même dossard, même épreuve, même valeur à quelques secondes d'intervalle) | Avertissement ; dédoublonnage à la synchronisation |
+| Mode compteur : plus de tirs que le nombre autorisé | Avertissement |
+| Course : même dossard saisi deux fois | **Bloquant** |
 
 ### 10.2 Contrôles globaux
 

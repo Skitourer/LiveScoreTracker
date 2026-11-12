@@ -1,0 +1,108 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('entry.race') }} · {{ t('workshop.' ~ workshop.id ~ '.name') }}{% endblock %}
+
+{% block content %}
+    {% include 'entry/_nav.html.twig' %}
+    <p><a href="{{ url_for('entry-workshop', {workshop: workshop.id}) }}">← {{ t('entry.other_race') }}</a></p>
+
+    {# Visual check of the children and their events before the start (spec § 8.4). #}
+    <ol class="race-lanes">
+        {% for lane in lanes %}
+            {% set child = lane.child %}
+            <li class="race-lane">
+                <span class="bib">{{ child.bib }}</span>
+                <span class="race-name">{{ child.publicName() }}</span>
+                <span>{{ label('level.' ~ child.child.level) }} → <strong>{{ event_label(lane.variant) }}</strong></span>
+                <span class="meta">
+                    {% if lane.progress.isFinished() %}<span class="badge muted">{{ t('entry.attempts_finished', {of: lane.variant.attempts}) }}</span>
+                    {% else %}{{ t('entry.attempt_number', {number: lane.progress.nextNumber(), of: lane.variant.attempts}) }}{% endif %}
+                    · <a href="{{ url_for('entry-child', {workshop: workshop.id, bib: child.bib}) }}">{{ t('entry.see_attempts') }}</a>
+                </span>
+                {% if not child.isPresent() %}<span class="badge warning">{{ t('entry.not_checked_in') }}</span>{% endif %}
+            </li>
+        {% endfor %}
+    </ol>
+    {% if different_events %}<p class="notice warning">{{ t('entry.different_events') }}</p>{% endif %}
+
+    {% if open %}
+        {% if mode == 'timer' %}
+            {# The phone's stopwatch (app.js); hidden without JavaScript, where the form below works as the manual mode. #}
+            <section class="stopwatch" hidden
+                data-review="{{ review ? '1' : '0' }}"
+                data-label-start="{{ t('entry.timer.start') }}" data-label-finish="{{ t('entry.timer.finish') }}"
+                data-place-first="{{ t('entry.timer.place_first') }}" data-place-other="{{ t('entry.timer.place_other') }}"
+                data-confirm-leave="{{ t('entry.timer.confirm_leave') }}"
+                data-decimal="{{ t('format.decimal_separator') }}">
+                <output class="stopwatch-clock" aria-live="off">0{{ t('format.decimal_separator') }}00</output>
+                <button type="button" class="button large stopwatch-go">{{ t('entry.timer.start') }}</button>
+                <div class="stopwatch-dnf">
+                    {% for lane in lanes %}
+                        <button type="button" class="button secondary" data-lane="{{ loop.index }}" disabled>{{ t('entry.timer.dnf', {name: lane.child.publicName()}) }}</button>
+                    {% endfor %}
+                </div>
+                <button type="button" class="button danger stopwatch-cancel" data-confirm-text="{{ t('entry.timer.confirm_cancel') }}">{{ t('entry.timer.cancel') }}</button>
+            </section>
+        {% endif %}
+
+        <form method="post" class="form entry-form race-form" action="{{ self }}">
+            {{ csrf_field() }}
+            <input type="hidden" name="bib1" value="{{ lanes[0].child.bib }}">
+            <input type="hidden" name="bib2" value="{{ lanes[1] is defined ? lanes[1].child.bib : '' }}">
+            <input type="hidden" name="mode" value="{{ mode }}">
+
+            {% if warnings|filter(w => w is not empty) is not empty %}
+                <div class="notice warning">{{ t('entry.confirm_hint') }}</div>
+                <input type="hidden" name="confirm" value="1">
+            {% endif %}
+
+            {% if mode == 'timer' and lanes|length > 1 %}
+                <button type="button" class="button secondary race-swap" hidden>{{ t('entry.timer.swap') }}</button>
+            {% endif %}
+
+            {% for lane in lanes %}
+                {% set i = loop.index0 %}
+                {% set n = loop.index %}
+                {% set form = forms[i] %}
+                {% set variant = lane.variant %}
+                <fieldset class="race-result" data-lane="{{ n }}" data-time-format="{{ variant.timeFormat ? variant.timeFormat.value : 'ss.cc' }}">
+                    <legend><span class="bib">{{ lane.child.bib }}</span> {{ lane.child.publicName() }} <small>{{ event_label(variant) }}</small></legend>
+                    <p class="race-place" hidden></p>
+                    <input type="hidden" name="{{ n }}_entry_id" value="{{ form.entry_id }}">
+                    <input type="hidden" name="{{ n }}_timed" value="{{ form.timed }}" class="race-timed">
+
+                    {% if errors[i] is defined %}<p class="flash error">{{ t(errors[i]) }}</p>{% endif %}
+                    {% if warnings[i] is defined and warnings[i] is not empty %}
+                        <ul class="notice warning">{% for warning in warnings[i] %}<li>{{ t('entry.warning.' ~ warning, {of: variant.attempts}) }}</li>{% endfor %}</ul>
+                    {% endif %}
+
+                    <label>{{ t('entry.time') }} <small>{{ t('entry.hint.time_' ~ (variant.timeFormat ? variant.timeFormat.value : 'ss.cc')|replace({':': '', '.': ''})) }}</small>
+                        <input type="text" name="{{ n }}_value" class="result-input" inputmode="numeric" pattern="[0-9]*" maxlength="7" autocomplete="off" value="{{ form.value }}"
+                            data-output="interpreted-{{ n }}"
+                            data-measure="time" data-time-format="{{ variant.timeFormat ? variant.timeFormat.value : '' }}"
+                            data-unit-seconds="{{ t('unit.seconds') }}" data-unit-minutes="{{ t('unit.minutes_seconds') }}" data-unit-metres="{{ t('unit.metres') }}" data-unit-points="{{ t('unit.points') }}"
+                            data-decimal="{{ t('format.decimal_separator') }}" data-invalid="{{ t('entry.error.invalid_value') }}">
+                    </label>
+                    <output class="interpreted" id="interpreted-{{ n }}" aria-live="polite">{{ interpreted[i] }}</output>
+
+                    <label class="choice"><input type="checkbox" name="{{ n }}_dnf" value="1" class="race-dnf" {% if form.dnf %}checked{% endif %}> {{ t('entry.did_not_finish') }}</label>
+
+                    {% for modifier in variant.modifiers %}
+                        {% set value = form.modifiers[modifier.id] ?? 0 %}
+                        {% if modifier.repeatable %}
+                            <label>{{ t('modifier.' ~ modifier.id) }} ({{ modifier.value > 0 ? '+' : '' }}{{ result(modifier.value, variant) }})
+                                <input type="number" name="{{ n }}_mod_{{ modifier.id }}" min="0" max="99" inputmode="numeric" value="{{ value }}">
+                            </label>
+                        {% else %}
+                            <label class="choice"><input type="checkbox" name="{{ n }}_mod_{{ modifier.id }}" value="1" {% if value > 0 %}checked{% endif %}>
+                                {{ t('modifier.' ~ modifier.id) }} ({{ modifier.value > 0 ? '+' : '' }}{{ result(modifier.value, variant) }})</label>
+                        {% endif %}
+                    {% endfor %}
+                </fieldset>
+            {% endfor %}
+
+            <button type="submit" class="button large">{{ warnings|filter(w => w is not empty) is empty ? t('entry.save') : t('entry.save_anyway') }}</button>
+            <a class="button danger race-abandon" href="{{ url_for('entry-workshop', {workshop: workshop.id}) }}">{{ t('entry.timer.cancel') }}</a>
+        </form>
+    {% endif %}
+{% endblock %}

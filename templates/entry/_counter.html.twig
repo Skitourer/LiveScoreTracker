@@ -1,0 +1,62 @@
+{#
+    Counter event (spec § 8.5): one big button per action, live total, undo,
+    automatic end (time up or last shot) with a beep and a vibration (app.js).
+    Without JavaScript, or to check and correct, the counts are typed in the
+    fields below. The total can also be typed directly, as a fallback.
+#}
+{% set limit = variant.limit %}
+{% set tally = form.tally %}
+<div class="counter" hidden
+    data-review="{{ counter_review ? '1' : '0' }}"
+    data-limit-type="{{ limit ? limit.type.value : '' }}" data-limit-value="{{ limit ? limit.value : 0 }}"
+    data-label-shot="{{ t('entry.counter.shot') }}" data-label-points="{{ t('unit.points') }}"
+    data-confirm-leave="{{ t('entry.counter.confirm_leave') }}">
+    <p class="counter-status"><output class="counter-clock"></output></p>
+    <output class="counter-total">{{ t('unit.points', {value: 0}) }}</output>
+    <button type="button" class="button large counter-start">{{ t('entry.counter.start') }}</button>
+    <div class="counter-actions">
+        {% for action in variant.actions %}
+            <button type="button" class="counter-action" data-action="{{ action.id }}" data-points="{{ action.points }}" disabled>
+                {{ t('action.' ~ action.id) }} <small>+{{ action.points }}</small> <span class="counter-count">0</span>
+            </button>
+        {% endfor %}
+        {% if limit and limit.type.value == 'shots' %}
+            <button type="button" class="counter-action missed" data-action="missed" data-points="0" disabled>
+                {{ t('entry.counter.missed') }} <span class="counter-count">0</span>
+            </button>
+        {% endif %}
+    </div>
+    <div class="toolbar">
+        <button type="button" class="button secondary counter-undo" disabled>{{ t('entry.counter.undo') }}</button>
+        <button type="button" class="button secondary counter-stop" disabled>{{ t('entry.counter.stop') }}</button>
+    </div>
+</div>
+
+<fieldset class="counter-counts">
+    <legend>{{ t('entry.counter.summary') }}{% if limit %} <small>{{ limit.type.value == 'shots' ? t('entry.counter.limit_shots', {count: limit.value}) : t('entry.counter.limit_duration', {duration: (limit.value // 60) ~ ':' ~ '%02d'|format(limit.value % 60)}) }}</small>{% endif %}</legend>
+    {% for action in variant.actions %}
+        <label>{{ t('action.' ~ action.id) }} (+{{ action.points }})
+            <input type="number" name="act_{{ action.id }}" min="0" max="999" inputmode="numeric" value="{{ tally ? (tally.counts[action.id] ?? 0) : 0 }}" data-points="{{ action.points }}">
+        </label>
+    {% endfor %}
+    {% if limit and limit.type.value == 'shots' %}
+        <label>{{ t('entry.counter.missed') }}
+            <input type="number" name="missed" min="0" max="999" inputmode="numeric" value="{{ tally ? tally.missed : 0 }}" data-points="0">
+        </label>
+    {% endif %}
+    <output class="interpreted counter-sum" aria-live="polite">{{ tally ? interpreted : '' }}</output>
+    <button type="submit" name="kind" value="counter" class="button large">{{ warnings is empty ? t('entry.save') : t('entry.save_anyway') }}</button>
+</fieldset>
+
+<details class="counter-direct"{% if form.kind == 'value' and form.value is not empty %} open{% endif %}>
+    <summary>{{ t('entry.counter.direct') }}</summary>
+    <label>{{ t('entry.counter.direct_total') }} <small>{{ t('entry.hint.counter') }}</small>
+        <input type="text" name="value" class="result-input" inputmode="numeric" pattern="[0-9]*" maxlength="7" autocomplete="off" value="{{ form.value }}"
+            data-output="counter-direct-value" data-measure="counter"
+            data-unit-points="{{ t('unit.points') }}" data-decimal="{{ t('format.decimal_separator') }}" data-invalid="{{ t('entry.error.invalid_value') }}">
+    </label>
+    <output class="interpreted" id="counter-direct-value" aria-live="polite">{{ form.kind == 'value' ? interpreted : '' }}</output>
+    <button type="submit" name="kind" value="value" class="button secondary">{{ t('entry.save') }}</button>
+</details>
+
+<button type="submit" name="kind" value="foul" class="button danger">{{ t('entry.foul_button') }}</button>

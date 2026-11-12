@@ -23,8 +23,9 @@ final class AttemptRepository
     ) {}
 
     /**
-     * @param array<string, int> $modifiers
-     * @param list<string>       $warnings
+     * @param array<string, int>   $modifiers
+     * @param list<string>         $warnings
+     * @param array<string, mixed> $details   how the value was obtained (timer, counter detail)
      *
      * @return int id of the stored attempt (the existing one if this entry was already received)
      */
@@ -38,6 +39,7 @@ final class AttemptRepository
         int $modifierTotal,
         array $warnings,
         Author $author,
+        array $details = [],
         ?int $originalId = null,
     ): int {
         $existing = $this->idForClient($clientId);
@@ -47,9 +49,9 @@ final class AttemptRepository
         try {
             $this->pdo->prepare(
                 'INSERT INTO attempts (client_id, original_id, registration_id, bib, variant_id, measured, modifiers, modifier_total,
-                    warnings, entered_at, user_id, username, referee_name, device_id)
+                    warnings, details, entered_at, user_id, username, referee_name, device_id)
                  VALUES (:client, :original, :reg, :bib, :variant, :measured, :modifiers, :total,
-                    :warnings, :at, :uid, :username, :referee, :device)',
+                    :warnings, :details, :at, :uid, :username, :referee, :device)',
             )->execute([
                 'client' => $clientId,
                 'original' => $originalId,
@@ -60,6 +62,7 @@ final class AttemptRepository
                 'modifiers' => $modifiers === [] ? null : json_encode($modifiers, JSON_THROW_ON_ERROR),
                 'total' => $modifierTotal,
                 'warnings' => $warnings === [] ? null : json_encode($warnings, JSON_THROW_ON_ERROR),
+                'details' => $details === [] ? null : json_encode($details, JSON_THROW_ON_ERROR),
                 'at' => $this->clock->stamp(),
                 'uid' => $author->userId,
                 'username' => $author->username,
@@ -77,17 +80,18 @@ final class AttemptRepository
     /**
      * Records a corrected version of an attempt and closes the previous one.
      *
-     * @param array<string, int> $modifiers
-     * @param list<string>       $warnings
+     * @param array<string, int>   $modifiers
+     * @param list<string>         $warnings
+     * @param array<string, mixed> $details
      */
-    public function correct(StoredAttempt $previous, string $clientId, ?int $measured, array $modifiers, int $modifierTotal, array $warnings, Author $author): int
+    public function correct(StoredAttempt $previous, string $clientId, ?int $measured, array $modifiers, int $modifierTotal, array $warnings, Author $author, array $details = []): int
     {
         if ($this->idForClient($clientId) !== null || !$previous->isCurrent()) {
             return $this->idForClient($clientId) ?? $previous->id;
         }
         $this->pdo->beginTransaction();
         try {
-            $id = $this->record($clientId, $previous->registrationId, $previous->bib, $previous->variantId, $measured, $modifiers, $modifierTotal, $warnings, $author, $previous->originalId);
+            $id = $this->record($clientId, $previous->registrationId, $previous->bib, $previous->variantId, $measured, $modifiers, $modifierTotal, $warnings, $author, $details, $previous->originalId);
             $this->pdo->prepare('UPDATE attempts SET replaced_at = :at WHERE id = :id')->execute(['at' => $this->clock->stamp(), 'id' => $previous->id]);
             $this->pdo->commit();
         } catch (PDOException $exception) {
@@ -207,6 +211,7 @@ final class AttemptRepository
             modifiers: $modifiers,
             modifierTotal: Row::int($row, 'modifier_total'),
             warnings: array_values(array_filter(self::json(Row::nullableString($row, 'warnings')), \is_string(...))),
+            details: self::stringKeys(self::json(Row::nullableString($row, 'details'))),
             enteredAt: Row::string($row, 'entered_at'),
             username: Row::nullableString($row, 'username'),
             refereeName: Row::nullableString($row, 'referee_name'),
@@ -214,6 +219,21 @@ final class AttemptRepository
             deletedAt: Row::nullableString($row, 'deleted_at'),
             deletedBy: Row::nullableString($row, 'deleted_by'),
         );
+    }
+
+    /**
+     * @param array<mixed> $values
+     *
+     * @return array<string, mixed>
+     */
+    private static function stringKeys(array $values): array
+    {
+        $result = [];
+        foreach ($values as $key => $value) {
+            $result[(string) $key] = $value;
+        }
+
+        return $result;
     }
 
     /**

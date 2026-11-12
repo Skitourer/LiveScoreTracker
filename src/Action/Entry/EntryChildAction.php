@@ -6,11 +6,13 @@ namespace LiveScoreTracker\Action\Entry;
 
 use LiveScoreTracker\Action\Support\Responder;
 use LiveScoreTracker\Application\EntryDesk;
+use LiveScoreTracker\Domain\Config\Measure;
 use LiveScoreTracker\Domain\Config\Variant;
 use LiveScoreTracker\Domain\Measurement\EntryParser;
 use LiveScoreTracker\Domain\Registration\AttendanceMark;
 use LiveScoreTracker\Domain\Registration\Registration;
 use LiveScoreTracker\Domain\Results\AttemptProgress;
+use LiveScoreTracker\Domain\Results\CounterTally;
 use LiveScoreTracker\Domain\Results\EntryChecks;
 use LiveScoreTracker\Domain\Results\StoredAttempt;
 use LiveScoreTracker\Domain\Security\Phase;
@@ -28,6 +30,9 @@ use Slim\Exception\HttpNotFoundException;
  * (first name + initial, level, event), the attempt number and the attempts
  * already made; then the result or "foul", the modifiers, and the warnings
  * to confirm (spec § 10.1). Also corrects or deletes an attempt.
+ *
+ * Counter events (spec § 8.5) are entered with the live counter, whose counts
+ * are sent with kind=counter; typing the total directly stays possible.
  *
  * Results are entered only while the competition runs.
  */
@@ -60,10 +65,12 @@ final class EntryChildAction
         $progress = $this->desk->progress($child, $variant);
         $open = $this->responder->context->phase === Phase::Running;
         $correcting = $this->editable($progress, (int) Responder::query($request, 'correct'));
-        $form = ['value' => '', 'kind' => 'value', 'modifiers' => [], 'entry_id' => bin2hex(random_bytes(16))];
+        $form = ['value' => '', 'kind' => 'value', 'modifiers' => [], 'entry_id' => EntryFields::newEntryId(), 'tally' => null];
         if ($correcting !== null) {
-            $form['value'] = $correcting->measured === null ? '' : EntryParser::toDigits($correcting->measured, $variant->measure, $variant->timeFormat);
+            $tally = CounterTally::fromDetails($correcting->details);
+            $form['value'] = $correcting->measured === null || $tally !== null ? '' : EntryParser::toDigits($correcting->measured, $variant->measure, $variant->timeFormat);
             $form['modifiers'] = $correcting->modifiers;
+            $form['tally'] = $tally;
         }
         $errors = [];
         $warnings = [];
@@ -90,14 +97,22 @@ final class EntryChildAction
             }
             if ($op === 'record' || ($op === 'correct' && $target !== null)) {
                 $correcting = $op === 'correct' ? $target : null;
+                $kind = Responder::field($request, 'kind');
+                $isCounter = $kind === 'counter' && $variant->measure === Measure::Counter;
                 $form = [
                     'value' => Responder::field($request, 'value'),
-                    'kind' => Responder::field($request, 'kind') === 'foul' ? 'foul' : 'value',
-                    'modifiers' => self::modifiers($request, $variant),
-                    'entry_id' => preg_match('/^[a-f0-9]{32}$/', Responder::field($request, 'entry_id')) === 1 ? Responder::field($request, 'entry_id') : $form['entry_id'],
+                    'kind' => $kind === 'foul' ? 'foul' : ($isCounter ? 'counter' : 'value'),
+                    'modifiers' => EntryFields::modifiers($request, $variant),
+                    'entry_id' => EntryFields::entryId($request, 'entry_id'),
+                    'tally' => $isCounter ? EntryFields::tally($request, $variant) : null,
                 ];
                 $measured = null;
-                if ($form['kind'] === 'value') {
+                $details = [];
+                if ($form['tally'] !== null) {
+                    // Counter: the result is the total of the actions, with their detail (spec § 8.5).
+                    $measured = $form['tally']->total($variant);
+                    $details = $form['tally']->toDetails();
+                } elseif ($form['kind'] === 'value') {
                     $measured = EntryParser::parse($form['value'], $variant->measure, $variant->timeFormat);
                     if ($measured === null) {
                         $errors['entry.error.invalid_value'] = [];
@@ -105,11 +120,14 @@ final class EntryChildAction
                 }
                 if ($errors === []) {
                     $warnings = EntryChecks::check($progress, $measured, $child->isPresent(), $correcting === null, $this->clock->now()->getTimestamp());
+                    if ($form['tally'] !== null) {
+                        $warnings = [...$warnings, ...$form['tally']->warnings($variant)];
+                    }
                     if ($warnings === [] || Responder::field($request, 'confirm') === '1') {
                         $modifiers = $measured === null ? [] : $form['modifiers'];
-                        $total = self::modifierTotal($variant, $modifiers);
+                        $total = EntryFields::modifierTotal($variant, $modifiers);
 
-                        return $this->save($response, $back, $self, $child, $variant, $progress, $correcting, $form['entry_id'], $measured, $modifiers, $total, $warnings);
+                        return $this->save($response, $back, $self, $child, $variant, $progress, $correcting, $form['entry_id'], $measured, $modifiers, $total, $warnings, $details);
                     }
                 }
             }
@@ -127,12 +145,15 @@ final class EntryChildAction
             'errors' => $errors,
             'warnings' => $warnings,
             'interpreted' => $this->interpreted($form, $variant),
+            // The counter shows the counts to check instead of starting a new run.
+            'counter_review' => $correcting !== null || $request->getMethod() === 'POST',
         ], $errors === [] && $warnings === [] ? 200 : 422);
     }
 
     /**
-     * @param array<string, int> $modifiers
-     * @param list<string>       $warnings
+     * @param array<string, int>   $modifiers
+     * @param list<string>         $warnings
+     * @param array<string, mixed> $details
      */
     private function save(
         ResponseInterface $response,
@@ -147,17 +168,18 @@ final class EntryChildAction
         array $modifiers,
         int $total,
         array $warnings,
+        array $details,
     ): ResponseInterface {
         $author = Author::from($this->responder->context);
         $result = $measured === null ? null : $this->formatter->format(max(0, $measured + $total), $variant);
         $params = ['name' => $child->publicName(), 'bib' => (string) $child->bib, 'result' => $result ?? '', 'number' => $progress->nextNumber(), 'of' => $variant->attempts];
         if ($correcting !== null) {
-            $this->attempts->correct($correcting, $entryId, $measured, $modifiers, $total, $warnings, $author);
+            $this->attempts->correct($correcting, $entryId, $measured, $modifiers, $total, $warnings, $author, $details);
             $this->responder->flash('success', $measured === null ? 'entry.corrected_foul' : 'entry.corrected', $params);
 
             return $this->responder->redirect($response, $self);
         }
-        $this->attempts->record($entryId, $child->id, (int) $child->bib, $variant->id(), $measured, $modifiers, $total, $warnings, $author);
+        $this->attempts->record($entryId, $child->id, (int) $child->bib, $variant->id(), $measured, $modifiers, $total, $warnings, $author, $details);
         $this->responder->flash($warnings === [] ? 'success' : 'warning', $measured === null ? 'entry.recorded_foul' : 'entry.recorded', $params);
 
         // Back to the bib field for the next child.
@@ -208,42 +230,15 @@ final class EntryChildAction
     }
 
     /**
-     * @return array<string, int> modifier id => times applied (only those applied)
-     */
-    private static function modifiers(ServerRequestInterface $request, Variant $variant): array
-    {
-        $applied = [];
-        foreach ($variant->modifiers as $modifier) {
-            $raw = Responder::field($request, 'mod_' . $modifier->id);
-            $count = $modifier->repeatable ? (ctype_digit($raw) ? min((int) $raw, 99) : 0) : ($raw === '1' ? 1 : 0);
-            if ($count > 0) {
-                $applied[$modifier->id] = $count;
-            }
-        }
-
-        return $applied;
-    }
-
-    /**
-     * @param array<string, int> $applied
-     */
-    private static function modifierTotal(Variant $variant, array $applied): int
-    {
-        $total = 0;
-        foreach ($variant->modifiers as $modifier) {
-            $total += $modifier->value * ($applied[$modifier->id] ?? 0);
-        }
-
-        return $total;
-    }
-
-    /**
      * The value as understood, shown large before validation (spec § 7.3).
      *
-     * @param array{value: string, kind: string, modifiers: array<string, int>, entry_id: string} $form
+     * @param array{value: string, kind: string, modifiers: array<string, int>, entry_id: string, tally: CounterTally|null} $form
      */
     private function interpreted(array $form, Variant $variant): ?string
     {
+        if ($form['tally'] !== null) {
+            return $this->formatter->format($form['tally']->total($variant), $variant);
+        }
         $measured = $form['kind'] === 'value' ? EntryParser::parse($form['value'], $variant->measure, $variant->timeFormat) : null;
 
         return $measured === null ? null : $this->formatter->format($measured, $variant);

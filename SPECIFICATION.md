@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.12 — 11 November 2026
+> Version 1.13 — 12 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -319,7 +319,7 @@ Details:
 - A result saved with a confirmed warning is flagged **"to check"** (checks dashboard, step 8).
 - Each entry carries a unique id created with the form: sending it twice (double tap, slow network) saves it once.
 - A child not checked in can be **marked present** from the entry screen, after confirmation.
-- Timed and counter events are entered as a standard result for now (time measured with an external stopwatch, total points); the built-in timer and the counter come in step 6.
+- Time events are entered by **race** (§ 8.4) and counter events with the **counter** (§ 8.5). The single-child screen remains available to view and correct a child's attempts.
 
 ### 8.3 Correction
 
@@ -349,6 +349,16 @@ The timer runs **on the phone** and works offline. The Finish button is only act
 
 Both modes are always available. The configuration sets the default mode.
 
+Details:
+- On a time workshop, the "bib" screen shows the race fields (the 2nd bib is optional) and two buttons, **Built-in timer** and **External stopwatch**, the default mode first. A separate field opens a bib's attempts to view or correct them.
+- Checks before the start: unknown bib, wrong level or bib typed twice → refused. Two children on different variants (e.g. a CP child on 30 m and a CM1 child on 40 m) → allowed, with a clearly visible message.
+- The time is taken **when the button is touched** (not when released), then rounded down to the hundredth, as on a stopwatch.
+- The first time goes to the first bib typed; **Swap** exchanges the two times. With a "Did not finish", the only time goes to the other child.
+- The race is approved **as a whole**: nothing is saved until both times are readable and the warnings (§ 10.1) confirmed.
+- Each time records where it came from: **built-in timer**, or **built-in timer, time edited by hand** when the referee changed it before approval (shown in the attempt history).
+- Leaving the page during a race asks for confirmation.
+- Without JavaScript, the screen works as the external stopwatch mode.
+
 ### 8.5 Counter-mode entry
 
 1. Enter the bib, verification.
@@ -358,6 +368,14 @@ Both modes are always available. The configuration sets the default mode.
 5. Detailed summary, then approval.
 
 Direct entry of the total is possible as a fallback.
+
+Details:
+- A **Stop now** button ends the count early (incident).
+- The summary shows the count of each action in **editable** fields, with the total recomputed; it is also the correction screen.
+- The saved result is the total of the points, with the **detail of the actions** (e.g. "Basket ×3, Rim ×2, Board ×1"), shown in the attempt history.
+- More shots than allowed → warning (§ 10.1).
+- Sound and vibration depend on the phone (no vibration on iPhone; no sound when the phone is on silent).
+- Without JavaScript, the referee types the count of each action.
 
 ### 8.6 Remaining bibs
 
@@ -476,6 +494,8 @@ Checks are **non-blocking warnings** unless stated otherwise. The affected resul
 | Value far from the category median (once some results exist) | Warning |
 | **Probable wrong distance**: time closer to the other variant's distribution (e.g. a CE1 time typical of the 40 m) | Warning "Correct distance?" |
 | Probable duplicate (same bib, same event, same value within a few seconds) | Warning; deduplication during sync |
+| Counter mode: more shots than allowed | Warning |
+| Race: same bib typed twice | **Blocking** |
 
 ### 10.2 Global checks
 
