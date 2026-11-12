@@ -16,6 +16,7 @@ C'est une application web pensée d'abord pour le téléphone, en PHP (Slim 4) a
 - **Hors ligne** : le téléphone construit lui-même ses écrans de saisie, le suivi et l'aide à partir du « paquet de l'atelier », garde les saisies et les envoie au retour du réseau.
 - **Points et classements** : points par épreuve selon des règles configurables, totaux et départage (premières places, places dans le top 3, plus jeune, puis à la main).
 - **Contrôles** : résultats « à vérifier », valeurs loin de la médiane, mauvaise distance probable, égalités à trancher, saisies arrivées après la clôture.
+- **Documents** : feuilles de secours pour la saisie papier (par épreuve, triées par dossard), fiches des épreuves, podiums et classements complets (PDF), classements et résultats détaillés (Excel).
 - **Affichages** : page d'accueil publique, espace participant (dossard + date de naissance), écran d'avancement pour un vidéoprojecteur, écran de cérémonie piloté depuis un téléphone.
 - **Sécurité et vie privée** : rôles et permissions, double authentification des admins, limitation des tentatives de connexion, protection CSRF, politique de sécurité du contenu stricte, journal d'audit, prénom + initiale affichés partout où c'est possible.
 - Interface en **français et en anglais** ; tout ce qui est propre à une édition (ateliers, barèmes, écoles, textes) est dans des fichiers de configuration.

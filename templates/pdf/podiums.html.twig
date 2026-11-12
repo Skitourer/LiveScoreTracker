@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="UTF-8">
+<title>{{ t('documents.podiums.title') }}</title>
+{% include 'pdf/_style.html.twig' %}
+<style>
+    .rank { width: 14mm; font-size: 14pt; font-weight: bold; }
+    .name { font-size: 13pt; }
+</style>
+</head>
+<body>
+<header>{{ edition.name }} — {{ edition.date|date('d/m/Y') }}{% if not closed %}<span class="provisional">{{ t('documents.provisional') }}</span>{% endif %}</header>
+<footer>{{ t('documents.state_at', {at: local_time(printedAt)}) }} · {{ t('reception_list.page') }} <span class="page"></span></footer>
+<h1>{{ t('documents.podiums.title') }}{% if not closed %} <span class="stamp">{{ t('documents.provisional') }}</span>{% endif %}</h1>
+{% for podium in podiums %}
+    <div class="keep">
+        <h2>{{ category_label(podium.category) }}</h2>
+        {% if podium.lines is empty %}
+            <p class="small">{{ t('documents.podiums.none') }}</p>
+        {% else %}
+            <table>
+                <tbody>
+                {% for line in podium.lines %}
+                    {% set child = podium.children[line.bib] %}
+                    <tr>
+                        <td class="rank">{{ line.rank }}</td>
+                        <td class="name"><strong>{{ child.child.firstName }}</strong> <span class="last">{{ child.child.lastName }}</span>{% if line.tied %} <span class="small">({{ t('documents.tied') }})</span>{% endif %}</td>
+                        <td class="small">{{ child.child.school }}</td>
+                        <td class="bib">{{ line.bib }}</td>
+                        <td class="num">{{ t('documents.points', {points: line.total}) }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+{% endfor %}
+</body>
+</html>

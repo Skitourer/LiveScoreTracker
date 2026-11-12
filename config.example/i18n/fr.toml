@@ -261,6 +261,7 @@ referee_account = "Compte des arbitres"
 audit_log = "Journal d'audit"
 configuration = "Configuration"
 system_status = "État du système"
+documents = "Documents"
 ceremony = "Cérémonie"
 
 [phase]
@@ -385,6 +386,7 @@ older = "Plus anciennes"
 "referee.disconnected_all" = "Téléphones des arbitres déconnectés"
 "phase.changed" = "Changement de phase"
 "setup.first_admin" = "Premier admin créé"
+"documents.downloaded" = "Document téléchargé"
 "reception.list_printed" = "Liste d'accueil imprimée"
 "auth.device_trusted" = "Appareil de confiance ajouté"
 "auth.device_untrusted" = "Appareil de confiance retiré"
@@ -710,6 +712,83 @@ bib_returned = "{name} ({bib}) : dossard rendu."
 bib_returned_undone = "{name} ({bib}) : retour du dossard annulé."
 gift_given = "{name} ({bib}) : cadeau et médaille remis."
 gift_given_undone = "{name} ({bib}) : remise du cadeau annulée."
+
+[documents]
+title = "Documents"
+lead = "Documents à imprimer et exports. Ils contiennent les noms complets des enfants : chaque téléchargement est inscrit au journal d'audit."
+before = "Avant la compétition"
+results_heading = "Résultats"
+provisional = "PROVISOIRE"
+provisional_notice = "La compétition n'est pas clôturée : les podiums et classements sont provisoires et marqués comme tels."
+privacy = "Ces documents contiennent des données personnelles : ne les diffusez pas et détruisez les copies papier après l'événement."
+state_at = "État au {at}"
+empty = "Aucune épreuve configurée."
+tied = "ex æquo"
+points = "{points} pts"
+results_title = "Résultats détaillés"
+
+[documents.rescue_sheets]
+download = "Feuilles de secours (PDF)"
+hint = "Une feuille par épreuve et groupe de classes, enfants triés par dossard, avec des lignes vides pour les inscrits de dernière minute. À utiliser si les téléphones ne fonctionnent pas."
+title = "Feuilles de secours"
+file_name = "feuilles-secours"
+levels = "Classes : {levels}"
+referee = "Arbitre :"
+outdated = "Dernière impression le {at} : {count} inscription(s) ajoutée(s) ou modifiée(s) depuis. Pensez à réimprimer."
+up_to_date = "Dernière impression le {at}, aucune inscription modifiée depuis."
+
+[documents.help_sheets]
+download = "Fiches des épreuves (PDF)"
+hint = "L'aide de chaque atelier, une page par atelier, avec les contacts utiles."
+title = "Fiches des épreuves"
+file_name = "fiches-epreuves"
+
+[documents.registrations]
+download = "Inscriptions (Excel)"
+
+[documents.podiums]
+download = "Podiums (PDF)"
+title = "Podiums"
+file_name = "podiums"
+none = "Aucun enfant classé."
+
+[documents.rankings]
+download = "Classements complets (PDF)"
+download_xlsx = "Classements complets (Excel)"
+title = "Classements"
+file_name = "classements"
+
+[documents.results_xlsx]
+download = "Résultats détaillés (Excel)"
+hint = "Tous les essais retenus, avec l'auteur et l'heure de la saisie."
+
+[documents.results]
+file_name = "resultats"
+
+[documents.unit]
+time = "Temps (min:s,cc)"
+distance = "Distance (m)"
+score = "Points"
+counter = "Compte"
+
+[documents.col]
+rank = "Rang"
+bib = "Dossard"
+child = "Enfant"
+present = "Présent"
+attempt = "Essai {n}"
+count = "Total"
+modifiers = "Bonus/pénalités"
+notes = "Remarques"
+total = "Total"
+first_places = "1res places"
+top3_places = "Places 1 à 3"
+event = "Épreuve"
+value = "Mesure"
+result = "Résultat"
+entered_at = "Saisi le"
+entered_by = "Saisi par"
+to_check = "À vérifier"
 
 [reception_list]
 page = "page"

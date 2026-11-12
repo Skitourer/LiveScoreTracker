@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="UTF-8">
+<title>{{ t('documents.help_sheets.title') }}</title>
+{% include 'pdf/_style.html.twig' %}
+</head>
+<body>
+<header>{{ edition.name }} — {{ edition.date|date('d/m/Y') }}</header>
+<footer>{{ t('reception_list.printed_at', {at: local_time(printedAt)}) }} · {{ t('reception_list.page') }} <span class="page"></span></footer>
+{% for sheet in sheets %}
+    <div{% if not loop.first %} class="break"{% endif %}>
+        <h1>{{ t('workshop.' ~ sheet.workshop.id ~ '.name') }}</h1>
+        {% if sheet.help %}{{ sheet.help|raw }}{% else %}<p>{{ t('entry.no_help') }}</p>{% endif %}
+        {% if contacts is not empty %}
+            <h2>{{ t('entry.contacts') }}</h2>
+            <ul>
+                {% for contact in contacts %}<li><strong>{{ t('contact.' ~ contact.role) }}</strong> : {{ contact.name }} — {{ contact.phone }}</li>{% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+{% endfor %}
+</body>
+</html>

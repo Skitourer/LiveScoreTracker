@@ -16,6 +16,7 @@ It is a mobile-first web application in PHP (Slim 4) with MySQL, designed for ch
 - **Offline first**: the phone builds its own entry screens, follow-up and help from a workshop pack, queues the entries and sends them when the network is back (idempotent sync).
 - **Scoring and rankings**: points per event from configurable rules, totals and tie-breaking (first places, top-3 places, youngest, then by hand).
 - **Checks**: results "to check", values far from the median, wrong distance probable, ties to break, entries received after the closing.
+- **Documents**: rescue sheets for paper entry (per event, sorted by bib), event sheets, podiums and full rankings (PDF), rankings and detailed results (spreadsheets).
 - **Displays**: public home page, participant space (bib + birth date), progress screen for a projector, award ceremony screen driven from a phone.
 - **Security and privacy**: roles and permissions, two-factor authentication for admins, throttled logins, CSRF protection, strict content security policy, audit log, only first name + initial shown where possible.
 - Interface in **French and English**; everything specific to an edition (workshops, scoring, schools, texts) lives in configuration files.

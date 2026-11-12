@@ -62,7 +62,7 @@ Each file is looked up first in the installation's **data folder** (outside the 
 - Migrations are numbered SQL files in `migrations/`, applied by `Infrastructure/Database/Migrator` (from `bin/console.php migrate`, or `POST /internal/migrate` with the deployment token, which the deployment workflow calls). Placeholders such as `{{id}}` and `{{table_options}}` adapt the SQL to SQLite and MySQL.
 - One repository class per table group in `Infrastructure/Persistence` (`RegistrationRepository`, `AttemptRepository`, `LateEntryRepository`…). They return domain objects.
 - Results are **never overwritten**: a correction creates a new version of the attempt (`replaced_at`) and a deletion marks it (`deleted_at`), so the history and the audit log stay complete.
-- Small application-wide values (current phase, ceremony state) live in the `app_meta` table (`AppState`).
+- Small application-wide values (current phase, ceremony state, last rescue-sheet printing) live in the `app_meta` table (`AppState`).
 
 ## Front end
 

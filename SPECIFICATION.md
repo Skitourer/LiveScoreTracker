@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.24 — 12 November 2026
+> Version 1.25 — 12 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -421,7 +421,7 @@ Three fallback levels in case of trouble:
 1. **Offline** on the phone (§ 8.8).
 2. **Entry by an admin or organizer** from their interface, for any event and any child.
 3. **Paper, then spreadsheet import**:
-   - **printable paper sheets** (PDF) per workshop and category: bib, first name, last name, attempt and modifier columns;
+   - **printable paper sheets** (PDF) per event and level group, children sorted by bib: bib, last name, first name, grade, "present" box, attempt, modifier and notes columns, a line for the referee's name, an "as of" date and 10 empty lines for last-minute registrations. They are printed the day before: the Documents page tells how many registrations were added or changed since the last printing;
    - **spreadsheet template** downloadable in advance (one sheet per variant, columns: bib, attempts, modifiers);
    - **import** of the filled-in template, with validation and display of conflicts with existing results before approval.
 
@@ -724,13 +724,15 @@ Details (step 9b): address `/participant`, linked from the home page. Only regis
 | Document | Format | Content |
 |---|---|---|
 | Check-in list | PDF | First name, full last name, bib, grade — **sorted by first name** |
-| Backup sheets | PDF | Per workshop and category: bib, first name, last name, attempt and modifier columns |
+| Backup sheets | PDF | Per event and level group, sorted by bib (details in § 8.9) |
 | Backup entry template | Spreadsheet | One sheet per variant |
-| Podiums | PDF | **Top 3 of each category** (first name, last name, total) |
-| Full rankings | PDF / spreadsheet | Per category |
-| Detailed results | Spreadsheet | All attempts, scores, ranks |
+| Podiums | PDF | **Top 3 of each category** (first name, last name, school, bib, total) |
+| Full rankings | PDF / spreadsheet | Per category: rank, bib, name, school, points per event, total (spreadsheet: also the tie-break criteria) |
+| Detailed results | Spreadsheet | Every retained attempt: child, event, measure, modifiers, result, who entered it and when, "to check" |
 | Registrations list | Spreadsheet | All registration information |
 | Event sheets | PDF | Content of the help pages (printed for workshops) |
+
+All documents are gathered on a **Documents** page (admins and organizers). They hold full names: every download is recorded in the audit log. Before the closing, podiums and rankings can be printed but are marked **"PROVISIONAL"**.
 
 ---
 

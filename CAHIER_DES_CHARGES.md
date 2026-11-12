@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.24 — 12 novembre 2026
+> Version 1.25 — 12 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -421,7 +421,7 @@ Trois niveaux de secours en cas de problème :
 1. **Hors ligne** sur le téléphone (§ 8.8).
 2. **Saisie par l'admin ou un organisateur** depuis leur interface, pour n'importe quelle épreuve et n'importe quel enfant.
 3. **Papier, puis import Excel** :
-   - **feuilles papier imprimables** (PDF) par atelier et par catégorie : dossard, prénom, nom, colonnes d'essais et de modificateurs ;
+   - **feuilles papier imprimables** (PDF) par épreuve et par groupe de classes, enfants triés par dossard : dossard, nom, prénom, classe, case « présent », colonnes d'essais, de modificateurs et de remarques, ligne pour le nom de l'arbitre, date « état au » et 10 lignes vides pour les inscrits de dernière minute. Elles sont imprimées la veille : la page Documents indique combien d'inscriptions ont été ajoutées ou modifiées depuis la dernière impression ;
    - **modèle Excel** téléchargeable à l'avance (une feuille par variante, colonnes dossard, essais, modificateurs) ;
    - **import** du modèle rempli, avec contrôle et affichage des conflits avec les résultats existants avant validation.
 
@@ -724,13 +724,15 @@ Précisions (étape 9b) : adresse `/participant`, liée depuis l'accueil. Seuls 
 | Document | Format | Contenu |
 |---|---|---|
 | Liste d'accueil | PDF | Prénom, nom complet, dossard, classe — **triée par prénom** |
-| Feuilles de secours | PDF | Par atelier et catégorie : dossard, prénom, nom, colonnes d'essais et de modificateurs |
+| Feuilles de secours | PDF | Par épreuve et groupe de classes, triées par dossard (détail § 8.9) |
 | Modèle de saisie de secours | Excel | Une feuille par variante |
-| Podiums | PDF | Les **3 premiers de chaque catégorie** (prénom, nom, total) |
-| Classements complets | PDF / Excel | Par catégorie |
-| Résultats détaillés | Excel | Tous les essais, scores, rangs |
+| Podiums | PDF | Les **3 premiers de chaque catégorie** (prénom, nom, école, dossard, total) |
+| Classements complets | PDF / Excel | Par catégorie : rang, dossard, nom, école, points par épreuve, total (Excel : aussi les critères de départage) |
+| Résultats détaillés | Excel | Tous les essais retenus : enfant, épreuve, mesure, modificateurs, résultat, auteur et heure de saisie, « à vérifier » |
 | Liste des inscrits | Excel | Toutes les informations d'inscription |
 | Fiches des épreuves | PDF | Contenu des pages d'aide (impression pour les ateliers) |
+
+Tous les documents sont regroupés sur une page **Documents** (admins et organisateurs). Ils contiennent les noms complets : chaque téléchargement est inscrit au journal d'audit. Avant la clôture, podiums et classements peuvent être imprimés mais sont marqués **« PROVISOIRE »**.
 
 ---
 
