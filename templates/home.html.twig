@@ -21,6 +21,7 @@
                 <h2>{{ t('public.registration') }}</h2>
                 {% if phase == 'running' %}
                     <p>{{ t('public.running') }}</p>
+                    <p><a class="button" href="{{ url_for('progress') }}">{{ t('public.progress') }}</a></p>
                 {% elseif phase == 'finished' %}
                     <p>{{ t('public.finished') }}</p>
                 {% else %}
@@ -54,6 +55,7 @@
         {% endfor %}
 
         <p class="toolbar">
+            <a class="button" href="{{ url_for('participant') }}">{{ t('public.participant') }}</a>
             {% if has_rules %}<a class="button secondary" href="{{ url_for('rules') }}">{{ t('public.rules') }}</a>{% endif %}
             {% if edition.contactEmail %}<a class="button secondary" href="mailto:{{ edition.contactEmail }}">{{ t('public.contact') }}</a>{% endif %}
         </p>

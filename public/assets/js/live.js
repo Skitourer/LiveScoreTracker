@@ -7,7 +7,7 @@
  * a list open, a box ticked, or a tap in the last few seconds. Open sections
  * (<details id=...>) and the scroll position are kept.
  */
-const EVERY = 30_000;
+const EVERY = 30_000; // data-live="10" sets another period, in seconds
 const QUIET_AFTER_TAP = 5_000;
 
 export const initLiveRefresh = ({ onRefresh = () => {} } = {}) => {
@@ -80,7 +80,8 @@ export const initLiveRefresh = ({ onRefresh = () => {} } = {}) => {
     showTime();
   };
 
-  window.setInterval(refresh, EVERY);
+  const seconds = Number.parseInt(region.dataset.live ?? '', 10);
+  window.setInterval(refresh, seconds > 0 ? seconds * 1000 : EVERY);
   document.addEventListener('visibilitychange', () => {
     if (document.visibilityState === 'visible') {
       refresh();

@@ -1,0 +1,37 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('progress.detail_title') }}{% endblock %}
+
+{% block main_class %} wide{% endblock %}
+
+{% block content %}
+    <h1>{{ t('progress.detail_title') }}</h1>
+    <p class="meta">{{ t('progress.detail_lead') }} <a href="{{ url_for('progress') }}">{{ t('progress.public_link') }}</a></p>
+    <div data-live>
+        <p><strong>{{ t('progress.overall') }}</strong> · {{ t('progress.count', {done: progress.done, expected: progress.expected}) }}</p>
+        {% include 'results/_progress_bar.html.twig' with {done: progress.done, expected: progress.expected} %}
+        <div class="table-scroll">
+            <table class="progress-table">
+                <thead>
+                    <tr>
+                        <th>{{ t('progress.workshop') }}</th>
+                        <th class="num">{{ t('progress.overall') }}</th>
+                        {% for category in progress.categories %}<th class="num">{{ category_label(category) }}</th>{% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in progress.workshops %}
+                        <tr class="{{ row.highlighted ? 'highlighted' : '' }}">
+                            <td><a href="{{ url_for('entry-tracking', {workshop: row.workshop.id}) }}">{{ t('workshop.' ~ row.workshop.id ~ '.name') }}</a></td>
+                            <td class="num"><strong>{{ row.done }} / {{ row.expected }}</strong></td>
+                            {% for category in progress.categories %}
+                                {% set cell = row.categories[category.id()] ?? null %}
+                                <td class="num{{ cell and cell.done < cell.expected ? ' todo' : '' }}">{% if cell %}{{ cell.done }} / {{ cell.expected }}{% else %}–{% endif %}</td>
+                            {% endfor %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
