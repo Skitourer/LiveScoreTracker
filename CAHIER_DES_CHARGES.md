@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.21 — 12 novembre 2026
+> Version 1.22 — 12 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -600,6 +600,8 @@ Précisions (étape 8a) :
 
 Version détaillée de l'écran public (§ 13.1) : par atelier et par catégorie.
 
+Précisions (étape 9b) : adresse `/progress` (admin, organisateur ; tuile « Suivi de la compétition » du tableau de bord) ; tableau atelier × catégorie « passés / attendus », lien vers le suivi de chaque atelier et vers l'écran public ; actualisation automatique.
+
 ### 11.6 Journal d'audit (admin)
 
 Toutes les actions sensibles : connexions, saisies et corrections (avec le téléphone d'origine pour le compte partagé), changements de configuration et de phase, imports, restaurations, propositions de Claude et leur validation.
@@ -687,6 +689,7 @@ Sujets et corps de tous les emails dans les fichiers de traduction, avec des var
 - Pour chaque atelier : nombre d'enfants passés / attendus, barre de progression.
 - **Ateliers les moins avancés mis en évidence**, pour orienter les enfants.
 - Avancement global. Rafraîchissement automatique (quelques secondes).
+- Précisions (étape 9b) : adresse `/avancement`, liée depuis l'accueil pendant la compétition. Un enfant est « passé » par un atelier dès qu'il y a au moins un essai ; les « attendus » sont les enfants présents (pointés) dont le groupe de niveaux a une épreuve à cet atelier. Les **2 ateliers** encore incomplets les moins avancés (en proportion) portent « À privilégier » pendant la compétition. Rafraîchissement toutes les 10 secondes ; deux colonnes sur grand écran ; rien d'autre que l'écran (pas de menu). Avant la compétition : « pas encore commencé » ; après la clôture : les chiffres finaux, sans mise en évidence.
 
 ### 13.2 Écran de cérémonie
 
@@ -706,6 +709,8 @@ Connexion par **dossard + date de naissance**, avec blocage temporaire après pl
 | Terminée | Résultats bruts, **scores**, **rang par épreuve**, **rang au total**, et **classement de sa catégorie** sous forme de liste (prénom + initiale, scores, rangs). |
 
 Les autres enfants sont toujours affichés en **prénom + initiale du nom**.
+
+Précisions (étape 9b) : adresse `/participant`, liée depuis l'accueil. Seuls les enfants inscrits avec un dossard peuvent se connecter ; blocage temporaire après 5 échecs pour un dossard ou 20 pour une adresse IP (§ 15). Cette connexion est indépendante des comptes bénévoles et se ferme après 30 minutes sans visite (bouton « Quitter »). L'enfant connecté voit son nom complet. Pendant la compétition, les résultats bruts s'affichent au fil de l'eau, y compris ceux « à vérifier », sans mention particulière. Après la clôture : total et rang dans la catégorie, tableau des épreuves (résultats, points, rang par épreuve ; « non faite » si besoin), puis classement de la catégorie (enfants présents, prénom + initiale, points) avec sa propre ligne mise en valeur.
 
 ---
 

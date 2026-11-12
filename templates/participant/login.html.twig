@@ -1,0 +1,21 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('participant.title') }}{% endblock %}
+
+{% block content %}
+    <p><a href="{{ url_for('home') }}">← {{ t('public.back_home') }}</a></p>
+    <h1>{{ t('participant.title') }}</h1>
+    <p class="lead">{{ t('participant.lead') }}</p>
+    {% include 'partials/errors.html.twig' %}
+    <form method="post" action="{{ url_for('participant') }}" class="form">
+        {{ csrf_field() }}
+        <label>{{ t('participant.bib') }}
+            <input type="text" name="bib" value="{{ bib }}" inputmode="numeric" pattern="[0-9]*" autocomplete="off" required autofocus>
+        </label>
+        <label>{{ t('participant.birth_date') }}
+            <input type="date" name="birth_date" required>
+        </label>
+        <button type="submit" class="button">{{ t('participant.submit') }}</button>
+    </form>
+    <p class="meta">{{ t('participant.hint') }}</p>
+{% endblock %}

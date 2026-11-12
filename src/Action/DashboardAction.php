@@ -27,7 +27,7 @@ final class DashboardAction
         ['dashboard.rankings', '/results', Permission::ViewResultsAndRankings],
         ['dashboard.missing_events', '/missing', Permission::ViewMonitoring],
         ['dashboard.checks', '/checks', Permission::ViewMonitoring],
-        ['dashboard.monitoring', null, Permission::ViewMonitoring],
+        ['dashboard.monitoring', '/progress', Permission::ViewMonitoring],
         ['dashboard.phase_tile', '/admin/phase', Permission::ChangePhase],
         ['dashboard.accounts', '/admin/users', Permission::ManageAccounts],
         ['dashboard.referee_account', '/admin/referee', Permission::ManageAccounts],

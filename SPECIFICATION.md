@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.21 — 12 November 2026
+> Version 1.22 — 12 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -600,6 +600,8 @@ Details (step 8a):
 
 Detailed version of the public screen (§ 13.1): per workshop and per category.
 
+Details (step 9b): address `/progress` (admin, organizer; "Competition monitoring" tile of the dashboard); workshop × category table "done / expected", links to each workshop's follow-up and to the public screen; automatic refresh.
+
 ### 11.6 Audit log (admin)
 
 All sensitive actions: logins, entries and corrections (with the originating phone for the shared account), configuration and phase changes, imports, restores, Claude's proposals and their approval.
@@ -687,6 +689,7 @@ At the site's address (`/`), **without login**, readable on a phone, **with no p
 - For each workshop: children done / expected, progress bar.
 - **Least advanced workshops highlighted**, to steer children toward them.
 - Overall progress. Automatic refresh (every few seconds).
+- Details (step 9b): address `/avancement`, linked from the home page during the competition. A child has "gone through" a workshop as soon as there is at least one attempt; "expected" children are the present (checked-in) children whose level group has an event at that workshop. The **2 least advanced** workshops still incomplete (in proportion) show "Go there" during the competition. Refreshed every 10 seconds; two columns on a large screen; nothing but the screen (no menu). Before the competition: "not started yet"; after closing: the final figures, without highlighting.
 
 ### 13.2 Ceremony screen
 
@@ -706,6 +709,8 @@ Login with **bib + date of birth**, with temporary lockout after several failure
 | Closed | Raw results, **scores**, **per-event rank**, **overall rank**, and their **category ranking** as a list (first name + initial, scores, ranks). |
 
 Other children are always shown as **first name + last-name initial**.
+
+Details (step 9b): address `/participant`, linked from the home page. Only registered children with a bib can log in; temporary block after 5 failures for a bib or 20 for an IP address (§ 15). This login is independent of the volunteers' accounts and ends after 30 minutes without a visit ("Leave" button). The logged-in child sees their full name. During the competition, raw results show as they come, including those "to check", without any particular mention. After closing: total and rank in the category, table of events (results, points, rank per event; "not done" if needed), then the category ranking (present children, first name + initial, points) with their own line highlighted.
 
 ---
 

@@ -1,0 +1,67 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('participant.title') }}{% endblock %}
+
+{% block content %}
+    <h1>{{ child.child.firstName }} {{ child.child.lastName }}</h1>
+    <p class="lead">{{ t('participant.bib_short', {bib: child.bib}) }} · {{ category_label(category) }}</p>
+
+    {% if phase == 'preparation' %}
+        <p>{{ t('participant.preparation') }}</p>
+        <ul>
+            {% for event in events %}<li>{{ event_label(event.variant) }}</li>{% endfor %}
+        </ul>
+    {% elseif phase == 'running' %}
+        <p class="meta">{{ t('participant.running') }}</p>
+        {% set todo = events|filter(e => e.attempts is empty) %}
+        <h2>{{ t('participant.done') }}</h2>
+        {% if todo|length == events|length %}<p class="meta">{{ t('participant.nothing_yet') }}</p>{% endif %}
+        <ul class="participant-events">
+            {% for event in events|filter(e => e.attempts is not empty) %}
+                <li><strong>{{ event_label(event.variant) }}</strong> :
+                    {% for attempt in event.attempts %}{% if attempt.isFoul() %}{{ t('report.foul') }}{% else %}{{ result(attempt.result(), event.variant) }}{% endif %}{% if not loop.last %} · {% endif %}{% endfor %}
+                </li>
+            {% endfor %}
+        </ul>
+        {% if todo is not empty %}
+            <h2>{{ t('participant.todo') }}</h2>
+            <ul>{% for event in todo %}<li>{{ event_label(event.variant) }}</li>{% endfor %}</ul>
+        {% endif %}
+    {% else %}
+        {% if line %}
+            <p class="participant-total">{{ t('participant.total', {total: line.total, rank: line.rank, count: standings.ranking|filter(l => l.present)|length}) }}</p>
+        {% endif %}
+        <div class="table-scroll">
+            <table>
+                <thead><tr><th>{{ t('participant.event') }}</th><th>{{ t('participant.attempts') }}</th><th class="num">{{ t('participant.score') }}</th><th class="num">{{ t('participant.rank') }}</th></tr></thead>
+                <tbody>
+                    {% for event in events %}
+                        {% set score = line ? line.events[event.variant.id()] ?? null : null %}
+                        <tr>
+                            <td>{{ event_label(event.variant) }}</td>
+                            <td>{% for attempt in event.attempts %}{% if attempt.isFoul() %}{{ t('report.foul') }}{% else %}{{ result(attempt.result(), event.variant) }}{% endif %}{% if not loop.last %} · {% endif %}{% else %}{{ t('participant.not_done') }}{% endfor %}</td>
+                            <td class="num">{{ score ? score.score : '–' }}</td>
+                            <td class="num">{{ score and score.rank ? score.rank : '–' }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <h2>{{ t('participant.ranking', {category: category_label(category)}) }}</h2>
+        <ol class="participant-ranking">
+            {% for other in standings.ranking|filter(l => l.present) %}
+                {% set registration = standings.children[other.bib] %}
+                <li value="{{ other.rank }}"{% if other.bib == child.bib ~ '' %} class="me"{% endif %}>
+                    {{ registration.publicName() }} · {{ t('participant.points', {total: other.total}) }}
+                </li>
+            {% endfor %}
+        </ol>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('participant') }}" class="inline">
+        {{ csrf_field() }}
+        <input type="hidden" name="op" value="logout">
+        <button type="submit" class="button secondary small">{{ t('participant.logout') }}</button>
+    </form>
+{% endblock %}

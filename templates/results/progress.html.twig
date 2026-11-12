@@ -1,0 +1,34 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('progress.title') }}{% endblock %}
+{# For a projector or a TV: nothing but the screen. #}
+{% block topbar_nav %}{% endblock %}
+{% block main_class %} wide{% endblock %}
+
+{% block content %}
+    <div class="progress-screen" data-live="10">
+        <h1>{{ t('progress.title') }}</h1>
+        {% if phase == 'preparation' %}
+            <p class="lead">{{ t('progress.not_started') }}</p>
+        {% else %}
+            {% if phase == 'finished' %}<p class="lead">{{ t('progress.finished') }}</p>{% endif %}
+            <section class="progress-total">
+                <p><strong>{{ t('progress.overall') }}</strong> · {{ t('progress.count', {done: progress.done, expected: progress.expected}) }}</p>
+                {% include 'results/_progress_bar.html.twig' with {done: progress.done, expected: progress.expected} %}
+            </section>
+            <ul class="progress-list">
+                {% for row in progress.workshops %}
+                    {% set highlighted = row.highlighted and phase == 'running' %}
+                    <li class="{{ highlighted ? 'highlighted' : '' }}{{ row.expected > 0 and row.done >= row.expected ? ' complete' : '' }}">
+                        <p>
+                            <strong>{{ t('workshop.' ~ row.workshop.id ~ '.name') }}</strong>
+                            {% if highlighted %}<span class="badge warning">{{ t('progress.go_there') }}</span>{% endif %}
+                            <span class="progress-count">{{ t('progress.count', {done: row.done, expected: row.expected}) }}</span>
+                        </p>
+                        {% include 'results/_progress_bar.html.twig' with {done: row.done, expected: row.expected} %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+{% endblock %}

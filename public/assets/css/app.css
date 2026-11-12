@@ -976,3 +976,100 @@ pre.details {
 .public-events {
   padding-left: var(--space-5);
 }
+
+/* ---------- Progress (spec § 13.1, § 11.5) ---------- */
+.progress-bar {
+  display: block;
+  width: 100%;
+  height: 0.9rem;
+  border: 0;
+  border-radius: var(--radius-md);
+  background: var(--color-border);
+  overflow: hidden;
+  appearance: none;
+}
+
+.progress-bar::-webkit-progress-bar {
+  background: var(--color-border);
+}
+
+.progress-bar::-webkit-progress-value {
+  background: var(--color-accent);
+}
+
+.progress-bar::-moz-progress-bar {
+  background: var(--color-accent);
+}
+
+.progress-list {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.progress-list p {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: baseline;
+  margin: 0 0 var(--space-1);
+}
+
+.progress-count {
+  margin-left: auto;
+  font-variant-numeric: tabular-nums;
+}
+
+.progress-list .highlighted .progress-bar::-webkit-progress-value {
+  background: var(--color-warning);
+}
+
+.progress-list .highlighted .progress-bar::-moz-progress-bar {
+  background: var(--color-warning);
+}
+
+.progress-list .complete {
+  opacity: 0.6;
+}
+
+.progress-total {
+  margin-bottom: var(--space-4);
+}
+
+/* Big screen: larger text from tablet width up. */
+@media (min-width: 48rem) {
+  .progress-screen {
+    font-size: var(--font-size-xl);
+  }
+
+  .progress-screen .progress-bar {
+    height: 1.4rem;
+  }
+}
+
+/* Wide screens (TV, projector): two columns so that every workshop fits. */
+@media (min-width: 64rem) {
+  .progress-list {
+    grid-template-columns: 1fr 1fr;
+    column-gap: var(--space-6);
+  }
+}
+
+.progress-table .highlighted td:first-child {
+  font-weight: var(--font-weight-strong);
+}
+
+.progress-table .todo {
+  color: var(--color-muted);
+}
+
+/* ---------- Participant space (spec § 13.3) ---------- */
+.participant-total {
+  font-size: var(--font-size-lg);
+}
+
+.participant-ranking .me {
+  font-weight: var(--font-weight-strong);
+  background: var(--color-highlight);
+}
