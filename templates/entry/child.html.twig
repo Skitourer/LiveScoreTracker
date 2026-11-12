@@ -83,6 +83,13 @@
     {% endif %}
 
     <h2>{{ t('entry.attempts') }}</h2>
+    {% if can_clear %}
+        <form method="post" class="inline" data-confirm="{{ t('entry.confirm_clear', {name: child.publicName(), event: event_label(variant)}) }}">
+            {{ csrf_field() }}
+            <input type="hidden" name="op" value="clear">
+            <button type="submit" class="button small danger">{{ t('entry.clear') }}</button>
+        </form>
+    {% endif %}
     {% if rows is empty %}
         <p class="meta">{{ t('entry.no_attempt') }}</p>
     {% else %}

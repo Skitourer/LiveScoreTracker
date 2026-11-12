@@ -8,6 +8,7 @@
     <p class="notice warning">{{ t('test_data.warning') }}</p>
     <form method="post" class="form" data-confirm="{{ t('test_data.confirm') }}">
         {{ csrf_field() }}
+        <label class="choice"><input type="checkbox" name="with_results" value="1"> {{ t('test_data.with_results') }}</label>
         <label>{{ t('test_data.type_word', {word: word}) }}
             <input type="text" name="confirmation" autocomplete="off" required>
         </label>

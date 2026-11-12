@@ -1,0 +1,114 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('results.title') }} · {{ category_label(standings.category) }}{% endblock %}
+
+{% block content %}
+    {% set category = standings.category %}
+    {% set children = standings.children %}
+    <h1>{{ t('results.title') }}</h1>
+    <p class="meta">{{ closed ? t('results.closed') : t('results.running') }}</p>
+
+    <nav class="chips" aria-label="{{ t('report.category') }}">
+        {% for candidate in categories %}
+            <a href="{{ url_for('results') }}?category={{ candidate.id() }}" {% if candidate.id() == category.id() %}aria-current="page"{% endif %}>{{ category_label(candidate) }}</a>
+        {% endfor %}
+    </nav>
+
+    <h2>{{ t('report.overall') }} · {{ category_label(category) }}</h2>
+    {% if children is empty %}
+        <p class="meta">{{ t('results.no_child') }}</p>
+    {% else %}
+        <div class="table-scroll">
+            <table class="ranking">
+                <thead>
+                    <tr>
+                        <th class="num">{{ t('report.rank') }}</th>
+                        <th>{{ t('report.child') }}</th>
+                        <th class="num">{{ t('report.total') }}</th>
+                        {% for event in standings.events %}<th class="num"><a href="#event-{{ loop.index }}">{{ event_label(event.variant) }}</a></th>{% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% set absents = [] %}
+                    {% for line in standings.ranking %}
+                        {% if line.present %}
+                            {% set child = children[line.bib] %}
+                            <tr{% if line.rank is not null and line.rank <= 3 %} class="podium"{% endif %}>
+                                <td class="num">{{ line.rank ?? '–' }}</td>
+                                <td>
+                                    <span class="bib">{{ line.bib }}</span> {{ child.child.firstName }} {{ child.child.lastName }}
+                                    {% if line.tied %}<span class="badge warning">{{ t('report.tie_unresolved') }}</span>
+                                    {% elseif line.decidedBy %}<span class="badge">{{ t('report.decided_by', {criterion: tie_breaker(line.decidedBy)}) }}</span>{% endif %}
+                                    {% if not line.complete %}<span class="badge muted">{{ t('report.incomplete') }}</span>{% endif %}
+                                </td>
+                                <td class="num strong">{{ line.total }}</td>
+                                {% for event in standings.events %}
+                                    {% set entry = line.events[event.variant.id()] ?? null %}
+                                    <td class="num">{{ entry and entry.score is not null ? entry.score : '–' }}</td>
+                                {% endfor %}
+                            </tr>
+                        {% else %}
+                            {% set absents = absents|merge([line.bib]) %}
+                        {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if absents is not empty %}
+            <p class="meta">{{ t('report.absent_children', {bibs: absents|join(', ')}) }}</p>
+        {% endif %}
+
+        <h2>{{ t('results.by_event') }}</h2>
+        {% for event in standings.events %}
+            {% set variant = event.variant %}
+            {% set scores = event.scores %}
+            <details class="card" id="event-{{ loop.index }}">
+                <summary>{{ event_label(variant) }}</summary>
+                <p class="meta">
+                    {% if scores.best is not null %}{{ t('report.bounds', {best: result(scores.best, variant), worst: result(scores.worst, variant)}) }}
+                    {% else %}{{ t('report.no_bounds') }}{% endif %}
+                    <br>{{ t('report.scale', {floor: variant.scoring.floor, max: variant.scoring.maxScore, foul: variant.scoring.foulScore, dnf: variant.scoring.dnfScore}) }}
+                </p>
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="num">{{ t('report.rank') }}</th>
+                                <th>{{ t('report.child') }}</th>
+                                <th>{{ t('report.attempts') }}</th>
+                                <th class="num">{{ t('report.points') }}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for entry in scores.entries %}
+                                {% if entry.status.value != 'absent' %}
+                                    {% set attempts = event.attempts[entry.bib] ?? [] %}
+                                    <tr>
+                                        <td class="num">{{ entry.rank ?? '–' }}</td>
+                                        <td>
+                                            <a href="{{ url_for('entry-child', {workshop: variant.workshopId, bib: entry.bib}) }}"><span class="bib">{{ entry.bib }}</span> {{ children[entry.bib].child.firstName }} {{ children[entry.bib].child.lastName }}</a>
+                                            {% if attempts|filter(a => a.warnings is not empty) is not empty %}<span class="badge warning">{{ t('entry.to_check') }}</span>{% endif %}
+                                        </td>
+                                        <td>
+                                            {% for attempt in attempts %}
+                                                {%- if attempt.isFoul() -%}
+                                                    <span class="foul">{{ t('report.foul') }}</span>
+                                                {%- else -%}
+                                                    <span{% if entry.best == attempt.result() %} class="best"{% endif %}>{{ result(attempt.result(), variant) }}</span>
+                                                {%- endif -%}
+                                                {%- if not loop.last %} · {% endif -%}
+                                            {% else %}
+                                                <span class="muted">{{ t('status.' ~ entry.status.value) }}</span>
+                                            {% endfor %}
+                                        </td>
+                                        <td class="num strong">{{ entry.score ?? '–' }}</td>
+                                    </tr>
+                                {% endif %}
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </details>
+        {% endfor %}
+    {% endif %}
+{% endblock %}

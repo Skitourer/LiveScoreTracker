@@ -54,6 +54,19 @@ final class FictitiousCompetition
     }
 
     /**
+     * Attempts of one child at one event (none when the event is not done).
+     *
+     * @return list<Attempt>
+     */
+    public function attemptsOf(string $variantId, string $bib): array
+    {
+        /** @var array<array-key, list<Attempt>> $byBib */
+        $byBib = $this->attempts[$variantId] ?? [];
+
+        return $byBib[$bib] ?? [];
+    }
+
+    /**
      * @return list<FictitiousChild>
      */
     private function generateChildren(int $count): array

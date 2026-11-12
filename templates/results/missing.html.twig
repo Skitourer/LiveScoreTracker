@@ -1,0 +1,68 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('missing.title') }}{% endblock %}
+
+{% block content %}
+    <h1>{{ t('missing.title') }}</h1>
+
+    <nav class="chips" aria-label="{{ t('missing.view') }}">
+        {% for name in ['workshop', 'child'] %}
+            <a href="{{ url_for('missing') }}?view={{ name }}&amp;workshop={{ workshop_filter|url_encode }}&amp;category={{ category_filter|url_encode }}" {% if name == view %}aria-current="page"{% endif %}>{{ t('missing.by_' ~ name) }}</a>
+        {% endfor %}
+    </nav>
+
+    <form method="get" class="filters">
+        <input type="hidden" name="view" value="{{ view }}">
+        <label>{{ t('missing.workshop') }}
+            <select name="workshop">
+                <option value="">{{ t('missing.all') }}</option>
+                {% for id, workshop in workshops %}<option value="{{ id }}" {% if id == workshop_filter %}selected{% endif %}>{{ t('workshop.' ~ id ~ '.name') }}</option>{% endfor %}
+            </select>
+        </label>
+        <label>{{ t('report.category') }}
+            <select name="category">
+                <option value="">{{ t('missing.all') }}</option>
+                {% for category in categories %}<option value="{{ category.id() }}" {% if category.id() == category_filter %}selected{% endif %}>{{ category_label(category) }}</option>{% endfor %}
+            </select>
+        </label>
+        <button type="submit" class="button secondary">{{ t('missing.filter') }}</button>
+    </form>
+
+    {% if view == 'workshop' %}
+        {% set shown = 0 %}
+        {% for id, workshop in workshops %}
+            {% if by_workshop[id] is defined %}
+                {% set shown = shown + 1 %}
+                <section class="missing-workshop">
+                    <h2>{{ t('workshop.' ~ id ~ '.name') }} <small>({{ by_workshop[id]|length }})</small></h2>
+                    {# Large, to be read out on the loudspeaker (spec § 11.3). #}
+                    <ul class="missing-list">
+                        {% for child in by_workshop[id] %}
+                            <li><span class="bib">{{ child.bib }}</span> {{ child.child.firstName }} {{ child.child.lastName }} <small>{{ label('level.' ~ child.child.level) }}</small></li>
+                        {% endfor %}
+                    </ul>
+                </section>
+            {% endif %}
+        {% endfor %}
+        {% if shown == 0 %}<p class="meta">{{ t('missing.none') }}</p>{% endif %}
+    {% else %}
+        {% if by_child is empty %}
+            <p class="meta">{{ t('missing.none') }}</p>
+        {% else %}
+            <div class="table-scroll">
+                <table>
+                    <thead><tr><th class="num">{{ t('entry.bib') }}</th><th>{{ t('report.child') }}</th><th>{{ t('missing.events') }}</th></tr></thead>
+                    <tbody>
+                        {% for row in by_child %}
+                            <tr>
+                                <td class="num"><span class="bib">{{ row.child.bib }}</span></td>
+                                <td>{{ row.child.child.firstName }} {{ row.child.child.lastName }} <small class="muted">{{ label('level.' ~ row.child.child.level) }}</small></td>
+                                <td>{% for variant in row.missing %}{{ event_label(variant) }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    {% endif %}
+{% endblock %}

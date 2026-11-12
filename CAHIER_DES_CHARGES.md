@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.16 — 12 novembre 2026
+> Version 1.17 — 12 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -571,6 +571,11 @@ Pour chaque variante × catégorie : liste des enfants avec **tous les essais**,
 
 Classement général de chaque catégorie : rang, prénom, nom, total, score par épreuve, critère de départage éventuel.
 
+Précisions (étape 8a) :
+- **Résultats et classements** (`/results`) : une page par catégorie (choix par pastilles) avec le classement général (rang, dossard, prénom, nom, total, score de chaque épreuve, critère de départage, badge « épreuves en attente »), puis le détail de chaque épreuve (bornes du barème, tous les essais, résultat retenu, score, rang, statut, badge « à vérifier »). Chaque ligne mène à l'écran de correction de l'enfant. Tout est recalculé à chaque affichage (§ 9.7) ; avant la clôture, une épreuve pas encore faite est « à faire ».
+- **Épreuves manquantes** (`/missing`) : vue « par atelier » en gros caractères (dossard, prénom, nom, classe) et vue « par enfant », avec filtres par atelier et par catégorie ; seuls les enfants présents sont listés.
+- **Effacer les résultats d'un dossard à une épreuve** (admin, organisateur, phase « en cours ») : un bouton sur l'écran de saisie de l'enfant supprime tous ses essais de l'épreuve (ils restent visibles dans l'historique, l'action est inscrite au journal d'audit) ; l'enfant peut refaire l'épreuve.
+
 ### 11.5 Avancement
 
 Version détaillée de l'écran public (§ 13.1) : par atelier et par catégorie.
@@ -954,7 +959,7 @@ Seules des **données fictives** sont autorisées (exemples de configuration, je
 | Sauvegardes | Serveur de production + copie **chiffrée** sur Drive | Dépôt |
 | Fichiers importés (Excel) | Traités en mémoire puis supprimés | Dépôt, disque après import |
 
-- Le **site d'essai** fonctionne par défaut avec des **données fictives générées** (commande de génération d'un jeu de test : ~100 enfants fictifs, résultats aléatoires réalistes). Une page **Données de test** (admin, absente en production) remplace toutes les inscriptions et tous les résultats par 100 enfants fictifs prêts pour le début de la compétition : 95 avec un dossard dont 90 présents (dossard remis), 5 en liste d'attente ; il faut taper « EFFACER » pour confirmer. Des données réelles n'y sont copiées qu'en cas de nécessité ponctuelle, puis effacées.
+- Le **site d'essai** fonctionne par défaut avec des **données fictives générées** (commande de génération d'un jeu de test : ~100 enfants fictifs, résultats aléatoires réalistes). Une page **Données de test** (admin, absente en production) remplace toutes les inscriptions et tous les résultats par 100 enfants fictifs prêts pour le début de la compétition : 95 avec un dossard dont 90 présents (dossard remis), 5 en liste d'attente ; il faut taper « EFFACER » pour confirmer. Une case permet d'ajouter des résultats fictifs réalistes (environ 3 épreuves sur 4 par enfant présent) pour juger les classements. Des données réelles n'y sont copiées qu'en cas de nécessité ponctuelle, puis effacées.
 - Le **dossier de données** est situé **hors du dossier public web** et désigné par une variable d'environnement. Le déploiement **ne touche jamais** ce dossier (exclusion explicite dans le script de déploiement).
 
 ### 25.3 Garde-fous techniques

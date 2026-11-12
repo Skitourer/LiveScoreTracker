@@ -15,6 +15,7 @@ use LiveScoreTracker\Domain\Results\AttemptProgress;
 use LiveScoreTracker\Domain\Results\CounterTally;
 use LiveScoreTracker\Domain\Results\EntryChecks;
 use LiveScoreTracker\Domain\Results\StoredAttempt;
+use LiveScoreTracker\Domain\Security\Permission;
 use LiveScoreTracker\Domain\Security\Phase;
 use LiveScoreTracker\Infrastructure\Clock;
 use LiveScoreTracker\Infrastructure\Persistence\AttemptRepository;
@@ -29,7 +30,8 @@ use Slim\Exception\HttpNotFoundException;
  * Workshop entry screen, step 2 (spec § 8.2 and § 8.3): the child shown large
  * (first name + initial, level, event), the attempt number and the attempts
  * already made; then the result or "foul", the modifiers, and the warnings
- * to confirm (spec § 10.1). Also corrects or deletes an attempt.
+ * to confirm (spec § 10.1). Also corrects or deletes an attempt, and lets an
+ * admin or organizer clear every result of the child at this event.
  *
  * Counter events (spec § 8.5) are entered with the live counter, whose counts
  * are sent with kind=counter; typing the total directly stays possible.
@@ -88,6 +90,16 @@ final class EntryChildAction
 
                 return $this->responder->redirect($response, $self);
             }
+            if ($op === 'clear' && $this->responder->context->can(Permission::EnterResultsAnyEvent) && $progress->attempts !== []) {
+                // Admin or organizer: every result of this child at this event, kept in the history.
+                foreach ($progress->attempts as $attempt) {
+                    $this->attempts->delete($attempt, Author::from($this->responder->context));
+                }
+                $this->responder->audit('results.cleared', ['bib' => $child->bib, 'event' => $variant->id(), 'count' => \count($progress->attempts)]);
+                $this->responder->flash('warning', 'entry.cleared', ['name' => $child->publicName(), 'count' => \count($progress->attempts)]);
+
+                return $this->responder->redirect($response, $self);
+            }
             $target = $this->editable($progress, (int) Responder::field($request, 'attempt_id'));
             if ($op === 'delete' && $target !== null) {
                 $this->attempts->delete($target, Author::from($this->responder->context));
@@ -140,6 +152,7 @@ final class EntryChildAction
             'progress' => $progress,
             'rows' => self::rows($this->attempts->history($child->id, $variant->id()), $variant),
             'open' => $open,
+            'can_clear' => $open && $progress->attempts !== [] && $this->responder->context->can(Permission::EnterResultsAnyEvent),
             'correcting' => $correcting,
             'form' => $form,
             'errors' => $errors,

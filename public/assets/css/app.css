@@ -863,3 +863,18 @@ pre.details {
 .entry-queue .button {
   margin-top: var(--space-1);
 }
+
+/* ---------- Missing events, read out on the loudspeaker (spec § 11.3) ---------- */
+.missing-list {
+  display: grid;
+  gap: var(--space-2);
+  padding: 0;
+  list-style: none;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-strong);
+}
+
+.missing-list small {
+  color: var(--color-muted);
+  font-weight: normal;
+}
