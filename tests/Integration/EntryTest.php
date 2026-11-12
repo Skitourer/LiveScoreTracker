@@ -80,9 +80,14 @@ final class EntryTest extends TestCase
         self::assertStringContainsString('à vérifier', $phone->lastBody);
         self::assertStringContainsString('Paul', $phone->lastBody);
 
-        // A third attempt is possible but must be confirmed.
-        $this->record($phone, ['value' => '300']);
-        self::assertStringContainsString('déjà fait ses 2 essais', $phone->lastBody);
+        // No third attempt: once every attempt is done, results can only be corrected.
+        self::assertStringNotContainsString('name="op" value="record"', $phone->lastBody);
+        self::assertStringContainsString('Tous les essais sont faits', $phone->lastBody);
+        $phone->post('/entry/long_jump/1', ['op' => 'record', 'kind' => 'value', 'value' => '300', 'entry_id' => bin2hex(random_bytes(16)), 'confirm' => '1']);
+        $phone->get('/entry/long_jump/1');
+        self::assertStringContainsString('a déjà fait tous ses essais', $phone->lastBody);
+        self::assertStringNotContainsString('<strong>3,00 m</strong>', $phone->lastBody);
+        self::assertStringContainsString('?correct=', $phone->lastBody, 'Corrections stay possible.');
     }
 
     public function testCorrectionAndDeletionKeepTheHistory(): void

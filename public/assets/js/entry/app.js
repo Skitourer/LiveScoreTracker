@@ -260,6 +260,11 @@ export const initEntryApp = () => {
       if (seen.has(resolved.child.bib)) {
         return tx(ERRORS.sameBib, { bib });
       }
+      // Every attempt is done: a result can only be corrected, on the server pages.
+      const { child, variant } = resolved;
+      if (usedAttempts(variant, attemptsOf(child, variant)) >= variant.attempts) {
+        return tx('entry.error.attempts_finished', { bib, of: variant.attempts });
+      }
       seen.add(resolved.child.bib);
     }
     return null;
@@ -289,6 +294,7 @@ export const initEntryApp = () => {
       card,
       tx,
       open: isOpen(),
+      finished: used >= variant.attempts,
       childUrl: childUrl(child.bib),
     });
     bindCommon();

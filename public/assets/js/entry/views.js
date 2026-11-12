@@ -156,7 +156,7 @@ const counterFields = (variant, tx) => {
 };
 
 /** One child: result, modifiers, save or foul; counter events get the counter. */
-export const childView = ({ child, variant, card, tx, open, childUrl }) => `
+export const childView = ({ child, variant, card, tx, open, finished, childUrl }) => `
   <p><a href="#">← ${h(tx('entry.other_bib'))}</a></p>
   ${card}
   ${
@@ -165,8 +165,9 @@ export const childView = ({ child, variant, card, tx, open, childUrl }) => `
       : `<div class="notice warning">${h(tx('entry.warning.not_present'))}
            ${open ? `<button type="button" class="button small secondary entry-mark-present">${h(tx('entry.mark_present'))}</button>` : ''}</div>`
   }
+  ${open && finished ? `<p class="notice">${h(tx('entry.finished_hint', { of: variant.attempts }))}</p>` : ''}
   ${
-    open
+    open && !finished
       ? `<form class="form entry-form" novalidate>
           <div class="entry-messages"></div>
           ${
@@ -210,10 +211,13 @@ export const raceView = ({ lanes, mode, tx, open, differentEvents, childUrl }) =
       ? ''
       : `<section class="stopwatch" hidden data-review="0"
           data-label-start="${h(tx('entry.timer.start'))}" data-label-finish="${h(tx('entry.timer.finish'))}"
+          data-label-finish-number="${h(tx('entry.timer.finish_number'))}" data-label-split="${h(tx('entry.timer.split'))}"
           data-place-first="${h(tx('entry.timer.place_first'))}" data-place-other="${h(tx('entry.timer.place_other'))}"
           data-decimal="${h(decimal)}">
           <output class="stopwatch-clock" aria-live="off">0${h(decimal)}00</output>
           <button type="button" class="button large stopwatch-go">${h(tx('entry.timer.start'))}</button>
+          <ol class="stopwatch-splits" aria-live="assertive"></ol>
+          <button type="button" class="button secondary stopwatch-undo" disabled>${h(tx('entry.timer.undo_finish'))}</button>
           <div class="stopwatch-dnf">${lanes
             .map(
               ({ child }, index) =>

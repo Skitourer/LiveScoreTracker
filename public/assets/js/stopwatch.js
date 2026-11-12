@@ -9,8 +9,12 @@
  *
  * The time runs in the phone (no network needed). Taps are timed with the
  * event's own timestamp, so a busy screen does not delay them.
+ *
+ * Each Finish tap is acknowledged at once (flash, vibration, the time in the
+ * list of arrivals, the button naming the next arrival) and the last one can
+ * be undone, so a referee never taps twice for the same child.
  */
-import { clockText, refreshInterpreted, toDigits } from './result-input.js';
+import { clockText, fill, refreshInterpreted, toDigits } from './result-input.js';
 
 export const initStopwatch = (root = document, { signal } = {}) => {
   const panel = root.querySelector('section.stopwatch');
@@ -22,6 +26,8 @@ export const initStopwatch = (root = document, { signal } = {}) => {
   const clock = panel.querySelector('.stopwatch-clock');
   const go = panel.querySelector('.stopwatch-go');
   const cancel = panel.querySelector('.stopwatch-cancel');
+  const splits = panel.querySelector('.stopwatch-splits');
+  const undo = panel.querySelector('.stopwatch-undo');
   const dnfButtons = [...panel.querySelectorAll('.stopwatch-dnf button')];
   const lanes = [...form.querySelectorAll('fieldset.race-result')];
   const swap = form.querySelector('.race-swap');
@@ -92,9 +98,49 @@ export const initStopwatch = (root = document, { signal } = {}) => {
     show();
   };
 
+  /** Arrivals expected: children not marked "did not finish". */
+  const expected = () => lanes.length - finished.size;
+
+  /** Acknowledges the arrivals so far: list, button label, undo. */
+  const showArrivals = () => {
+    if (splits) {
+      splits.innerHTML = '';
+      arrivals.forEach((arrival, index) => {
+        const item = document.createElement('li');
+        item.textContent = fill(data.labelSplit ?? '{place} : {time}', {
+          place: index === 0 ? data.placeFirst : data.placeOther,
+          time: clockText(Math.floor(arrival / 10), timeFormat, data.decimal),
+        });
+        splits.append(item);
+      });
+    }
+    if (state === 'running') {
+      go.textContent =
+        expected() > 1 && data.labelFinishNumber
+          ? fill(data.labelFinishNumber, { number: arrivals.length + 1, of: expected() })
+          : data.labelFinish;
+    }
+    if (undo) {
+      undo.disabled = state !== 'running' || arrivals.length === 0;
+    }
+  };
+
+  /** A visible and tactile sign that the tap was taken. */
+  const acknowledge = () => {
+    go.classList.remove('tapped');
+    // Restart the animation on every tap.
+    void go.offsetWidth;
+    go.classList.add('tapped');
+    if ('vibrate' in navigator) {
+      navigator.vibrate(80);
+    }
+  };
+
   const checkDone = () => {
-    if (arrivals.length >= lanes.length - finished.size) {
+    if (arrivals.length >= expected()) {
       review();
+    } else {
+      showArrivals();
     }
   };
 
@@ -114,6 +160,7 @@ export const initStopwatch = (root = document, { signal } = {}) => {
       setLane(lane, null, '');
       dnfOf(lane).checked = false;
     }
+    showArrivals();
     show();
   };
 
@@ -121,13 +168,15 @@ export const initStopwatch = (root = document, { signal } = {}) => {
     if (state === 'idle') {
       state = 'running';
       start = at;
-      go.textContent = data.labelFinish;
       for (const button of dnfButtons) {
         button.disabled = false;
       }
+      acknowledge();
+      showArrivals();
       tick();
     } else if (state === 'running') {
       arrivals.push(at - start);
+      acknowledge();
       checkDone();
     }
   };
@@ -141,6 +190,13 @@ export const initStopwatch = (root = document, { signal } = {}) => {
   go.addEventListener('click', (event) => {
     if (event.detail === 0) {
       press(performance.now());
+    }
+  });
+
+  undo?.addEventListener('click', () => {
+    if (state === 'running' && arrivals.length > 0) {
+      arrivals = arrivals.slice(0, -1);
+      showArrivals();
     }
   });
 

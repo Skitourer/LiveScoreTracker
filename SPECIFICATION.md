@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.17 — 12 November 2026
+> Version 1.18 — 12 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -352,6 +352,7 @@ Details:
 - On a time workshop, the "bib" screen shows the race fields (the 2nd bib is optional) and two buttons: **Built-in timer** (first, main button) and **External stopwatch**. A separate field opens a bib's attempts to view or correct them.
 - Checks before the start: unknown bib, wrong level or bib typed twice → refused. Two children on different variants (e.g. a CP child on 30 m and a CM1 child on 40 m) → allowed, with a clearly visible message.
 - The time is taken **when the button is touched** (not when released), then rounded down to the hundredth, as on a stopwatch.
+- **Each Finish tap is acknowledged at once**: the button flashes, the phone vibrates, the time shows in the list of arrivals ("1st to finish: 12.34") and the button names the arrival expected ("Finish 2/2"). An **"Undo the last finish"** button corrects an extra tap.
 - The first time goes to the first bib typed; **Swap** exchanges the two times. With a "Did not finish", the only time goes to the other child.
 - The race is approved **as a whole**: nothing is saved until both times are readable and the warnings (§ 10.1) confirmed.
 - Each time records where it came from: **built-in timer**, or **built-in timer, time edited by hand** when the referee changed it before approval (shown in the attempt history).
@@ -570,6 +571,8 @@ For each variant × category: list of children with **all attempts**, modifiers,
 ### 11.4 Rankings
 
 Overall ranking of each category: rank, first name, last name, total, score per event, tie-break criterion if any.
+
+- **Attempts used up**: once a child has done every attempt, no attempt can be added (child screen, race, offline phone); a result can only be changed with "Correct". Only exception: an entry made offline by another phone is accepted and marked "to check" (§ 8.8).
 
 Details (step 8a):
 - **Results and rankings** (`/results`): one page per category (chosen with chips) with the overall ranking (rank, bib, first name, last name, total, score of each event, tie-break criterion, "events pending" badge), then the detail of each event (scale bounds, every attempt, retained result, score, rank, status, "to check" badge). Each line leads to the child's correction screen. Everything is recomputed on every display (§ 9.7); before closing, an event not done yet is "to do".

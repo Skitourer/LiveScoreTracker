@@ -30,7 +30,9 @@
         </div>
     {% endif %}
 
-    {% if open %}
+    {% if open and not correcting and progress.isFinished() %}
+        <p class="notice">{{ t('entry.finished_hint', {of: variant.attempts}) }}</p>
+    {% elseif open %}
         {% include 'partials/errors.html.twig' %}
         <form method="post" class="form entry-form">
             {{ csrf_field() }}

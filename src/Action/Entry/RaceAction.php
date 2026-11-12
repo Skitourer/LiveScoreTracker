@@ -78,7 +78,7 @@ final class RaceAction
             }
             $bibs = [$ticked[0] ?? '', $ticked[1] ?? ''];
         }
-        $lanes = $this->lanes($workshop, $bibs);
+        $lanes = $this->lanes($workshop, $bibs, !$isPost);
         if (\is_string($lanes)) {
             return $this->responder->redirect($response, $back);
         }
@@ -158,11 +158,12 @@ final class RaceAction
     /**
      * The children of the race, or a blocking error (already flashed).
      *
-     * @param list<string> $bibs as typed (the second one may be empty)
+     * @param list<string> $bibs           as typed (the second one may be empty)
+     * @param bool         $refuseFinished before the start; once run, a race is saved and flagged instead
      *
      * @return list<array{child: Registration, variant: Variant, progress: AttemptProgress}>|string
      */
-    private function lanes(Workshop $workshop, array $bibs): array|string
+    private function lanes(Workshop $workshop, array $bibs, bool $refuseFinished): array|string
     {
         $lanes = [];
         $seen = [];
@@ -184,7 +185,14 @@ final class RaceAction
             }
             $seen[(int) $bib] = true;
             [$child, $variant] = $resolved;
-            $lanes[] = ['child' => $child, 'variant' => $variant, 'progress' => $this->desk->progress($child, $variant)];
+            $progress = $this->desk->progress($child, $variant);
+            if ($refuseFinished && $progress->isFinished()) {
+                // Every attempt is done: a result can only be corrected (spec § 8.2).
+                $this->responder->flash('error', 'entry.error.attempts_finished', ['bib' => $bib, 'of' => $variant->attempts]);
+
+                return 'entry.error.attempts_finished';
+            }
+            $lanes[] = ['child' => $child, 'variant' => $variant, 'progress' => $progress];
         }
         if ($lanes === []) {
             $this->responder->flash('error', 'entry.error.no_bib');

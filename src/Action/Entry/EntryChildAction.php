@@ -107,6 +107,12 @@ final class EntryChildAction
 
                 return $this->responder->redirect($response, $self);
             }
+            if ($op === 'record' && $progress->isFinished()) {
+                // Every attempt is done: a result can only be corrected (spec § 8.2).
+                $this->responder->flash('error', 'entry.error.attempts_finished', ['bib' => (string) $child->bib, 'of' => $variant->attempts]);
+
+                return $this->responder->redirect($response, $self);
+            }
             if ($op === 'record' || ($op === 'correct' && $target !== null)) {
                 $correcting = $op === 'correct' ? $target : null;
                 $kind = Responder::field($request, 'kind');

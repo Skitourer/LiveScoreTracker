@@ -878,3 +878,30 @@ pre.details {
   color: var(--color-muted);
   font-weight: normal;
 }
+
+/* Each Finish tap is acknowledged (spec § 8.4). */
+.stopwatch-go.tapped {
+  animation: stopwatch-tap 0.4s ease-out;
+}
+
+@keyframes stopwatch-tap {
+  from {
+    background: var(--color-ok);
+    border-color: var(--color-ok);
+    transform: scale(0.97);
+  }
+}
+
+.stopwatch-splits {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  text-align: center;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-strong);
+  font-variant-numeric: tabular-nums;
+}
+
+.stopwatch-splits:empty {
+  display: none;
+}
