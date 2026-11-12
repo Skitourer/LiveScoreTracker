@@ -107,6 +107,8 @@ final class ResultsTest extends TestCase
         self::assertMatchesRegularExpression('/dont 90 présents, 5 en liste d&#039;attente, [1-9][0-9]+ résultats/', $this->admin->lastBody);
         $this->admin->get('/results?category=CM2-boy');
         self::assertStringContainsString('class="podium"', $this->admin->lastBody);
+        // The ceremony screen's grid must not apply to the ranking rows of the podium.
+        self::assertDoesNotMatchRegularExpression('#^\.podium\s*\{#m', (string) file_get_contents(__DIR__ . '/../../public/assets/css/app.css'));
         $this->admin->get('/missing');
         self::assertStringContainsString('missing-list', $this->admin->lastBody);
     }

@@ -1099,7 +1099,7 @@ pre.details {
   font-size: var(--font-size-display);
 }
 
-.podium {
+.ceremony-podium {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-4);

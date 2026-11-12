@@ -43,6 +43,7 @@ final class DocumentsTest extends TestCase
         if ($text !== null) {
             self::assertStringContainsString('Saut en longueur', $text);
             self::assertStringContainsString('Arbitre :', $text);
+            self::assertStringContainsString('But marqué (-3,00 s)', $text, 'Modifier values in the unit of the event.');
             self::assertStringContainsString('État au', $text);
             self::assertMatchesRegularExpression('#1\s+MARTIN Zoé.*2\s+MARTIN Léa#s', $text, 'Sorted by bib.');
         }

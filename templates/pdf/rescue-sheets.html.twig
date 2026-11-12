@@ -22,7 +22,7 @@
         <h1>{{ event_label(variant) }}</h1>
         <table class="sheet-head"><tr>
             <td>{{ t('documents.rescue_sheets.levels', {levels: sheet.levels|map(l => label('level.' ~ l))|join(', ')}) }}<br>
-                {{ t('documents.unit.' ~ variant.measure.value) }}{% if variant.modifiers is not empty %} · {{ t('documents.col.modifiers') }} : {{ variant.modifiers|map(m => t('modifier.' ~ m.id) ~ ' (' ~ (m.value > 0 ? '+' : '') ~ m.value ~ ')')|join(', ') }}{% endif %}</td>
+                {{ t('documents.unit.' ~ variant.measure.value) }}{% if variant.modifiers is not empty %} · {{ t('documents.col.modifiers') }} : {{ variant.modifiers|map(m => t('modifier.' ~ m.id) ~ ' (' ~ (m.value > 0 ? '+' : '') ~ result(m.value, variant) ~ ')')|join(', ') }}{% endif %}</td>
             <td class="num">{{ t('documents.rescue_sheets.referee') }} ____________________<br>{{ t('documents.state_at', {at: local_time(printedAt)}) }}</td>
         </tr></table>
         <table>
