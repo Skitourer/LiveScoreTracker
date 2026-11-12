@@ -44,6 +44,8 @@ use LiveScoreTracker\Action\Registration\RegistrationExportAction;
 use LiveScoreTracker\Action\Registration\RegistrationImportAction;
 use LiveScoreTracker\Action\Registration\RegistrationNewAction;
 use LiveScoreTracker\Action\Registration\RegistrationsAction;
+use LiveScoreTracker\Action\Results\MissingEventsAction;
+use LiveScoreTracker\Action\Results\ResultsAction;
 use LiveScoreTracker\Action\ScoringReportAction;
 use LiveScoreTracker\Action\StyleguideAction;
 use LiveScoreTracker\Domain\Config\CompetitionConfig;
@@ -191,6 +193,10 @@ final class Kernel
         $app->post('/entry/{workshop:[a-z0-9_]+}/sync', EntrySyncAction::class)->setName('entry-sync')->add($guard(Permission::EnterResultsChosenEvent));
         $app->map(['GET', 'POST'], '/entry/{workshop:[a-z0-9_]+}/race', RaceAction::class)->setName('entry-race')->add($guard(Permission::EnterResultsChosenEvent));
         $app->map(['GET', 'POST'], '/entry/{workshop:[a-z0-9_]+}/{bib:[0-9]+}', EntryChildAction::class)->setName('entry-child')->add($guard(Permission::EnterResultsChosenEvent));
+
+        // Results, rankings and missing events (spec § 11)
+        $app->get('/results', ResultsAction::class)->setName('results')->add($guard(Permission::ViewResultsAndRankings));
+        $app->get('/missing', MissingEventsAction::class)->setName('missing')->add($guard(Permission::ViewMonitoring));
 
         // Administration
         // Slim binds group callbacks to itself: the closure must not be static.

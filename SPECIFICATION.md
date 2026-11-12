@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.16 — 12 November 2026
+> Version 1.17 — 12 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -571,6 +571,11 @@ For each variant × category: list of children with **all attempts**, modifiers,
 
 Overall ranking of each category: rank, first name, last name, total, score per event, tie-break criterion if any.
 
+Details (step 8a):
+- **Results and rankings** (`/results`): one page per category (chosen with chips) with the overall ranking (rank, bib, first name, last name, total, score of each event, tie-break criterion, "events pending" badge), then the detail of each event (scale bounds, every attempt, retained result, score, rank, status, "to check" badge). Each line leads to the child's correction screen. Everything is recomputed on every display (§ 9.7); before closing, an event not done yet is "to do".
+- **Missing events** (`/missing`): "by workshop" view in large print (bib, first name, last name, grade) and "by child" view, with filters by workshop and by category; only present children are listed.
+- **Clear a bib's results at an event** (admin, organizer, "running" phase): a button on the child's entry screen deletes all their attempts at the event (they stay visible in the history, the action is written to the audit log); the child can do the event again.
+
 ### 11.5 Progress
 
 Detailed version of the public screen (§ 13.1): per workshop and per category.
@@ -954,7 +959,7 @@ Only **fictitious data** is allowed (example configuration, test data sets, demo
 | Backups | Production server + **encrypted** copy on Drive | Repository |
 | Imported files (spreadsheets) | Processed in memory then deleted | Repository, disk after import |
 
-- The **test site** runs on **generated fictitious data** by default (a command generates a test set: ~100 fictitious children, realistic random results). A **Test data** page (admin, absent in production) replaces every registration and result by 100 fictitious children ready for the start of the competition: 95 with a bib including 90 present (bib handed out), 5 on the waiting list; typing "EFFACER" confirms it. Real data is only copied there when strictly necessary, then deleted.
+- The **test site** runs on **generated fictitious data** by default (a command generates a test set: ~100 fictitious children, realistic random results). A **Test data** page (admin, absent in production) replaces every registration and result by 100 fictitious children ready for the start of the competition: 95 with a bib including 90 present (bib handed out), 5 on the waiting list; typing "EFFACER" confirms it. A checkbox adds realistic fictitious results (about 3 events out of 4 per present child) to judge the rankings. Real data is only copied there when strictly necessary, then deleted.
 - The **data directory** is **outside the public web directory** and set by an environment variable. Deployment **never touches** this directory (explicit exclusion in the deployment script).
 
 ### 25.3 Technical safeguards

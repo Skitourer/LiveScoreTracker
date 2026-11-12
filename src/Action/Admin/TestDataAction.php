@@ -37,9 +37,9 @@ final class TestDataAction
 
                 return $this->responder->redirect($response, '/admin/test-data');
             }
-            $result = $this->reset->reset($this->responder->context->user);
+            $result = $this->reset->reset($this->responder->context->user, withResults: Responder::field($request, 'with_results') === '1');
             $this->responder->audit('test_data.reset', $result);
-            $this->responder->flash('success', 'test_data.done', $result);
+            $this->responder->flash('success', $result['results'] > 0 ? 'test_data.done_with_results' : 'test_data.done', $result);
 
             return $this->responder->redirect($response, '/admin/test-data');
         }
