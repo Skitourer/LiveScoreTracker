@@ -31,11 +31,14 @@
             <section class="stopwatch" hidden
                 data-review="{{ review ? '1' : '0' }}"
                 data-label-start="{{ t('entry.timer.start') }}" data-label-finish="{{ t('entry.timer.finish') }}"
+                data-label-finish-number="{{ t('entry.timer.finish_number') }}" data-label-split="{{ t('entry.timer.split') }}"
                 data-place-first="{{ t('entry.timer.place_first') }}" data-place-other="{{ t('entry.timer.place_other') }}"
                 data-confirm-leave="{{ t('entry.timer.confirm_leave') }}"
                 data-decimal="{{ t('format.decimal_separator') }}">
                 <output class="stopwatch-clock" aria-live="off">0{{ t('format.decimal_separator') }}00</output>
                 <button type="button" class="button large stopwatch-go">{{ t('entry.timer.start') }}</button>
+                <ol class="stopwatch-splits" aria-live="assertive"></ol>
+                <button type="button" class="button secondary stopwatch-undo" disabled>{{ t('entry.timer.undo_finish') }}</button>
                 <div class="stopwatch-dnf">
                     {% for lane in lanes %}
                         <button type="button" class="button secondary" data-lane="{{ loop.index }}" disabled>{{ t('entry.timer.dnf', {name: lane.child.publicName()}) }}</button>

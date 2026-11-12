@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.17 — 12 novembre 2026
+> Version 1.18 — 12 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -352,6 +352,7 @@ Précisions :
 - Sur un atelier à temps, l'écran « dossard » propose les champs de la course (le 2ᵉ dossard est facultatif) et deux boutons : **Chrono intégré** (en premier, bouton principal) et **Chrono classique**. Un champ à part ouvre les essais d'un dossard pour les consulter ou les corriger.
 - Contrôles avant le départ : dossard inconnu, pas du bon niveau ou saisi deux fois → refusé. Deux enfants de variantes différentes (ex. un CP sur 30 m et un CM1 sur 40 m) → possible, avec un message bien visible.
 - Le temps est pris **au moment du toucher** sur le bouton (et non au relâchement), puis arrondi au centième inférieur, comme sur un chronomètre.
+- **Chaque appui sur Arrivée est confirmé tout de suite** : le bouton clignote, le téléphone vibre, le temps s'affiche dans la liste des arrivées (« 1er arrivé : 12,34 ») et le bouton indique l'arrivée attendue (« Arrivée 2/2 »). Un bouton **« Annuler la dernière arrivée »** corrige un appui en trop.
 - Le premier temps va au premier dossard saisi ; **Inverser** échange les deux temps. Avec un « N'a pas fini », le seul temps va à l'autre enfant.
 - La course est validée **en bloc** : rien n'est enregistré tant que les deux temps ne sont pas lisibles et les avertissements (§ 10.1) confirmés.
 - Chaque temps garde la trace de son origine : **chrono intégré**, ou **chrono intégré, temps modifié à la main** si l'arbitre l'a changé avant de valider (visible dans l'historique des essais).
@@ -570,6 +571,8 @@ Pour chaque variante × catégorie : liste des enfants avec **tous les essais**,
 ### 11.4 Classements
 
 Classement général de chaque catégorie : rang, prénom, nom, total, score par épreuve, critère de départage éventuel.
+
+- **Essais épuisés** : quand un enfant a fait tous ses essais, on ne peut plus en ajouter (écran de l'enfant, course, téléphone hors ligne) ; un résultat se change seulement par « Corriger ». Seule exception : une saisie faite hors ligne par un autre téléphone est acceptée et marquée « à vérifier » (§ 8.8).
 
 Précisions (étape 8a) :
 - **Résultats et classements** (`/results`) : une page par catégorie (choix par pastilles) avec le classement général (rang, dossard, prénom, nom, total, score de chaque épreuve, critère de départage, badge « épreuves en attente »), puis le détail de chaque épreuve (bornes du barème, tous les essais, résultat retenu, score, rang, statut, badge « à vérifier »). Chaque ligne mène à l'écran de correction de l'enfant. Tout est recalculé à chaque affichage (§ 9.7) ; avant la clôture, une épreuve pas encore faite est « à faire ».

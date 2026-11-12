@@ -36,6 +36,7 @@ final class EntryPack
         'entry.hint.time_sscc', 'entry.hint.time_msscc', 'entry.hint.distance', 'entry.hint.score', 'entry.hint.counter',
         'entry.timer.start', 'entry.timer.finish', 'entry.timer.place_first', 'entry.timer.place_other', 'entry.timer.dnf',
         'entry.timer.cancel', 'entry.timer.confirm_cancel', 'entry.timer.confirm_leave', 'entry.timer.swap',
+        'entry.timer.finish_number', 'entry.timer.split', 'entry.timer.undo_finish', 'entry.finished_hint', 'entry.error.attempts_finished',
         'entry.counter.start', 'entry.counter.shot', 'entry.counter.missed', 'entry.counter.undo', 'entry.counter.stop',
         'entry.counter.summary', 'entry.counter.limit_shots', 'entry.counter.limit_duration', 'entry.counter.confirm_leave',
         'entry.counter.direct', 'entry.counter.direct_total',
