@@ -31,6 +31,11 @@ initStopwatch();
 initCounter();
 initTrackingRace();
 initEntryApp();
+
+// Ceremony screen: full screen on the projector.
+document.querySelector('.fullscreen-toggle')?.addEventListener('click', () => {
+  document.documentElement.requestFullscreen?.().catch(() => {});
+});
 initLiveRefresh({ onRefresh: () => initTrackingRace() });
 initOffline();
 

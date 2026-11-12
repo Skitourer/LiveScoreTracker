@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.22 — 12 November 2026
+> Version 1.23 — 12 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -695,8 +695,13 @@ At the site's address (`/`), **without login**, readable on a phone, **with no p
 
 - Available **only after closing**.
 - Shown on a big screen, **driven from the phone** of an admin or organizer: "next category", "reveal next place".
-- For each category: reveal **3rd, then 2nd, then 1st**, as **first name + initial** with total points.
+- For each category: reveal **3rd, then 2nd, then 1st**, with **full first and last names** (the children are called over the microphone; requested in step 9c) and total points, on the screen and on the control page.
 - Configurable category order.
+- Details (step 9c):
+  - **Screen** `/ceremony`: on the computer connected to the projector, **logged in as admin or organizer** (no public link). It follows the state every 2 seconds; no menu nor messages; "Full screen" button. Stepped podium (2nd on the left, 1st in the middle, 3rd on the right), a place not revealed shows "?", the last place revealed is animated (unless the device asks for less motion).
+  - **Control** `/ceremony/control` (admin, organizer; "Ceremony" tile of the dashboard, link from the phase page once the competition is closed): big "Reveal the 3rd / 2nd / 1st place" button, then "Next category"; "Hide the last place", "Previous category"; category order adjustable (up, down, go to a category), by default the configuration's.
+  - Podium: **present** children ranked 1 to 3 in the final ranking (ties broken by hand included); an unbroken tie shares the same place and is revealed at once. The state (order, category, places revealed) is kept in the database, shared by the screen and the phone.
+  - Only available in the "closed" phase; before, both pages say so.
 
 ### 13.3 Participant page
 

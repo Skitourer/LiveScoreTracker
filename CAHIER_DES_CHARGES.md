@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.22 — 12 novembre 2026
+> Version 1.23 — 12 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -695,8 +695,13 @@ Sujets et corps de tous les emails dans les fichiers de traduction, avec des var
 
 - Disponible **uniquement après la clôture**.
 - Affiché sur un grand écran, **piloté depuis le téléphone** d'un admin ou d'un organisateur : « catégorie suivante », « révéler la place suivante ».
-- Pour chaque catégorie : révélation du **3e, puis du 2e, puis du 1er**, en **prénom + initiale** avec le total de points.
+- Pour chaque catégorie : révélation du **3e, puis du 2e, puis du 1er**, en **prénom et nom complets** (les enfants sont appelés au micro ; demande de Boris, étape 9c) avec le total de points, sur l'écran comme sur la page de pilotage.
 - Ordre des catégories configurable.
+- Précisions (étape 9c) :
+  - **Écran** `/ceremony` : sur l'ordinateur relié au vidéoprojecteur, **connecté en admin ou organisateur** (pas de lien public). Il suit l'état toutes les 2 secondes ; ni menu ni messages ; bouton « Plein écran ». Podium en marches (2e à gauche, 1er au centre, 3e à droite), place non révélée affichée « ? », dernière place révélée animée (sauf si l'appareil demande moins d'animations).
+  - **Pilotage** `/ceremony/control` (admin, organisateur ; tuile « Cérémonie » du tableau de bord, lien depuis la page de phase une fois la compétition terminée) : gros bouton « Révéler la 3e / 2e / 1re place », puis « Catégorie suivante » ; « Masquer la dernière place », « Catégorie précédente » ; ordre des catégories réglable (monter, descendre, aller à une catégorie), par défaut celui de la configuration.
+  - Podium : enfants **présents** classés 1 à 3 au classement final (égalités tranchées comprises) ; une égalité non tranchée partage la même place et se révèle d'un coup. L'état (ordre, catégorie, places révélées) est gardé dans la base, partagé entre l'écran et le téléphone.
+  - Disponible seulement en phase « terminée » ; avant, les deux pages l'indiquent.
 
 ### 13.3 Page participant
 

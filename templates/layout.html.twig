@@ -36,9 +36,11 @@
         </nav>{% endblock %}
     </header>
     <main class="container{% block main_class %}{% endblock %}">
-        {% for flash in flashes() %}
-            <p class="flash {{ flash.type }}" role="status">{{ t(flash.key, flash.params) }}</p>
-        {% endfor %}
+        {% block flashes %}
+            {% for flash in flashes() %}
+                <p class="flash {{ flash.type }}" role="status">{{ t(flash.key, flash.params) }}</p>
+            {% endfor %}
+        {% endblock %}
         {% block content %}{% endblock %}
     </main>
 </body>
