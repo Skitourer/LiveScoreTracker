@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+<head>
+<meta charset="UTF-8">
+<title>{{ t('documents.rankings.title') }}</title>
+{% include 'pdf/_style.html.twig' %}
+</head>
+<body>
+<header>{{ edition.name }} — {{ edition.date|date('d/m/Y') }}{% if not closed %}<span class="provisional">{{ t('documents.provisional') }}</span>{% endif %}</header>
+<footer>{{ t('documents.state_at', {at: local_time(printedAt)}) }} · {{ t('reception_list.page') }} <span class="page"></span></footer>
+{% for category in categories %}
+    <div{% if not loop.first %} class="break"{% endif %}>
+        <h1>{{ category_label(category.category) }}{% if not closed %} <span class="stamp">{{ t('documents.provisional') }}</span>{% endif %}</h1>
+        {% if category.ranking is empty %}
+            <p class="small">{{ t('documents.podiums.none') }}</p>
+        {% else %}
+            <table>
+                <thead><tr>
+                    <th class="num">{{ t('documents.col.rank') }}</th>
+                    <th class="bib">{{ t('documents.col.bib') }}</th>
+                    <th>{{ t('documents.col.child') }}</th>
+                    <th>{{ t('registration.field.school') }}</th>
+                    {% for event in category.events %}<th class="num">{{ event_label(event.variant) }}</th>{% endfor %}
+                    <th class="num">{{ t('documents.col.total') }}</th>
+                </tr></thead>
+                <tbody>
+                {% for line in category.ranking %}
+                    {% set child = category.children[line.bib] %}
+                    <tr>
+                        <td class="num"><strong>{{ line.rank }}</strong></td>
+                        <td class="bib">{{ line.bib }}</td>
+                        <td><span class="last">{{ child.child.lastName }}</span> {{ child.child.firstName }}{% if line.tied %} <span class="small">({{ t('documents.tied') }})</span>{% endif %}</td>
+                        <td class="small">{{ child.child.school }}</td>
+                        {% for event in category.events %}
+                            {% set score = line.events[event.variant.id()] ?? null %}
+                            <td class="num">{{ score and score.score is not null ? score.score : '–' }}</td>
+                        {% endfor %}
+                        <td class="num"><strong>{{ line.total }}</strong></td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        {% endif %}
+    </div>
+{% endfor %}
+</body>
+</html>

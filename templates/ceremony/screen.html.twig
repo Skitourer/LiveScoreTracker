@@ -20,7 +20,7 @@
             {% if state.steps is empty %}
                 <p class="lead">{{ t('ceremony.empty') }}</p>
             {% else %}
-                <div class="podium">
+                <div class="ceremony-podium">
                     {# Steps are in the order of the reveal: the 3rd place first. #}
                     {% for step in state.steps %}
                         {% set shown = loop.index <= state.revealed %}

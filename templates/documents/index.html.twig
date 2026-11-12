@@ -1,0 +1,52 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('documents.title') }}{% endblock %}
+
+{% block content %}
+    <h1>{{ t('documents.title') }}</h1>
+    <p class="meta">{{ t('documents.lead') }}</p>
+
+    <h2>{{ t('documents.before') }}</h2>
+    <ul class="document-list">
+        <li>
+            <a class="button secondary" href="{{ url_for('document', {name: 'rescue-sheets.pdf'}) }}">{{ t('documents.rescue_sheets.download') }}</a>
+            <p class="meta">{{ t('documents.rescue_sheets.hint') }}</p>
+            {% if freshness %}
+                {% if freshness.changed > 0 %}
+                    <p class="notice warning">{{ t('documents.rescue_sheets.outdated', {at: local_time(freshness.printed_at), count: freshness.changed}) }}</p>
+                {% else %}
+                    <p class="meta">{{ t('documents.rescue_sheets.up_to_date', {at: local_time(freshness.printed_at)}) }}</p>
+                {% endif %}
+            {% endif %}
+        </li>
+        <li>
+            <a class="button secondary" href="{{ url_for('document', {name: 'help-sheets.pdf'}) }}">{{ t('documents.help_sheets.download') }}</a>
+            <p class="meta">{{ t('documents.help_sheets.hint') }}</p>
+        </li>
+        <li>
+            <a class="button secondary" href="{{ url_for('reception-list') }}">{{ t('reception_list.download') }}</a>
+        </li>
+        {% if can('view_registrations') %}
+            <li>
+                <a class="button secondary" href="{{ url_for('registration-export') }}">{{ t('documents.registrations.download') }}</a>
+            </li>
+        {% endif %}
+    </ul>
+
+    <h2>{{ t('documents.results_heading') }}</h2>
+    {% if not closed %}<p class="notice">{{ t('documents.provisional_notice') }}</p>{% endif %}
+    <ul class="document-list">
+        <li>
+            <a class="button secondary" href="{{ url_for('document', {name: 'podiums.pdf'}) }}">{{ t('documents.podiums.download') }}</a>
+        </li>
+        <li>
+            <a class="button secondary" href="{{ url_for('document', {name: 'rankings.pdf'}) }}">{{ t('documents.rankings.download') }}</a>
+            <a class="button secondary" href="{{ url_for('document', {name: 'rankings.xlsx'}) }}">{{ t('documents.rankings.download_xlsx') }}</a>
+        </li>
+        <li>
+            <a class="button secondary" href="{{ url_for('document', {name: 'results.xlsx'}) }}">{{ t('documents.results_xlsx.download') }}</a>
+            <p class="meta">{{ t('documents.results_xlsx.hint') }}</p>
+        </li>
+    </ul>
+    <p class="meta">{{ t('documents.privacy') }}</p>
+{% endblock %}

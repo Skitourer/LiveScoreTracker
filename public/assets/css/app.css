@@ -409,6 +409,18 @@ select:focus,
 }
 
 /* ---------- Cards, tiles and facts ---------- */
+.document-list {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.document-list .meta,
+.document-list .notice {
+  margin: var(--space-1) 0 0;
+}
+
 .tiles {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
@@ -1087,7 +1099,7 @@ pre.details {
   font-size: var(--font-size-display);
 }
 
-.podium {
+.ceremony-podium {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-4);

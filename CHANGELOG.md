@@ -8,6 +8,7 @@ Each step of the development plan (specification § 23) is one or more pull requ
 
 ### Added
 
+- **Step 10a — documents**: Documents page; rescue sheets per event and level group, sorted by bib, with a "present" box, a referee line, an "as of" date and empty lines, and a warning when registrations changed since the last printing; event sheets; podiums and full rankings in PDF (marked "provisional" before the closing); rankings and detailed results in spreadsheets; every download in the audit log; modifier values shown in the unit of the event.
 - Repository documentation: README in English and French, contributing guide, security policy, code of conduct, this changelog, issue and pull request templates, developer documentation (`docs/development/`).
 - **Step 9c — award ceremony** (#16): big screen for the projector (stepped podium revealed from the 3rd place to the 1st, full names, follows the state every 2 s, full screen) driven from a phone (reveal, hide, previous/next category, order of the categories); only once the competition is closed.
 - **Step 9b — participant space and progress** (#15): participant space with bib + birth date (raw results while running; points, ranks and category ranking after the closing); public progress screen for a projector (workshops done/expected, least advanced highlighted, refreshed every 10 s); detailed progress by category for organizers.
@@ -26,6 +27,7 @@ Each step of the development plan (specification § 23) is one or more pull requ
 
 ### Fixed
 
+- Podium rows of the rankings and of the calculation report were laid out as the ceremony podium (shared CSS class).
 - License year set to 2026, the year the project was published.
 - Exhausted attempts are blocked; every "Arrival" tap gives feedback and the last arrival can be undone (#12).
 - The test deployment now includes the example help and public pages (#14).

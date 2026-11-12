@@ -215,6 +215,18 @@ final class RegistrationRepository
     }
 
     /**
+     * Registrations created or changed since a moment (UTC 'Y-m-d H:i:s', included),
+     * to know whether printed lists are still up to date.
+     */
+    public function countChangedSince(string $at): int
+    {
+        $statement = $this->pdo->prepare('SELECT COUNT(*) FROM registrations WHERE updated_at >= :at OR created_at >= :at2');
+        $statement->execute(['at' => $at, 'at2' => $at]);
+
+        return (int) $statement->fetchColumn();
+    }
+
+    /**
      * @return array<string, int> status => number of registrations
      */
     public function countByStatus(): array
@@ -334,9 +346,10 @@ final class RegistrationRepository
                 $next = $this->lowestFreeBib($firstBib);
 
                 $update = $this->pdo->prepare(
-                    'UPDATE registrations SET bib = :bib, registered_at = :now WHERE id = :id AND bib IS NULL',
+                    'UPDATE registrations SET bib = :bib, registered_at = :now, updated_at = :now2 WHERE id = :id AND bib IS NULL',
                 );
-                $update->execute(['bib' => $next, 'now' => $this->clock->stamp(), 'id' => $id]);
+                $now = $this->clock->stamp();
+                $update->execute(['bib' => $next, 'now' => $now, 'now2' => $now, 'id' => $id]);
                 if ($update->rowCount() > 0) {
                     $this->addHistory($id, 'bib', ['bib' => [null, $next]], null);
                 } else {

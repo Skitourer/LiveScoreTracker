@@ -24,6 +24,7 @@ use LiveScoreTracker\Action\Auth\SetupAction;
 use LiveScoreTracker\Action\Auth\TwoFactorChallengeAction;
 use LiveScoreTracker\Action\Auth\TwoFactorSetupAction;
 use LiveScoreTracker\Action\DashboardAction;
+use LiveScoreTracker\Action\Documents\DocumentsAction;
 use LiveScoreTracker\Action\Entry\EntryBibAction;
 use LiveScoreTracker\Action\Entry\EntryChildAction;
 use LiveScoreTracker\Action\Entry\EntryPackAction;
@@ -196,6 +197,8 @@ final class Kernel
 
         // Reception on the competition day (spec § 6)
         $app->get('/reception-list.pdf', ReceptionListAction::class)->setName('reception-list')->add($guard(Permission::PrintDocuments));
+        $app->get('/documents', DocumentsAction::class)->setName('documents')->add($guard(Permission::PrintDocuments));
+        $app->get('/documents/{name}', DocumentsAction::class)->setName('document')->add($guard(Permission::PrintDocuments));
         $app->get('/check-in', CheckInAction::class)->setName('check-in')->add($guard(Permission::CheckInOut));
         $app->map(['GET', 'POST'], '/check-in/{id:[0-9]+}', CheckInCardAction::class)->setName('check-in-card')->add($guard(Permission::CheckInOut));
 

@@ -261,6 +261,7 @@ referee_account = "Referee account"
 audit_log = "Audit log"
 configuration = "Configuration"
 system_status = "System status"
+documents = "Documents"
 ceremony = "Ceremony"
 
 [phase]
@@ -385,6 +386,7 @@ older = "Older"
 "referee.disconnected_all" = "Referee phones disconnected"
 "phase.changed" = "Phase change"
 "setup.first_admin" = "First admin created"
+"documents.downloaded" = "Document downloaded"
 "reception.list_printed" = "Reception list printed"
 "auth.device_trusted" = "Trusted device added"
 "auth.device_untrusted" = "Trusted device removed"
@@ -710,6 +712,83 @@ bib_returned = "{name} ({bib}): bib given back."
 bib_returned_undone = "{name} ({bib}): bib return undone."
 gift_given = "{name} ({bib}): gift and medal handed out."
 gift_given_undone = "{name} ({bib}): gift hand-out undone."
+
+[documents]
+title = "Documents"
+lead = "Documents to print and exports. They hold the children's full names: every download is recorded in the audit log."
+before = "Before the competition"
+results_heading = "Results"
+provisional = "PROVISIONAL"
+provisional_notice = "The competition is not closed: podiums and rankings are provisional and marked as such."
+privacy = "These documents hold personal data: do not share them and destroy the paper copies after the event."
+state_at = "As of {at}"
+empty = "No event configured."
+tied = "tied"
+points = "{points} pts"
+results_title = "Detailed results"
+
+[documents.rescue_sheets]
+download = "Rescue sheets (PDF)"
+hint = "One sheet per event and level group, children sorted by bib, with empty lines for last-minute registrations. To use if the phones do not work."
+title = "Rescue sheets"
+file_name = "rescue-sheets"
+levels = "Levels: {levels}"
+referee = "Referee:"
+outdated = "Last printed on {at}: {count} registration(s) added or changed since. Remember to print them again."
+up_to_date = "Last printed on {at}, no registration changed since."
+
+[documents.help_sheets]
+download = "Event sheets (PDF)"
+hint = "The help of each workshop, one page per workshop, with the useful contacts."
+title = "Event sheets"
+file_name = "event-sheets"
+
+[documents.registrations]
+download = "Registrations (Excel)"
+
+[documents.podiums]
+download = "Podiums (PDF)"
+title = "Podiums"
+file_name = "podiums"
+none = "No child ranked."
+
+[documents.rankings]
+download = "Full rankings (PDF)"
+download_xlsx = "Full rankings (Excel)"
+title = "Rankings"
+file_name = "rankings"
+
+[documents.results_xlsx]
+download = "Detailed results (Excel)"
+hint = "Every retained attempt, with who entered it and when."
+
+[documents.results]
+file_name = "results"
+
+[documents.unit]
+time = "Time (min:s.cc)"
+distance = "Distance (m)"
+score = "Points"
+counter = "Count"
+
+[documents.col]
+rank = "Rank"
+bib = "Bib"
+child = "Child"
+present = "Present"
+attempt = "Attempt {n}"
+count = "Total"
+modifiers = "Bonuses/penalties"
+notes = "Notes"
+total = "Total"
+first_places = "1st places"
+top3_places = "Places 1 to 3"
+event = "Event"
+value = "Measure"
+result = "Result"
+entered_at = "Entered at"
+entered_by = "Entered by"
+to_check = "To check"
 
 [reception_list]
 page = "page"

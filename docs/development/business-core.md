@@ -35,6 +35,10 @@ For each event and category, `EventScorer` keeps each child's best valid result 
 
 `Standings` puts it together for one category, reading the current attempts from the database. Rankings are recomputed on every display: before the closing an event not done counts as "to do", after it as "not done".
 
+## Documents (§ 14)
+
+`Documents` gathers the content of the printed documents: rescue sheets (one per event variant, registered children of its level group sorted by bib, with empty lines), podiums and full rankings (from `Standings`, present children only). The time of the last rescue-sheet printing is kept in `app_meta`, with the number of registrations already changed during that second, so that the Documents page can tell how many registrations changed since. PDFs are Twig templates in `templates/pdf/` rendered by `PdfRenderer` (Dompdf); spreadsheets are built by `Infrastructure/Spreadsheet/ResultsExport` (PhpSpreadsheet).
+
 ## Displays (§ 13)
 
 - `Progress`: for each workshop, present children who have at least one attempt, out of those expected.
