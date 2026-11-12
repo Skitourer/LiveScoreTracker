@@ -7,11 +7,14 @@ namespace LiveScoreTracker\Application;
 use LiveScoreTracker\Domain\Config\Measure;
 use LiveScoreTracker\Domain\Config\Variant;
 use LiveScoreTracker\Domain\Config\Workshop;
+use LiveScoreTracker\Domain\Registration\Registration;
 use LiveScoreTracker\Domain\Results\CounterTally;
 use LiveScoreTracker\Domain\Results\EntryChecks;
 use LiveScoreTracker\Domain\Security\Phase;
 use LiveScoreTracker\Infrastructure\Persistence\AttemptRepository;
 use LiveScoreTracker\Infrastructure\Persistence\Author;
+use LiveScoreTracker\Infrastructure\Persistence\LateEntry;
+use LiveScoreTracker\Infrastructure\Persistence\LateEntryRepository;
 
 /**
  * Entries sent by a phone, possibly long after they were made offline (spec § 8.8).
@@ -20,12 +23,16 @@ use LiveScoreTracker\Infrastructure\Persistence\Author;
  * stored once. The server checks everything again; its warnings are added to
  * those the referee confirmed, so an attempt that conflicts with another
  * phone's entry (e.g. one attempt too many) is kept and marked "to check".
+ *
+ * After the competition is closed, entries are kept aside ("late"), not
+ * counted, until an admin or organizer accepts or refuses them.
  */
 final class EntrySync
 {
     public const SAVED = 'saved';
     public const REJECTED = 'rejected';
     public const CLOSED = 'closed';
+    public const LATE = 'late';
 
     /** Entries made more than this long before they arrive keep the time they were made on the phone. */
     private const OFFLINE_DELAY = 60;
@@ -38,6 +45,7 @@ final class EntrySync
     public function __construct(
         private readonly EntryDesk $desk,
         private readonly AttemptRepository $attempts,
+        private readonly LateEntryRepository $lateEntries,
     ) {}
 
     /**
@@ -53,7 +61,13 @@ final class EntrySync
                 continue;
             }
             $id = $entry['id'];
-            $outcome = $phase === Phase::Running ? $this->one($workshop, $id, $entry, $author, $now) : ['status' => self::CLOSED];
+            $outcome = match (true) {
+                // Already stored (the answer to an earlier send was lost).
+                $this->attempts->hasClient($id) => ['status' => self::SAVED],
+                $phase === Phase::Running => $this->one($workshop, $id, $entry, $author, $now),
+                $phase === Phase::Finished => $this->late($workshop, $id, $entry, $author),
+                default => ['status' => self::CLOSED],
+            };
             $results[] = ['id' => $id, ...$outcome];
         }
 
@@ -61,26 +75,73 @@ final class EntrySync
     }
 
     /**
+     * Records a late entry as a normal one (accepted on the control board).
+     *
+     * @return array{status: string, reason?: string}
+     */
+    public function accept(Workshop $workshop, LateEntry $late, int $now): array
+    {
+        return $this->one($workshop, $late->clientId, ['bib' => $late->bib, ...$late->payload], $late->author, $now, true);
+    }
+
+    /**
+     * Keeps an entry arrived after the closing aside, once the blocking checks pass.
+     *
      * @param array<mixed> $entry
      *
      * @return array{status: string, reason?: string}
      */
-    private function one(Workshop $workshop, string $id, array $entry, Author $author, int $now): array
+    private function late(Workshop $workshop, string $id, array $entry, Author $author): array
+    {
+        $resolved = $this->validate($workshop, $entry);
+        if (\is_string($resolved)) {
+            return ['status' => self::REJECTED, 'reason' => $resolved];
+        }
+        $bib = \is_int($entry['bib'] ?? null) ? $entry['bib'] : 0;
+        $variant = \is_string($entry['variant'] ?? null) ? $entry['variant'] : '';
+        $this->lateEntries->store($id, $workshop->id, $bib, $variant, $entry, $author);
+
+        return ['status' => self::LATE];
+    }
+
+    /**
+     * Blocking checks (spec § 10.1): known bib, event of the child's level group, readable value.
+     *
+     * @param array<mixed> $entry
+     *
+     * @return array{0: Registration, 1: Variant}|string the child and the event, or the reason of the refusal
+     */
+    private function validate(Workshop $workshop, array $entry): array|string
     {
         $bib = $entry['bib'] ?? null;
         $resolved = \is_int($bib) ? $this->desk->resolve($workshop, $bib) : EntryDesk::UNKNOWN_BIB;
-        if (!\is_array($resolved)) {
+        if (\is_string($resolved)) {
+            return $resolved;
+        }
+        if (($entry['variant'] ?? null) !== $resolved[1]->id()) {
+            return EntryDesk::OTHER_GROUP;
+        }
+        $measured = $entry['measured'] ?? null;
+        if ($measured !== null && (!\is_int($measured) || $measured < 0 || $measured > 9_999_999)) {
+            return 'entry.error.invalid_value';
+        }
+
+        return $resolved;
+    }
+
+    /**
+     * @param array<mixed> $entry
+     *
+     * @return array{status: string, reason?: string}
+     */
+    private function one(Workshop $workshop, string $id, array $entry, Author $author, int $now, bool $late = false): array
+    {
+        $resolved = $this->validate($workshop, $entry);
+        if (\is_string($resolved)) {
             return ['status' => self::REJECTED, 'reason' => $resolved];
         }
         [$child, $variant] = $resolved;
-        if (($entry['variant'] ?? null) !== $variant->id()) {
-            return ['status' => self::REJECTED, 'reason' => EntryDesk::OTHER_GROUP];
-        }
-
-        $measured = $entry['measured'] ?? null;
-        if ($measured !== null && (!\is_int($measured) || $measured < 0 || $measured > 9_999_999)) {
-            return ['status' => self::REJECTED, 'reason' => 'entry.error.invalid_value'];
-        }
+        $measured = \is_int($entry['measured'] ?? null) ? $entry['measured'] : null;
         $details = [];
         $tally = null;
         $sent = \is_array($entry['details'] ?? null) ? $entry['details'] : [];
@@ -95,6 +156,9 @@ final class EntrySync
         $at = $entry['at'] ?? null;
         if (\is_int($at) && $now - intdiv($at, 1000) > self::OFFLINE_DELAY) {
             $details['entered_on_phone'] = gmdate('Y-m-d H:i:s', intdiv($at, 1000));
+        }
+        if ($late) {
+            $details['late'] = true;
         }
 
         $modifiers = $measured === null ? [] : $this->modifiers($variant, $entry['modifiers'] ?? null);

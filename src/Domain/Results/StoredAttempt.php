@@ -36,6 +36,8 @@ final class StoredAttempt
         public readonly ?string $replacedAt = null,
         public readonly ?string $deletedAt = null,
         public readonly ?string $deletedBy = null,
+        public readonly ?string $checkedAt = null,
+        public readonly ?string $checkedBy = null,
     ) {}
 
     public function isFoul(): bool
@@ -59,6 +61,22 @@ final class StoredAttempt
         $source = $this->details['source'] ?? null;
 
         return \is_string($source) ? $source : null;
+    }
+
+    /**
+     * Marked "to check" when it was entered (warnings confirmed or added by the server).
+     */
+    public function isFlagged(): bool
+    {
+        return $this->warnings !== [];
+    }
+
+    /**
+     * Marked as verified on the control board (spec § 10).
+     */
+    public function isChecked(): bool
+    {
+        return $this->checkedAt !== null;
     }
 
     public function isCorrection(): bool

@@ -5,7 +5,9 @@ declare(strict_types=1);
 namespace LiveScoreTracker\Action;
 
 use LiveScoreTracker\Action\Support\Responder;
+use LiveScoreTracker\Application\ControlBoard;
 use LiveScoreTracker\Domain\Security\Permission;
+use LiveScoreTracker\Domain\Security\Phase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -24,6 +26,7 @@ final class DashboardAction
         ['dashboard.check_in', '/check-in', Permission::CheckInOut],
         ['dashboard.rankings', '/results', Permission::ViewResultsAndRankings],
         ['dashboard.missing_events', '/missing', Permission::ViewMonitoring],
+        ['dashboard.checks', '/checks', Permission::ViewMonitoring],
         ['dashboard.monitoring', null, Permission::ViewMonitoring],
         ['dashboard.phase_tile', '/admin/phase', Permission::ChangePhase],
         ['dashboard.accounts', '/admin/users', Permission::ManageAccounts],
@@ -32,14 +35,23 @@ final class DashboardAction
         ['dashboard.configuration', null, Permission::ManageConfiguration],
     ];
 
-    public function __construct(private readonly Responder $responder) {}
+    public function __construct(
+        private readonly Responder $responder,
+        private readonly ControlBoard $board,
+    ) {}
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
+        $context = $this->responder->context;
         $tiles = [];
         foreach (self::TILES as [$label, $link, $permission]) {
-            if ($this->responder->context->can($permission)) {
-                $tiles[] = ['label' => $label, 'link' => $link];
+            if ($context->can($permission)) {
+                $count = null;
+                // Items waiting on the control board, outside the preparation phase.
+                if ($link === '/checks' && $context->phase !== Phase::Preparation) {
+                    $count = $this->board->pendingCount($context->phase === Phase::Finished);
+                }
+                $tiles[] = ['label' => $label, 'link' => $link, 'count' => $count];
             }
         }
 

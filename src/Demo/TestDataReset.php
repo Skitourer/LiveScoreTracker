@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace LiveScoreTracker\Demo;
 
 use LiveScoreTracker\Domain\Config\CompetitionConfig;
+use LiveScoreTracker\Domain\Config\Measure;
 use LiveScoreTracker\Domain\Registration\AttendanceMark;
 use LiveScoreTracker\Domain\Registration\ChildData;
 use LiveScoreTracker\Domain\Registration\RegistrationSource;
@@ -44,7 +45,7 @@ final class TestDataReset
      */
     public function reset(?User $actor, int $count = 100, int $withoutBibRate = 5, int $presentRate = 90, bool $withResults = false, int $seed = 2027): array
     {
-        foreach (['attempts', 'registration_history', 'registrations'] as $table) {
+        foreach (['attempts', 'late_entries', 'tie_decisions', 'registration_history', 'registrations'] as $table) {
             $this->pdo->exec('DELETE FROM ' . $table);
         }
 
@@ -97,6 +98,8 @@ final class TestDataReset
     /**
      * Results of one present child, taken from the fictitious competition; about one event
      * in four is left to do, so that the follow-up and missing-events screens have content.
+     * A few children get an odd value for the control board: three times too big
+     * (a typing slip), or a time half as long again (the wrong sprint distance).
      */
     private function results(FictitiousCompetition $competition, int $registrationId, ?User $actor): int
     {
@@ -106,12 +109,25 @@ final class TestDataReset
         }
         $author = new Author($actor?->id, $actor?->username, null, null);
         $count = 0;
+        // Factor applied to one value of this child: 3 for a typing slip, 1.5 for the wrong distance.
+        $slip = match ($child->bib % 10) {
+            7 => 3.0,
+            3 => 1.5,
+            default => null,
+        };
         foreach ($this->config->variantsForGroup($this->config->groupOf($child->child->level)) as $variant) {
             if (crc32($child->bib . '|' . $variant->id()) % 4 === 0) {
                 continue;
             }
             foreach ($competition->attemptsOf($variant->id(), (string) $child->bib) as $attempt) {
-                $this->attempts->record(bin2hex(random_bytes(16)), $child->id, $child->bib, $variant->id(), $attempt->result(), [], 0, [], $author);
+                $value = $attempt->result();
+                $eligible = $slip === 3.0 ? \in_array($variant->measure, [Measure::Time, Measure::Distance], true)
+                    : $variant->measure === Measure::Time && $variant->label !== null && preg_match('/\d\s*m\b/', $variant->label) === 1;
+                if ($slip !== null && $value !== null && $eligible) {
+                    $value = (int) round($value * $slip);
+                    $slip = null;
+                }
+                $this->attempts->record(bin2hex(random_bytes(16)), $child->id, $child->bib, $variant->id(), $value, [], 0, [], $author);
                 ++$count;
             }
         }

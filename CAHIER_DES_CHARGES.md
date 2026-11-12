@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.18 — 12 novembre 2026
+> Version 1.19 — 12 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -108,6 +108,7 @@ Le compte **arbitre de table** n'est actif que pendant la phase « compétition 
 
 - Le passage à « terminée » est une **validation explicite d'un admin**. Il est précédé d'une **alerte bloquante** qui liste les enfants présents ayant des épreuves manquantes et les égalités non départagées. L'admin confirme en connaissance de cause.
 - La **réouverture** (retour à « en cours ») est possible en cas d'oubli. Elle est tracée dans le journal.
+- Détail de la clôture et du tableau des contrôles : § 10, précisions de l'étape 8b.
 - Les inscriptions en ligne ont leur propre état (§ 5.2), indépendant de ces phases.
 
 ---
@@ -410,6 +411,7 @@ Précisions (étape 7a) :
 - **Bandeau d'état** : en ligne (tout est envoyé), hors ligne, nombre de saisies en attente, session expirée (se reconnecter : les saisies restent sur le téléphone), heure des données. La liste « Saisies sur ce téléphone » montre ce qui attend ; une saisie refusée par le serveur (dossard inconnu…) ou arrivée hors phase « en cours » y reste signalée et peut être retirée.
 - **Application installable** : manifeste et icône ; un *service worker* garde les fichiers de l'application (renouvelés à chaque déploiement) et la dernière version de chaque page d'atelier ouverte.
 - À la **déconnexion**, les données des enfants sont effacées du téléphone ; les saisies en attente sont conservées.
+- **Après la clôture** (étape 8b) : un téléphone d'arbitre déjà connecté garde sa session pour une seule chose, envoyer les saisies qu'il a encore (et lire les données de l'atelier, qui indiquent que la compétition est terminée). Ces saisies sont mises de côté sur le serveur, non comptées, puis acceptées ou refusées depuis le tableau des contrôles ; le téléphone les retire de sa file. Toutes les autres pages demandent de se reconnecter (refusé tant que la compétition est terminée) ; la session refonctionne si l'admin rouvre. En préparation, les saisies restent gardées sur le téléphone comme avant.
 
 ### 8.9 Secours
 
@@ -521,6 +523,18 @@ Les vérifications sont des **avertissements non bloquants**, sauf mention contr
 - **Égalités non départagées** dans les classements.
 - **Conflits de synchronisation** et saisies arrivées après la clôture.
 - Enfants ayant **plus d'essais que permis**.
+
+Précisions (étape 8b) :
+- **Tableau des contrôles** (`/checks`, admin et organisateur ; compteur des éléments en attente sur la tuile « Contrôles » du tableau de bord, hors préparation). Tout est recalculé à chaque affichage. Trois parties :
+  - **Résultats à vérifier** : chaque résultat actuel marqué « à vérifier » à la saisie (avertissements confirmés par l'arbitre ou ajoutés par le serveur, dont les conflits entre téléphones), plus ceux signalés par les deux contrôles ci-dessous. Pour chacun : dossard, enfant, épreuve, résultat, auteur, raisons, bouton « Corriger » (écran de l'enfant) et bouton « Vérifié » (admin, organisateur). « Vérifié » est tracé (qui, quand) dans l'historique des essais et le journal d'audit. Une correction crée une nouvelle version du résultat : elle repart non vérifiée.
+  - **Égalités à trancher** (§ 9.6) : pendant la compétition, une égalité n'est listée qu'une fois que les enfants concernés ont fait toutes leurs épreuves (avant, elle peut encore changer) ; après la clôture, toutes. L'admin choisit l'ordre (une place par enfant) ; le classement affiche « départagé : décision de l'arbitre principal ». La décision vaut pour ces enfants-là tant qu'ils restent à égalité : si les résultats changent, elle est ignorée. Elle peut être annulée. Décision et annulation sont tracées dans le journal d'audit.
+  - **Saisies après la clôture** (§ 8.8) : résultat, heure sur le téléphone, heure de réception, arbitre ; boutons « Accepter » (le résultat est enregistré comme une saisie normale, avec les contrôles habituels, et marqué « reçu après la clôture, accepté ») et « Refuser » (gardée sur le serveur). Possible en compétition ou terminée, sans rouvrir ; les classements sont recalculés. Tracé dans le journal d'audit.
+- **Contrôles par rapport aux autres résultats** (§ 10.1), faits sur le tableau des contrôles et non au moment de la saisie, uniquement pour les temps et les distances, et seulement quand au moins 5 autres résultats sont connus. Seul le résultat retenu de chaque enfant est comparé :
+  - **loin de la médiane** : plus du double, ou moins de la moitié, de la médiane des autres enfants de la catégorie ;
+  - **distance correcte ?** (épreuves chronométrées avec une variante par groupe de niveaux, ex. sprint 30 m / 40 m) : temps au moins aussi lent que le temps médian de l'autre distance (plus longue), ou au moins aussi rapide que celui de l'autre distance (plus courte), pour les enfants du même genre.
+- **Clôture** (admin, page « Phase de la compétition ») : le bouton « Clôturer la compétition » ouvre d'abord une page de rappel : enfants présents avec des épreuves manquantes (liste), égalités à trancher, résultats à vérifier, saisies tardives en attente. L'admin peut clôturer quand même (« Clôturer quand même »). Le nombre d'éléments en suspens est inscrit au journal d'audit avec le changement de phase. Après la clôture : saisie fermée, une épreuve non faite compte « non faite », compte des arbitres inactif (sauf l'envoi des saisies en attente, § 8.8).
+- **Réouverture** (admin) : retour à « en cours », après confirmation ; inscrite au journal d'audit.
+- **Données de test** : avec l'option « résultats fictifs », quelques enfants reçoivent une valeur aberrante (trois fois trop grande) pour que le tableau des contrôles ait du contenu.
 
 ### 10.3 À l'import
 

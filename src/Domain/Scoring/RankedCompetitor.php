@@ -17,6 +17,7 @@ final class RankedCompetitor
      * @param bool            $tied        equal total that no criterion could separate: the admin decides (§ 9.6)
      * @param bool            $complete    false while some events are still pending
      * @param array<string, EntryScore|null> $events variant id => score on that event
+     * @param bool            $manual      order decided by hand by an admin after an unbreakable tie
      */
     public function __construct(
         public readonly string $bib,
@@ -29,5 +30,14 @@ final class RankedCompetitor
         public readonly bool $complete,
         public readonly bool $present,
         public readonly array $events,
+        public readonly bool $manual = false,
     ) {}
+
+    /**
+     * The same line with the rank given by an admin's decision.
+     */
+    public function decidedByHand(int $rank): self
+    {
+        return new self($this->bib, $rank, $this->total, $this->firstPlaces, $this->top3Places, null, false, $this->complete, $this->present, $this->events, true);
+    }
 }

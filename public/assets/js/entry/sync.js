@@ -106,7 +106,8 @@ export const createSync = ({ base, workshop, getPack, onPack, onChange }) => {
             if (!result) {
               return entry;
             }
-            if (result.status === 'saved') {
+            // "late": received after the closing, kept on the server for the admin to decide.
+            if (result.status === 'saved' || result.status === 'late') {
               return { ...entry, status: 'sent', sentAt: now };
             }
             return { ...entry, status: result.status, reason: result.reason ?? '' };

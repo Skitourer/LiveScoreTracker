@@ -5,18 +5,32 @@
 {% block content %}
     <h1>{{ t('phase.title') }}</h1>
     <p class="lead">{{ t('phase.current', {phase: t('phase.' ~ current.value)}) }}</p>
-    <form method="post" class="form">
-        {{ csrf_field() }}
-        {% if current.value == 'preparation' %}
+    {% if current.value == 'preparation' %}
+        <form method="post" class="form">
+            {{ csrf_field() }}
             <p>{{ t('phase.start_hint') }}</p>
             <input type="hidden" name="phase" value="running">
             <button type="submit" class="button">{{ t('phase.start') }}</button>
-        {% elseif current.value == 'running' %}
+        </form>
+    {% elseif current.value == 'running' %}
+        <section class="form">
+            <p>{{ t('phase.close_hint') }}</p>
+            <p><a class="button" href="{{ url_for('admin-phase') }}?close=1">{{ t('phase.close') }}</a></p>
+        </section>
+        <form method="post" class="form" data-confirm="{{ t('phase.back_confirm') }}">
+            {{ csrf_field() }}
             <p>{{ t('phase.back_hint') }}</p>
             <input type="hidden" name="phase" value="preparation">
             <button type="submit" class="button secondary">{{ t('phase.back_to_preparation') }}</button>
-        {% endif %}
-    </form>
-    <p class="meta">{{ t('phase.closing_later') }}</p>
+        </form>
+    {% else %}
+        <form method="post" class="form" data-confirm="{{ t('phase.reopen_confirm') }}">
+            {{ csrf_field() }}
+            <p>{{ t('phase.reopen_hint') }}</p>
+            <input type="hidden" name="phase" value="running">
+            <button type="submit" class="button secondary">{{ t('phase.reopen') }}</button>
+        </form>
+        <p><a href="{{ url_for('checks') }}">{{ t('checks.title') }}</a> · <a href="{{ url_for('results') }}">{{ t('results.title') }}</a></p>
+    {% endif %}
     {% if test_data %}<p><a class="button small secondary" href="{{ url_for('admin-test-data') }}">{{ t('test_data.title') }}</a></p>{% endif %}
 {% endblock %}

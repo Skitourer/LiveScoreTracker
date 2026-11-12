@@ -38,6 +38,7 @@
                                 <td>
                                     <span class="bib">{{ line.bib }}</span> {{ child.child.firstName }} {{ child.child.lastName }}
                                     {% if line.tied %}<span class="badge warning">{{ t('report.tie_unresolved') }}</span>
+                                    {% elseif line.manual %}<span class="badge">{{ t('report.decided_by_hand') }}</span>
                                     {% elseif line.decidedBy %}<span class="badge">{{ t('report.decided_by', {criterion: tie_breaker(line.decidedBy)}) }}</span>{% endif %}
                                     {% if not line.complete %}<span class="badge muted">{{ t('report.incomplete') }}</span>{% endif %}
                                 </td>
@@ -87,7 +88,7 @@
                                         <td class="num">{{ entry.rank ?? '–' }}</td>
                                         <td>
                                             <a href="{{ url_for('entry-child', {workshop: variant.workshopId, bib: entry.bib}) }}"><span class="bib">{{ entry.bib }}</span> {{ children[entry.bib].child.firstName }} {{ children[entry.bib].child.lastName }}</a>
-                                            {% if attempts|filter(a => a.warnings is not empty) is not empty %}<span class="badge warning">{{ t('entry.to_check') }}</span>{% endif %}
+                                            {% if attempts|filter(a => a.warnings is not empty and not a.isChecked()) is not empty %}<span class="badge warning">{{ t('entry.to_check') }}</span>{% endif %}
                                         </td>
                                         <td>
                                             {% for attempt in attempts %}
