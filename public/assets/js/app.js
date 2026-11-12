@@ -1,9 +1,11 @@
 /**
  * Client entry point. Interactive features: result fields, the built-in
- * timer (spec § 8.4) and the counter (spec § 8.5). Offline entry comes in a
- * later step.
+ * timer (spec § 8.4), the counter (spec § 8.5) and the entry screens that
+ * work offline (spec § 8.8).
  */
 import { initCounter } from './counter.js';
+import { initEntryApp } from './entry/app.js';
+import { forgetPacks } from './entry/store.js';
 import { initResultInputs } from './result-input.js';
 import { initStopwatch } from './stopwatch.js';
 import { initTrackingRace } from './tracking.js';
@@ -26,6 +28,27 @@ initResultInputs();
 initStopwatch();
 initCounter();
 initTrackingRace();
+initEntryApp();
+
+/**
+ * Installable application, entry screens available offline (spec § 8.8).
+ * Each deployment gets its own cache (sw.js?v=<revision>).
+ */
+if ('serviceWorker' in navigator) {
+  const { base = '', revision = 'dev' } = document.documentElement.dataset;
+  navigator.serviceWorker
+    .register(`${base}/sw.js?v=${encodeURIComponent(revision)}`, { scope: `${base}/` })
+    .catch(() => {});
+}
+
+// Logout: the children's data leaves the phone (queued results stay until sent).
+document.addEventListener('submit', (event) => {
+  const form = event.target;
+  if (form instanceof HTMLFormElement && /\/logout$/.test(form.getAttribute('action') ?? '')) {
+    forgetPacks();
+    navigator.serviceWorker?.controller?.postMessage('logout');
+  }
+});
 
 /**
  * Keep the screen on while entering results (spec § 8.1), where the browser allows it.

@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.15 — 12 novembre 2026
+> Version 1.16 — 12 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -400,6 +400,15 @@ Accessible à tout moment depuis l'écran de saisie (§ 12.6).
 - Chaque saisie reçoit un **identifiant unique généré sur le téléphone**. Elle est stockée localement puis **envoyée dès que le réseau revient**. Le serveur ignore un envoi déjà reçu (pas de doublon en cas de renvoi).
 - Les conflits (ex. un autre téléphone a déjà saisi le dernier essai autorisé) sont **acceptés et signalés** à l'admin, jamais perdus.
 - Les saisies hors ligne arrivées **après la clôture** sont signalées à l'admin et non intégrées automatiquement.
+
+Précisions (étape 7a) :
+- Les écrans de saisie (dossard, enfant, course, compteur) sont construits **par le téléphone**, avec ou sans réseau : un seul comportement. Correction, historique des essais, « Suivi » et accueil restent des pages du serveur (réseau nécessaire). Sans JavaScript, les écrans du serveur restent utilisables.
+- **Paquet de l'atelier** : à l'ouverture d'un atelier, le téléphone télécharge et garde les épreuves, les enfants avec un dossard (dossard, prénom et initiale du nom, niveau, présence), leurs essais sur l'atelier et les textes des écrans ; il le rafraîchit toutes les 2 minutes et au retour du réseau. Le nom de famille complet ne quitte pas le serveur.
+- Les **avertissements** (§ 10.1) sont calculés sur le téléphone avec les mêmes règles que le serveur, en tenant compte des saisies encore en attente ; le serveur les refait à la réception et ajoute les siens (ex. un essai de trop saisi par un autre téléphone → « à vérifier »).
+- **File d'attente** : chaque résultat est d'abord gardé dans le téléphone (il survit à une coupure, un redémarrage ou une déconnexion), puis envoyé dès que possible (toutes les 20 s, au retour du réseau, ou par « Envoyer maintenant »). Une course est envoyée en bloc. Le total d'un compteur est recalculé par le serveur à partir du détail des actions. Une saisie faite plus d'une minute avant son arrivée garde l'heure du téléphone.
+- **Bandeau d'état** : en ligne (tout est envoyé), hors ligne, nombre de saisies en attente, session expirée (se reconnecter : les saisies restent sur le téléphone), heure des données. La liste « Saisies sur ce téléphone » montre ce qui attend ; une saisie refusée par le serveur (dossard inconnu…) ou arrivée hors phase « en cours » y reste signalée et peut être retirée.
+- **Application installable** : manifeste et icône ; un *service worker* garde les fichiers de l'application (renouvelés à chaque déploiement) et la dernière version de chaque page d'atelier ouverte.
+- À la **déconnexion**, les données des enfants sont effacées du téléphone ; les saisies en attente sont conservées.
 
 ### 8.9 Secours
 

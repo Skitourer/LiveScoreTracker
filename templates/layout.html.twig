@@ -1,11 +1,14 @@
 <!doctype html>
-<html lang="{{ lang|default('fr') }}">
+<html lang="{{ lang|default('fr') }}" data-base="{{ base_path() }}" data-revision="{{ app_revision }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark">
     <meta name="robots" content="noindex, nofollow">
     <title>{% block title %}{{ t('app.name') }}{% endblock %}</title>
+    <link rel="manifest" href="{{ base_path() }}/manifest.webmanifest">
+    <meta name="theme-color" content="#1f5fbf">
+    <link rel="apple-touch-icon" href="{{ base_path() }}/assets/icons/icon-192.png">
     <link rel="stylesheet" href="{{ base_path() }}/assets/css/tokens.css">
     <link rel="stylesheet" href="{{ base_path() }}/assets/css/app.css">
     <script type="module" src="{{ base_path() }}/assets/js/app.js"></script>

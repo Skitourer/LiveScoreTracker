@@ -6,36 +6,47 @@
     {% set nav_here = 'bib' %}
     {% include 'entry/_nav.html.twig' %}
     <p class="meta">{% for level in levels %}{{ label('level.' ~ level) }}{% if not loop.last %} · {% endif %}{% endfor %}</p>
-    {% if error %}<p class="flash error">{{ t(error, {bib: bib}) }}</p>{% endif %}
+    {# Entry on the phone, with or without network (assets/js/entry/app.js, spec § 8.8). #}
+    <div class="entry-app" hidden data-workshop="{{ workshop.id }}" data-base="{{ base_path() }}" data-no-pack="{{ t('entry.offline.no_pack') }}">
+        <p class="sync-status" role="status"></p>
+        <div class="entry-phase"></div>
+        <div class="entry-flash"></div>
+        <div class="entry-view"></div>
+    </div>
 
-    {% if timed %}
-        {# Time event: a race of 1 or 2 children, with the phone's timer or an external one (spec § 8.4). #}
-        <form method="get" action="{{ url_for('entry-race', {workshop: workshop.id}) }}" class="race-start">
-            <div class="race-bibs">
-                {% for slot in 1..bibs_per_race %}
-                    <label>{{ bibs_per_race > 1 ? t('entry.race_bib', {number: slot}) : t('entry.bib') }}{% if slot > 1 %} <small>{{ t('entry.optional') }}</small>{% endif %}
-                        <input type="text" name="bib{{ slot }}" class="bib-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" {% if slot == 1 %}autofocus required{% endif %}>
-                    </label>
+    {# Without JavaScript: the server screens. #}
+    <div class="entry-fallback">
+        {% if error %}<p class="flash error">{{ t(error, {bib: bib}) }}</p>{% endif %}
+
+        {% if timed %}
+            {# Time event: a race of 1 or 2 children, with the phone's timer or an external one (spec § 8.4). #}
+            <form method="get" action="{{ url_for('entry-race', {workshop: workshop.id}) }}" class="race-start">
+                <div class="race-bibs">
+                    {% for slot in 1..bibs_per_race %}
+                        <label>{{ bibs_per_race > 1 ? t('entry.race_bib', {number: slot}) : t('entry.bib') }}{% if slot > 1 %} <small>{{ t('entry.optional') }}</small>{% endif %}
+                            <input type="text" name="bib{{ slot }}" class="bib-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" {% if slot == 1 %}autofocus required{% endif %}>
+                        </label>
+                    {% endfor %}
+                </div>
+                {% for mode in ['timer', 'manual'] %}
+                    <button type="submit" name="mode" value="{{ mode }}" class="button large{{ loop.first ? '' : ' secondary' }}">{{ t('entry.mode_' ~ mode) }}</button>
                 {% endfor %}
-            </div>
-            {% for mode in ['timer', 'manual'] %}
-                <button type="submit" name="mode" value="{{ mode }}" class="button large{{ loop.first ? '' : ' secondary' }}">{{ t('entry.mode_' ~ mode) }}</button>
-            {% endfor %}
-        </form>
+            </form>
 
-        <h2>{{ t('entry.see_bib') }}</h2>
-        <form method="get" class="check-in-search">
-            <label>{{ t('entry.bib') }}
-                <input type="text" name="bib" inputmode="numeric" pattern="[0-9]*" autocomplete="off" required>
-            </label>
-            <button type="submit" class="button secondary">{{ t('entry.open') }}</button>
-        </form>
-    {% else %}
-        <form method="get" class="check-in-search">
-            <label>{{ t('entry.bib') }}
-                <input type="text" name="bib" class="bib-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autofocus required>
-            </label>
-            <button type="submit" class="button">{{ t('entry.open') }}</button>
-        </form>
-    {% endif %}
+            <h2>{{ t('entry.see_bib') }}</h2>
+            <form method="get" class="check-in-search">
+                <label>{{ t('entry.bib') }}
+                    <input type="text" name="bib" inputmode="numeric" pattern="[0-9]*" autocomplete="off" required>
+                </label>
+                <button type="submit" class="button secondary">{{ t('entry.open') }}</button>
+            </form>
+        {% else %}
+            <form method="get" class="check-in-search">
+                <label>{{ t('entry.bib') }}
+                    <input type="text" name="bib" class="bib-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autofocus required>
+                </label>
+                <button type="submit" class="button">{{ t('entry.open') }}</button>
+            </form>
+        {% endif %}
+    </div>
 {% endblock %}

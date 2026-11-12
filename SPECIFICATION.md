@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.15 — 12 November 2026
+> Version 1.16 — 12 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -400,6 +400,15 @@ Accessible at any time from the entry screen (§ 12.6).
 - Each entry gets a **unique identifier generated on the phone**. It is stored locally, then **sent as soon as the network is back**. The server ignores an entry it already received (no duplicates on resend).
 - Conflicts (e.g. another phone already entered the last allowed attempt) are **accepted and reported** to the admin, never lost.
 - Offline entries arriving **after closing** are reported to the admin and not merged automatically.
+
+Details (step 7a):
+- The entry screens (bib, child, race, counter) are built **by the phone**, with or without network: a single behaviour. Corrections, attempt history, "Follow-up" and reception stay server pages (network needed). Without JavaScript, the server screens remain usable.
+- **Workshop pack**: when a workshop is opened, the phone downloads and keeps its events, the children with a bib (bib, first name and initial of the last name, level, presence), their attempts at the workshop and the screens' texts; it refreshes it every 2 minutes and when the network comes back. The full last name never leaves the server.
+- **Warnings** (§ 10.1) are computed on the phone with the server's rules, counting entries still waiting; the server checks again on receipt and adds its own (e.g. one attempt too many entered by another phone → "to check").
+- **Queue**: every result is first kept on the phone (it survives a network cut, a restart or a logout), then sent as soon as possible (every 20 s, when the network comes back, or with "Send now"). A race is sent as a whole. A counter's total is recomputed by the server from the detail of the actions. An entry made more than a minute before it arrives keeps the phone's time.
+- **Status line**: online (everything sent), offline, number of entries waiting, session expired (log in again: the entries stay on the phone), time of the data. The "Entries on this phone" list shows what is waiting; an entry refused by the server (unknown bib…) or arriving outside the "running" phase stays flagged there and can be removed.
+- **Installable application**: manifest and icon; a *service worker* keeps the application's files (renewed at each deployment) and the last version of each workshop page opened.
+- On **logout**, the children's data is erased from the phone; waiting entries are kept.
 
 ### 8.9 Fallbacks
 

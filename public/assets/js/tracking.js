@@ -20,5 +20,13 @@ export const initTrackingRace = () => {
   for (const box of boxes) {
     box.addEventListener('change', update);
   }
+  // The race opens in the phone's entry screen (works offline once started).
+  form.addEventListener('submit', (event) => {
+    const ticked = boxes.filter((box) => box.checked).map((box) => box.value);
+    if (ticked.length > 0 && form.dataset.app) {
+      event.preventDefault();
+      window.location.href = `${form.dataset.app}#race/${ticked[0]}/${ticked[1] ?? '-'}/timer`;
+    }
+  });
   update();
 };
