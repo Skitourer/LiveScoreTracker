@@ -14,7 +14,7 @@
 {% block content %}
     <h1>{{ t('referee.title') }}</h1>
     <p>{{ t('referee.intro') }}</p>
-    {% if phase() != 'running' %}<p class="notice">{{ t('referee.inactive_now') }}</p>{% endif %}
+    {% if phase() == 'preparation' %}<p class="notice">{{ t('referee.inactive_now') }}</p>{% endif %}
     {% include 'partials/errors.html.twig' %}
 
     {% if account is null %}

@@ -111,6 +111,27 @@ final class AttemptRepository
             ->execute(['at' => $this->clock->stamp(), 'by' => $author->refereeName ?? $author->username, 'id' => $attempt->id]);
     }
 
+    /**
+     * Marks a result "to check" as verified (spec § 10). Only the current
+     * version can be marked: a correction starts unverified again.
+     */
+    public function markChecked(StoredAttempt $attempt, string $by): bool
+    {
+        $statement = $this->pdo->prepare('UPDATE attempts SET checked_at = :at, checked_by = :by
+            WHERE id = :id AND checked_at IS NULL AND replaced_at IS NULL AND deleted_at IS NULL');
+        $statement->execute(['at' => $this->clock->stamp(), 'by' => $by, 'id' => $attempt->id]);
+
+        return $statement->rowCount() > 0;
+    }
+
+    /**
+     * Whether an entry with this id (made on the form or the phone) was already stored.
+     */
+    public function hasClient(string $clientId): bool
+    {
+        return $this->idForClient($clientId) !== null;
+    }
+
     public function find(int $id): ?StoredAttempt
     {
         $statement = $this->pdo->prepare('SELECT * FROM attempts WHERE id = :id');
@@ -218,6 +239,8 @@ final class AttemptRepository
             replacedAt: Row::nullableString($row, 'replaced_at'),
             deletedAt: Row::nullableString($row, 'deleted_at'),
             deletedBy: Row::nullableString($row, 'deleted_by'),
+            checkedAt: Row::nullableString($row, 'checked_at'),
+            checkedBy: Row::nullableString($row, 'checked_by'),
         );
     }
 

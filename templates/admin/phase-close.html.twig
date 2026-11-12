@@ -1,0 +1,61 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('phase.close') }}{% endblock %}
+
+{% block content %}
+    <h1>{{ t('phase.close') }}</h1>
+    <p class="lead">{{ t('phase.close_lead') }}</p>
+
+    {% set tie_count = ties|reduce((sum, c) => sum + c.unresolved|length, 0) %}
+    {% set all_clear = missing is empty and tie_count == 0 and to_check == 0 and late == 0 %}
+    {% if all_clear %}
+        <p class="notice">{{ t('phase.close_all_clear') }}</p>
+    {% else %}
+        <ul class="status">
+            <li class="{{ missing is empty ? 'ok' : 'warning' }}">{{ t('phase.close_missing', {count: missing|length}) }}</li>
+            <li class="{{ tie_count == 0 ? 'ok' : 'warning' }}">{{ t('phase.close_ties', {count: tie_count}) }}</li>
+            <li class="{{ to_check == 0 ? 'ok' : 'warning' }}">{{ t('phase.close_to_check', {count: to_check}) }}</li>
+            {% if late > 0 %}<li class="warning">{{ t('phase.close_late', {count: late}) }}</li>{% endif %}
+        </ul>
+        <p><a href="{{ url_for('checks') }}">{{ t('checks.title') }}</a> · <a href="{{ url_for('missing') }}">{{ t('missing.title') }}</a></p>
+    {% endif %}
+
+    {% if missing is not empty %}
+        <h2>{{ t('missing.title') }}</h2>
+        <div class="table-scroll">
+            <table>
+                <thead><tr><th class="num">{{ t('entry.bib') }}</th><th>{{ t('report.child') }}</th><th>{{ t('missing.events') }}</th></tr></thead>
+                <tbody>
+                    {% for row in missing %}
+                        <tr>
+                            <td class="num"><span class="bib">{{ row.child.bib }}</span></td>
+                            <td>{{ row.child.child.firstName }} {{ row.child.child.lastName }} <small class="muted">{{ label('level.' ~ row.child.child.level) }}</small></td>
+                            <td>{% for variant in row.missing %}{{ event_label(variant) }}{% if not loop.last %}, {% endif %}{% endfor %}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+
+    {% if tie_count > 0 %}
+        <h2>{{ t('checks.ties') }}</h2>
+        <ul>
+            {% for category in ties %}
+                {% for group in category.unresolved %}
+                    <li>{{ category_label(category.category) }} · {{ t('checks.tie_rank', {rank: group[0].rank, total: group[0].total}) }} :
+                        {% for line in group %}<span class="bib">{{ line.bib }}</span> {{ category.children[line.bib].child.firstName }} {{ category.children[line.bib].child.lastName }}{% if not loop.last %}, {% endif %}{% endfor %}</li>
+                {% endfor %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('admin-phase') }}" class="form">
+        {{ csrf_field() }}
+        <input type="hidden" name="phase" value="finished">
+        <input type="hidden" name="confirm" value="1">
+        <p>{{ t('phase.close_effect') }}</p>
+        <button type="submit" class="button{% if not all_clear %} danger{% endif %}">{{ all_clear ? t('phase.close_confirm') : t('phase.close_anyway') }}</button>
+        <a class="button secondary" href="{{ url_for('admin-phase') }}">{{ t('phase.cancel') }}</a>
+    </form>
+{% endblock %}

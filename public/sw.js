@@ -5,7 +5,10 @@
  *   registers sw.js?v=<revision>, so each deployment gets a fresh cache).
  * - Workshop entry pages (/entry/<workshop>): network first, the last copy
  *   when there is no network.
- * - Everything else (forms, data, other pages): always the network.
+ * - A workshop's follow-up and help without network: its entry page, which
+ *   shows them from the phone's data.
+ * - Any other page without network: the "offline" page, never a browser error.
+ * - Everything else (forms, data): always the network.
  *
  * The results themselves are queued by the page (assets/js/entry/), not here.
  */
@@ -21,6 +24,8 @@ const ASSETS = [
   'assets/js/stopwatch.js',
   'assets/js/counter.js',
   'assets/js/tracking.js',
+  'assets/js/live.js',
+  'assets/js/offline.js',
   'assets/js/entry/app.js',
   'assets/js/entry/format.js',
   'assets/js/entry/store.js',
@@ -31,13 +36,15 @@ const ASSETS = [
   'manifest.webmanifest',
 ].map((path) => BASE + path);
 
+const OFFLINE_PAGE = `${BASE}offline`;
 const ENTRY_PAGE = new RegExp(`^${BASE}entry/[a-z0-9_]+$`);
+const INSIDE_PAGE = new RegExp(`^${BASE}entry/([a-z0-9_]+)/(tracking|help)$`);
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
     caches
       .open(CACHE)
-      .then((cache) => cache.addAll(ASSETS))
+      .then((cache) => cache.addAll([...ASSETS, OFFLINE_PAGE]))
       .then(() => self.skipWaiting()),
   );
 });
@@ -57,6 +64,9 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+const offlinePage = async () =>
+  (await caches.match(OFFLINE_PAGE)) ?? new Response('Offline', { status: 503 });
+
 /** Network first; the last good copy of the page when offline. */
 const entryPage = async (request) => {
   const cache = await caches.open(CACHE);
@@ -68,12 +78,22 @@ const entryPage = async (request) => {
       await cache.put(key, response.clone());
     }
     return response;
-  } catch (error) {
+  } catch {
     const copy = await cache.match(key);
-    if (copy) {
-      return copy;
+    return copy ?? offlinePage();
+  }
+};
+
+/** Any other page: the network, or what can be shown without it. */
+const otherPage = async (request) => {
+  try {
+    return await fetch(request);
+  } catch {
+    const inside = new URL(request.url).pathname.match(INSIDE_PAGE);
+    if (inside) {
+      return Response.redirect(new URL(`${BASE}entry/${inside[1]}#${inside[2]}`, self.location.origin).href, 302);
     }
-    throw error;
+    return offlinePage();
   }
 };
 
@@ -83,8 +103,8 @@ self.addEventListener('fetch', (event) => {
   if (request.method !== 'GET' || url.origin !== self.location.origin) {
     return;
   }
-  if (request.mode === 'navigate' && ENTRY_PAGE.test(url.pathname)) {
-    event.respondWith(entryPage(request));
+  if (request.mode === 'navigate') {
+    event.respondWith(ENTRY_PAGE.test(url.pathname) ? entryPage(request) : otherPage(request));
     return;
   }
   if (ASSETS.includes(url.pathname)) {

@@ -473,6 +473,8 @@ a.tile {
   margin: 0;
 }
 
+div.card,
+form.card,
 details.card {
   margin: var(--space-3) 0;
   padding: var(--space-2) var(--space-3);
@@ -904,4 +906,49 @@ pre.details {
 
 .stopwatch-splits:empty {
   display: none;
+}
+
+/* ---------- Control board (spec § 10) ---------- */
+.card h3 {
+  margin: 0 0 var(--space-2);
+  font-size: var(--font-size-md);
+}
+
+.tie-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0 0 var(--space-2);
+  padding: 0;
+  list-style: none;
+}
+
+.tie-list select {
+  margin-right: var(--space-2);
+}
+
+.check-list {
+  display: grid;
+  gap: var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.check-list li {
+  padding: var(--space-2) var(--space-3);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.check-list p {
+  margin: 0 0 var(--space-1);
+}
+
+/* ---------- Without network (spec § 8.8) ---------- */
+.is-offline .needs-network,
+.is-offline .entry-online-link {
+  opacity: 0.5;
+}
+
+.live-stamp {
+  margin-top: var(--space-3);
 }

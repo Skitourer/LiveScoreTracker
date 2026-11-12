@@ -3,4 +3,5 @@
 {% if attempt.modifierTotal != 0 %} <small>({{ result(attempt.measured, variant) }}{% for id, count in attempt.modifiers %}, {{ t('modifier.' ~ id) }}{% if count > 1 %} ×{{ count }}{% endif %}{% endfor %})</small>{% endif %}
 {% if attempt.details.actions is defined %} <small>({% for id, count in attempt.details.actions %}{{ t('action.' ~ id) }} ×{{ count }}{% if not loop.last %}, {% endif %}{% endfor %}{% if attempt.details.missed is defined %}{% if attempt.details.actions is not empty %}, {% endif %}{{ t('entry.counter.missed') }} ×{{ attempt.details.missed }}{% endif %})</small>{% endif %}
 <br><small class="muted">{{ local_time(attempt.enteredAt) }} · {{ attempt.author() }}{% if attempt.source() in ['timer', 'timer_edited'] %} · {{ t('entry.source.' ~ attempt.source()) }}{% endif %}</small>
-{% if attempt.warnings is not empty %}<span class="badge warning">{{ t('entry.to_check') }}</span>{% endif %}
+{% if attempt.details.late is defined %} <small class="muted">· {{ t('entry.late_accepted') }}</small>{% endif %}
+{% if attempt.isChecked() %}<span class="badge ok">{{ t('entry.checked_by', {who: attempt.checkedBy, at: local_time(attempt.checkedAt)}) }}</span>{% elseif attempt.warnings is not empty %}<span class="badge warning">{{ t('entry.to_check') }}</span>{% endif %}

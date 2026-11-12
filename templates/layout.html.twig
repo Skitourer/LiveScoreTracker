@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="{{ lang|default('fr') }}" data-base="{{ base_path() }}" data-revision="{{ app_revision }}">
+<html lang="{{ lang|default('fr') }}" data-base="{{ base_path() }}" data-revision="{{ app_revision }}" data-live-text="{{ t('live.updated_at') }}" data-offline-text="{{ t('offline.needs_network') }}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -16,7 +16,7 @@
 <body>
     <header class="topbar">
         <a class="brand" href="{{ logged_in() ? url_for('dashboard') : url_for('home') }}">{{ t('app.name') }}</a>
-        <nav class="topbar-nav">
+        {% block topbar_nav %}<nav class="topbar-nav">
             {% set me = current_user() %}
             {% if me %}
                 {% if me.role.value == 'referee' %}
@@ -33,7 +33,7 @@
             {% else %}
                 <a href="{{ url_for('login') }}">{{ t('nav.login') }}</a>
             {% endif %}
-        </nav>
+        </nav>{% endblock %}
     </header>
     <main class="container">
         {% for flash in flashes() %}

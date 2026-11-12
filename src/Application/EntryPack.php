@@ -44,6 +44,11 @@ final class EntryPack
         'entry.offline.sending', 'entry.offline.login_again', 'entry.offline.no_pack', 'entry.offline.queue_title',
         'entry.offline.status_pending', 'entry.offline.status_rejected', 'entry.offline.status_closed',
         'entry.offline.remove', 'entry.offline.confirm_remove', 'entry.offline.needs_network', 'entry.offline.updated_at',
+        'entry.tracking.title', 'entry.tracking.search', 'entry.tracking.best', 'entry.tracking.no_match',
+        'entry.tracking.race_hint', 'entry.tracking.start_race', 'entry.tracking.tab.todo', 'entry.tracking.tab.started',
+        'entry.tracking.tab.finished', 'entry.tracking.tab.absent', 'entry.tracking.tab.all', 'entry.tracking.empty.todo',
+        'entry.tracking.empty.started', 'entry.tracking.empty.finished', 'entry.tracking.empty.absent', 'entry.tracking.empty.all',
+        'entry.attempts_done', 'entry.to_check', 'entry.back_to_entry', 'entry.help', 'check_in.child',
         'unit.seconds', 'unit.minutes_seconds', 'unit.metres', 'unit.points', 'format.decimal_separator',
     ];
 
@@ -83,6 +88,8 @@ final class EntryPack
                     'm' => $attempt->measured,
                     'r' => $attempt->result(),
                     'at' => (int) strtotime($attempt->enteredAt . ' UTC'),
+                    // "To check" and not verified yet (follow-up list).
+                    'k' => $attempt->isFlagged() && !$attempt->isChecked(),
                 ];
             }
             $children[] = [

@@ -1,0 +1,17 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('offline.title') }}{% endblock %}
+
+{# Kept by the service worker: nothing about the account that loaded it. #}
+{% block topbar_nav %}{% endblock %}
+
+{% block content %}
+    <h1>{{ t('offline.title') }}</h1>
+    <p class="lead">{{ t('offline.lead') }}</p>
+    <p>{{ t('offline.queue') }}</p>
+    <p><button type="button" class="button offline-back">{{ t('offline.back') }}</button></p>
+    <section class="offline-workshops" hidden>
+        <h2>{{ t('offline.workshops') }}</h2>
+        <div class="toolbar"></div>
+    </section>
+{% endblock %}

@@ -1,0 +1,127 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('checks.title') }}{% endblock %}
+
+{% block content %}
+    <h1>{{ t('checks.title') }}</h1>
+    <p class="meta">{{ t('checks.lead') }}</p>
+
+<div data-live>
+    <nav class="chips" aria-label="{{ t('checks.title') }}">
+        <a href="#to-check">{{ t('checks.to_check') }} ({{ to_check|length }})</a>
+        <a href="#ties">{{ t('checks.ties') }} ({{ ties|reduce((sum, c) => sum + c.unresolved|length, 0) }})</a>
+        <a href="#late">{{ t('checks.late') }} ({{ late_entries|length }})</a>
+    </nav>
+
+    <h2 id="to-check">{{ t('checks.to_check') }}</h2>
+    {% if to_check is empty %}
+        <p class="meta">{{ t('checks.none_to_check') }}</p>
+    {% else %}
+        <ul class="check-list">
+            {% for item in to_check %}
+                {% set attempt = item.attempt %}
+                <li>
+                    <p><span class="bib">{{ attempt.bib }}</span> <strong>{{ item.child.child.firstName }} {{ item.child.child.lastName }}</strong> <small class="muted">{{ label('level.' ~ item.child.child.level) }}</small></p>
+                    <p>{{ event_label(item.variant) }} : {% if attempt.isFoul() %}{{ t('report.foul') }}{% else %}<strong>{{ result(attempt.result(), item.variant) }}</strong>{% endif %}
+                        <br><small class="muted">{{ local_time(attempt.enteredAt) }} · {{ attempt.author() }}</small></p>
+                    <p>{% for code in item.codes %}<span class="badge warning">{{ t('checks.code.' ~ code) }}</span> {% endfor %}</p>
+                    <div class="toolbar">
+                        <a class="button small secondary" href="{{ url_for('entry-child', {workshop: item.variant.workshopId, bib: attempt.bib}) }}">{{ t('checks.correct') }}</a>
+                        {% if can_verify %}
+                            <form method="post" class="inline">
+                                {{ csrf_field() }}
+                                <input type="hidden" name="op" value="verify">
+                                <input type="hidden" name="attempt" value="{{ attempt.id }}">
+                                <button type="submit" class="button small">{{ t('checks.verify') }}</button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <h2 id="ties">{{ t('checks.ties') }}</h2>
+    <p class="meta">{{ t('checks.ties_hint') }}</p>
+    {% set any_tie = false %}
+    {% for category in ties %}
+        {% for group in category.unresolved %}
+            {% set any_tie = true %}
+            <form method="post" class="card tie">
+                {{ csrf_field() }}
+                <input type="hidden" name="op" value="tie">
+                <input type="hidden" name="category" value="{{ category.category.id() }}">
+                <h3>{{ category_label(category.category) }} · {{ t('checks.tie_rank', {rank: group[0].rank, total: group[0].total}) }}</h3>
+                <ul class="tie-list">
+                    {% for line in group %}
+                        {% set child = category.children[line.bib] %}
+                        <li>
+                            {% if can_order_ties %}
+                                {% set index = loop.index %}
+                                <select name="position[{{ line.bib }}]" aria-label="{{ t('checks.position', {bib: line.bib}) }}">
+                                    {% for p in 1..group|length %}<option value="{{ p }}" {% if p == index %}selected{% endif %}>{{ group[0].rank + p - 1 }}</option>{% endfor %}
+                                </select>
+                            {% endif %}
+                            <span class="bib">{{ line.bib }}</span> {{ child.child.firstName }} {{ child.child.lastName }}
+                            <small class="muted">{{ t('checks.tie_detail', {first: line.firstPlaces, top3: line.top3Places}) }}{% if child.child.birthDate %} · {{ child.child.birthDate|date('d/m/Y') }}{% endif %}</small>
+                        </li>
+                    {% endfor %}
+                </ul>
+                {% if can_order_ties %}<button type="submit" class="button small">{{ t('checks.tie_save') }}</button>{% endif %}
+            </form>
+        {% endfor %}
+        {% for group in category.decided %}
+            {% set any_tie = true %}
+            <div class="card tie decided">
+                <h3>{{ category_label(category.category) }} · {{ t('checks.tie_decided_title', {total: group[0].total}) }}</h3>
+                <ol class="tie-list">
+                    {% for line in group %}
+                        {% set child = category.children[line.bib] %}
+                        <li><strong>{{ line.rank }}</strong> <span class="bib">{{ line.bib }}</span> {{ child.child.firstName }} {{ child.child.lastName }}</li>
+                    {% endfor %}
+                </ol>
+                {% if can_order_ties %}
+                    <form method="post" class="inline" data-confirm="{{ t('checks.tie_reset_confirm') }}">
+                        {{ csrf_field() }}
+                        <input type="hidden" name="op" value="tie_reset">
+                        <input type="hidden" name="category" value="{{ category.category.id() }}">
+                        <input type="hidden" name="bibs" value="{{ group|map(l => l.bib)|join(',') }}">
+                        <button type="submit" class="button small secondary">{{ t('checks.tie_reset_button') }}</button>
+                    </form>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% endfor %}
+    {% if not any_tie %}<p class="meta">{{ t('checks.no_tie') }}</p>{% endif %}
+
+    <h2 id="late">{{ t('checks.late') }}</h2>
+    <p class="meta">{{ t('checks.late_hint') }}</p>
+    {% if late_entries is empty %}
+        <p class="meta">{{ t('checks.no_late') }}</p>
+    {% else %}
+        <ul class="check-list">
+            {% for item in late_entries %}
+                {% set entry = item.entry %}
+                <li>
+                    <p><span class="bib">{{ entry.bib }}</span> {% if item.child %}<strong>{{ item.child.child.firstName }} {{ item.child.child.lastName }}</strong>{% endif %}</p>
+                    <p>{% if item.variant %}{{ event_label(item.variant) }}{% else %}{{ entry.variantId }}{% endif %} :
+                        {% if entry.measured() is null %}{{ t('report.foul') }}{% elseif item.variant %}<strong>{{ result(entry.measured(), item.variant) }}</strong>{% else %}{{ entry.measured() }}{% endif %}
+                        <br><small class="muted">{{ t('checks.late_made', {at: local_time(entry.madeAt()), received: local_time(entry.receivedAt), who: entry.authorName()}) }}</small></p>
+                    {% if can_decide_late %}
+                        <div class="toolbar">
+                            {% for op in ['accept', 'refuse'] %}
+                                <form method="post" class="inline">
+                                    {{ csrf_field() }}
+                                    <input type="hidden" name="op" value="{{ op }}">
+                                    <input type="hidden" name="late" value="{{ entry.id }}">
+                                    <button type="submit" class="button small{% if op == 'refuse' %} secondary{% endif %}">{{ t('checks.late_' ~ op) }}</button>
+                                </form>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+</div>
+{% endblock %}

@@ -5,15 +5,17 @@
 {% block content %}
     <h1>{{ t('dashboard.title') }}</h1>
     <p class="meta">{{ t('dashboard.phase', {phase: t('phase.' ~ phase())}) }}</p>
+<div data-live>
     <ul class="tiles">
         {% for tile in tiles %}
             <li>
                 {% if tile.link %}
-                    <a class="tile" href="{{ tile.link }}">{{ t(tile.label) }}</a>
+                    <a class="tile" href="{{ tile.link }}">{{ t(tile.label) }}{% if tile.count %} <span class="badge warning">{{ tile.count }}</span>{% endif %}</a>
                 {% else %}
                     <span class="tile soon">{{ t(tile.label) }} <small>{{ t('dashboard.coming_soon') }}</small></span>
                 {% endif %}
             </li>
         {% endfor %}
     </ul>
+</div>
 {% endblock %}

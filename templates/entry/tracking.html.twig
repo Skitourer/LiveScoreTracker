@@ -7,6 +7,7 @@
     {% include 'entry/_nav.html.twig' %}
     <h1>{{ t('entry.tracking.title') }}</h1>
 
+<div data-live>
     <nav class="chips" aria-label="{{ t('entry.tracking.title') }}">
         {% for name in tabs %}
             <a href="{{ url_for('entry-tracking', {workshop: workshop.id}) }}?tab={{ name }}" {% if name == tab and not query %}aria-current="page"{% endif %}>{{ t('entry.tracking.tab.' ~ name) }} ({{ counts[name] }})</a>
@@ -63,4 +64,5 @@
             </form>
         {% endif %}
     {% endif %}
+</div>
 {% endblock %}

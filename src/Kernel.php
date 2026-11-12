@@ -36,6 +36,7 @@ use LiveScoreTracker\Action\HealthAction;
 use LiveScoreTracker\Action\HomeAction;
 use LiveScoreTracker\Action\ImportSampleAction;
 use LiveScoreTracker\Action\MigrateAction;
+use LiveScoreTracker\Action\OfflineAction;
 use LiveScoreTracker\Action\Reception\CheckInAction;
 use LiveScoreTracker\Action\Reception\CheckInCardAction;
 use LiveScoreTracker\Action\Reception\ReceptionListAction;
@@ -44,6 +45,7 @@ use LiveScoreTracker\Action\Registration\RegistrationExportAction;
 use LiveScoreTracker\Action\Registration\RegistrationImportAction;
 use LiveScoreTracker\Action\Registration\RegistrationNewAction;
 use LiveScoreTracker\Action\Registration\RegistrationsAction;
+use LiveScoreTracker\Action\Results\ChecksAction;
 use LiveScoreTracker\Action\Results\MissingEventsAction;
 use LiveScoreTracker\Action\Results\ResultsAction;
 use LiveScoreTracker\Action\ScoringReportAction;
@@ -148,6 +150,7 @@ final class Kernel
 
         $app->get('/', HomeAction::class)->setName('home');
         $app->get('/health', HealthAction::class)->setName('health');
+        $app->get('/offline', OfflineAction::class)->setName('offline');
         $app->post('/internal/migrate', MigrateAction::class)->setName('migrate');
         $app->get('/demo/report', ScoringReportAction::class)->setName('demo-report');
         $app->get('/demo/styleguide', StyleguideAction::class)->setName('demo-styleguide');
@@ -197,6 +200,7 @@ final class Kernel
         // Results, rankings and missing events (spec § 11)
         $app->get('/results', ResultsAction::class)->setName('results')->add($guard(Permission::ViewResultsAndRankings));
         $app->get('/missing', MissingEventsAction::class)->setName('missing')->add($guard(Permission::ViewMonitoring));
+        $app->map(['GET', 'POST'], '/checks', ChecksAction::class)->setName('checks')->add($guard(Permission::ViewMonitoring));
 
         // Administration
         // Slim binds group callbacks to itself: the closure must not be static.

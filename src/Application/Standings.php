@@ -16,13 +16,16 @@ use LiveScoreTracker\Domain\Scoring\Competitor;
 use LiveScoreTracker\Domain\Scoring\EventEntry;
 use LiveScoreTracker\Domain\Scoring\EventScorer;
 use LiveScoreTracker\Domain\Scoring\EventScores;
+use LiveScoreTracker\Domain\Scoring\ManualTieBreak;
 use LiveScoreTracker\Domain\Scoring\RankedCompetitor;
 use LiveScoreTracker\Infrastructure\Persistence\AttemptRepository;
 use LiveScoreTracker\Infrastructure\Persistence\RegistrationRepository;
+use LiveScoreTracker\Infrastructure\Persistence\TieDecisionRepository;
 
 /**
  * Scores and rankings of one category, always recomputed from the stored
- * attempts (spec § 9.7): per event (§ 9.2 to 9.4) and overall (§ 9.5, 9.6).
+ * attempts (spec § 9.7): per event (§ 9.2 to 9.4) and overall (§ 9.5, 9.6),
+ * with the ties an admin ordered by hand.
  */
 final class Standings
 {
@@ -30,6 +33,7 @@ final class Standings
         private readonly CompetitionConfig $config,
         private readonly RegistrationRepository $registrations,
         private readonly AttemptRepository $attempts,
+        private readonly TieDecisionRepository $tieDecisions,
     ) {}
 
     /**
@@ -75,10 +79,13 @@ final class Standings
             $birth = $child->child->birthDate === null ? null : DateTimeImmutable::createFromFormat('!Y-m-d', $child->child->birthDate);
             $competitors[] = new Competitor((string) $bib, $child->isPresent(), $birth === false ? null : $birth);
         }
-        $ranking = CategoryRanker::rank(
-            $competitors,
-            array_map(static fn(array $event): EventScores => $event['scores'], $events),
-            $this->config->scoring->tieBreakers,
+        $ranking = ManualTieBreak::apply(
+            CategoryRanker::rank(
+                $competitors,
+                array_map(static fn(array $event): EventScores => $event['scores'], $events),
+                $this->config->scoring->tieBreakers,
+            ),
+            array_map(static fn(array $decision): array => $decision['bibs'], $this->tieDecisions->forCategory($category->id())),
         );
 
         return ['category' => $category, 'children' => $children, 'events' => $events, 'ranking' => $ranking];

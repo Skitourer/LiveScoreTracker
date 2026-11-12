@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.18 — 12 November 2026
+> Version 1.20 — 12 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -87,7 +87,7 @@ Having **at least 2 admins** is recommended, so that they can reset each other's
 | Audit log | ✅ | | | |
 | Child's personal page | | | | ✅ (own) |
 
-The **table referee** account is only active during the "competition in progress" phase.
+The **table referee** account is active during the "competition in progress" phase and, **read only**, after closing ("closed" phase): the referee can look at the workshop follow-up and each child's attempts, without entering or correcting anything. It is inactive in preparation.
 
 ---
 
@@ -108,6 +108,7 @@ The **table referee** account is only active during the "competition in progress
 
 - Switching to "closed" requires **explicit admin approval**. It is preceded by a **blocking alert** listing present children with missing events and unresolved ties. The admin confirms knowingly.
 - **Reopening** (back to "in progress") is possible if something was forgotten. It is recorded in the log.
+- Details of the closing and of the checks dashboard: § 10, step 8b details.
 - Online registration has its own state (§ 5.2), independent of these phases.
 
 ---
@@ -410,6 +411,9 @@ Details (step 7a):
 - **Status line**: online (everything sent), offline, number of entries waiting, session expired (log in again: the entries stay on the phone), time of the data. The "Entries on this phone" list shows what is waiting; an entry refused by the server (unknown bib…) or arriving outside the "running" phase stays flagged there and can be removed.
 - **Installable application**: manifest and icon; a *service worker* keeps the application's files (renewed at each deployment) and the last version of each workshop page opened.
 - On **logout**, the children's data is erased from the phone; waiting entries are kept.
+- **After closing** (step 8b): the referee phone keeps sending the entries it still holds (the account stays active, read only, § 3.2). These entries are kept aside on the server, not counted, then accepted or refused from the checks dashboard; the phone removes them from its queue. In preparation, entries stay on the phone as before.
+- **Follow-up and help without network**: from a workshop's entry page, "Follow-up" and "Help" open in the phone's application, built from the workshop pack (which also holds the help page and the contacts): same tabs, search and race start as the server page (§ 8.6), counting the entries still on the phone; a line leads to the child's screen on the phone. Help images are only visible with network.
+- **No link leads to an error without network**: the entry page, follow-up and help of a workshop already opened work; links that need the network (change workshop, a bib's attempts, dashboard…) are greyed and show "No network: this action needs it" without leaving the page; forms sent to the server (logout included) are held back the same way. Any other page requested without network (reload, typed address) shows an "Offline" page kept by the *service worker*, with a way back to the previous page and the list of workshops usable without network; a workshop's follow-up or help requested without network opens the phone's.
 
 ### 8.9 Fallbacks
 
@@ -521,6 +525,19 @@ Checks are **non-blocking warnings** unless stated otherwise. The affected resul
 - **Unresolved ties** in rankings.
 - **Sync conflicts** and entries arriving after closing.
 - Children with **more attempts than allowed**.
+
+Details (step 8b):
+- **Checks dashboard** (`/checks`, admin and organizer; count of pending items on the "Checks" tile of the dashboard, outside preparation). Everything is recomputed on every display. Three parts:
+  - **Results to check**: every current result flagged "to check" on entry (warnings confirmed by the referee or added by the server, including conflicts between phones), plus those flagged by the two checks below. For each: bib, child, event, result, author, reasons, "Correct" button (child's screen) and "Checked" button (admin, organizer). "Checked" is recorded (who, when) in the attempt history and the audit log. A correction creates a new version of the result: it starts unchecked again.
+  - **Ties to break** (§ 9.6): during the competition, a tie is only listed once the tied children have done all their events (before, it may still change); after closing, all of them. The admin chooses the order (one place per child); the ranking shows "decided by the head referee". The decision applies to these children as long as they stay tied: if results change, it is ignored. It can be cancelled. Decision and cancellation are recorded in the audit log.
+  - **Entries after closing** (§ 8.8): result, time on the phone, time received, referee; "Accept" (the result is recorded as a normal entry, with the usual checks, and marked "received after the closing, accepted") and "Refuse" (kept on the server). Possible while running or closed, without reopening; rankings are recomputed. Recorded in the audit log.
+- **Checks against the other results** (§ 10.1), made on the checks dashboard rather than on entry, only for times and distances, and only once at least 5 other results are known. Only each child's retained result is compared:
+  - **far from the median**: more than twice, or less than half, the median of the other children of the category;
+  - **right distance?** (timed events with one variant per level group, e.g. sprint 30 m / 40 m): a time at least as slow as the median time of the other (longer) distance, or at least as fast as that of the other (shorter) distance, among children of the same gender.
+- **Closing** (admin, "Competition phase" page): the "Close the competition" button first opens a recap page: present children with missing events (list), ties to break, results to check, late entries waiting. The admin can close anyway ("Close anyway"). The number of pending items is written to the audit log with the phase change. After closing: entry closed, an event not done counts as "not done", referee account inactive (except for sending waiting entries, § 8.8).
+- **Reopening** (admin): back to "in progress", after confirmation; recorded in the audit log.
+- **Test data**: with the "fictitious results" option, a few children get an odd value (three times too big, or a time half as long again) so that the checks dashboard has content.
+- **Automatic refresh** of the follow-up pages (checks dashboard, results and rankings, missing events, workshop follow-up, dashboard): every 30 seconds, the changing part is reloaded if it changed, keeping the scroll position and open sections, with "Updated automatically · HH:MM". Nothing moves during an action (field being typed in, list open, box ticked, tap in the last 5 seconds), nor when the page is not visible or without network. Form pages are not concerned.
 
 ### 10.3 On import
 
