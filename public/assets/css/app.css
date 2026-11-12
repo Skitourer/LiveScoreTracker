@@ -942,3 +942,13 @@ pre.details {
 .check-list p {
   margin: 0 0 var(--space-1);
 }
+
+/* ---------- Without network (spec § 8.8) ---------- */
+.is-offline .needs-network,
+.is-offline .entry-online-link {
+  opacity: 0.5;
+}
+
+.live-stamp {
+  margin-top: var(--space-3);
+}

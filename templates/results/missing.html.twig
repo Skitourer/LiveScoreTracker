@@ -28,6 +28,8 @@
         <button type="submit" class="button secondary">{{ t('missing.filter') }}</button>
     </form>
 
+<div data-live>
+
     {% if view == 'workshop' %}
         {% set shown = 0 %}
         {% for id, workshop in workshops %}
@@ -65,4 +67,5 @@
             </div>
         {% endif %}
     {% endif %}
+</div>
 {% endblock %}

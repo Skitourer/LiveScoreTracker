@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.19 — 12 novembre 2026
+> Version 1.20 — 12 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -87,7 +87,7 @@ Il est recommandé d'avoir **au moins 2 admins**, pour permettre la réinitialis
 | Journal d'audit | ✅ | | | |
 | Page personnelle de l'enfant | | | | ✅ (la sienne) |
 
-Le compte **arbitre de table** n'est actif que pendant la phase « compétition en cours ».
+Le compte **arbitre de table** est actif pendant la phase « compétition en cours » et, **en lecture seule**, après la clôture (phase « terminée ») : l'arbitre peut consulter le suivi de son atelier et les essais de chaque enfant, sans saisir ni corriger. Il est inactif en préparation.
 
 ---
 
@@ -411,7 +411,9 @@ Précisions (étape 7a) :
 - **Bandeau d'état** : en ligne (tout est envoyé), hors ligne, nombre de saisies en attente, session expirée (se reconnecter : les saisies restent sur le téléphone), heure des données. La liste « Saisies sur ce téléphone » montre ce qui attend ; une saisie refusée par le serveur (dossard inconnu…) ou arrivée hors phase « en cours » y reste signalée et peut être retirée.
 - **Application installable** : manifeste et icône ; un *service worker* garde les fichiers de l'application (renouvelés à chaque déploiement) et la dernière version de chaque page d'atelier ouverte.
 - À la **déconnexion**, les données des enfants sont effacées du téléphone ; les saisies en attente sont conservées.
-- **Après la clôture** (étape 8b) : un téléphone d'arbitre déjà connecté garde sa session pour une seule chose, envoyer les saisies qu'il a encore (et lire les données de l'atelier, qui indiquent que la compétition est terminée). Ces saisies sont mises de côté sur le serveur, non comptées, puis acceptées ou refusées depuis le tableau des contrôles ; le téléphone les retire de sa file. Toutes les autres pages demandent de se reconnecter (refusé tant que la compétition est terminée) ; la session refonctionne si l'admin rouvre. En préparation, les saisies restent gardées sur le téléphone comme avant.
+- **Après la clôture** (étape 8b) : le téléphone d'arbitre continue d'envoyer les saisies qu'il a encore (le compte reste actif en lecture seule, § 3.2). Ces saisies sont mises de côté sur le serveur, non comptées, puis acceptées ou refusées depuis le tableau des contrôles ; le téléphone les retire de sa file. En préparation, les saisies restent gardées sur le téléphone comme avant.
+- **Suivi et aide sans réseau** : depuis la page de saisie d'un atelier, « Suivi » et « Aide » s'ouvrent dans l'application du téléphone, construits à partir du paquet de l'atelier (qui contient aussi la page d'aide et les contacts) : mêmes onglets, recherche et lancement de course que la page du serveur (§ 8.6), en tenant compte des saisies encore sur le téléphone ; une ligne mène à l'écran de l'enfant sur le téléphone. Les images de l'aide ne sont visibles qu'avec du réseau.
+- **Aucun lien ne mène à une erreur sans réseau** : la page de saisie, le suivi et l'aide d'un atelier déjà ouvert fonctionnent ; les liens qui ont besoin du réseau (changer d'atelier, essais d'un dossard, tableau de bord…) sont grisés et affichent « Pas de réseau : cette action en a besoin » sans quitter la page ; les formulaires envoyés au serveur (déconnexion comprise) sont retenus de la même façon. Toute autre page demandée sans réseau (rechargement, adresse tapée) affiche une page « Hors ligne » gardée par le *service worker*, avec un retour à la page précédente et la liste des ateliers utilisables sans réseau ; le suivi ou l'aide d'un atelier demandés sans réseau ouvrent ceux du téléphone.
 
 ### 8.9 Secours
 
@@ -534,7 +536,8 @@ Précisions (étape 8b) :
   - **distance correcte ?** (épreuves chronométrées avec une variante par groupe de niveaux, ex. sprint 30 m / 40 m) : temps au moins aussi lent que le temps médian de l'autre distance (plus longue), ou au moins aussi rapide que celui de l'autre distance (plus courte), pour les enfants du même genre.
 - **Clôture** (admin, page « Phase de la compétition ») : le bouton « Clôturer la compétition » ouvre d'abord une page de rappel : enfants présents avec des épreuves manquantes (liste), égalités à trancher, résultats à vérifier, saisies tardives en attente. L'admin peut clôturer quand même (« Clôturer quand même »). Le nombre d'éléments en suspens est inscrit au journal d'audit avec le changement de phase. Après la clôture : saisie fermée, une épreuve non faite compte « non faite », compte des arbitres inactif (sauf l'envoi des saisies en attente, § 8.8).
 - **Réouverture** (admin) : retour à « en cours », après confirmation ; inscrite au journal d'audit.
-- **Données de test** : avec l'option « résultats fictifs », quelques enfants reçoivent une valeur aberrante (trois fois trop grande) pour que le tableau des contrôles ait du contenu.
+- **Données de test** : avec l'option « résultats fictifs », quelques enfants reçoivent une valeur aberrante (trois fois trop grande, ou un temps une fois et demie trop long) pour que le tableau des contrôles ait du contenu.
+- **Actualisation automatique** des pages de suivi (tableau des contrôles, résultats et classements, épreuves manquantes, suivi d'un atelier, tableau de bord) : toutes les 30 secondes, la partie qui change est rechargée si elle a changé, en gardant la position dans la page et les sections ouvertes, avec la mention « Mis à jour automatiquement · HH:MM ». Rien ne bouge pendant une action (champ en cours de saisie, liste ouverte, case cochée, appui dans les 5 dernières secondes), ni quand la page n'est pas affichée ou sans réseau. Les pages de formulaire ne sont pas concernées.
 
 ### 10.3 À l'import
 

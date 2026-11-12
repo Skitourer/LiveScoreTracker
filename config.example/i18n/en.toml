@@ -334,7 +334,7 @@ no_name_yet = "(first name not typed yet)"
 renamed = "First name saved."
 title = "Referee account"
 intro = "All table referees log in with the same username and password. Change the password for each edition."
-inactive_now = "This account only works during the \"competition running\" phase."
+inactive_now = "This account only works during the competition, then read only once the competition is finished."
 password = "Referee password"
 create = "Create the referee account"
 phones = "Connected phones: {count}"
@@ -949,3 +949,14 @@ duplicate = "probable duplicate"
 too_many_shots = "too many shots"
 far_from_median = "far from the median"
 wrong_distance = "right distance?"
+
+[live]
+updated_at = "Updated automatically · {time}"
+
+[offline]
+needs_network = "No network: this action needs it. Entries stay on the phone."
+title = "Offline"
+lead = "This page needs the network, and the phone has none for now."
+queue = "Results entered on this phone are kept and will be sent as soon as the network is back."
+back = "Back to the previous page"
+workshops = "Workshops usable without network"

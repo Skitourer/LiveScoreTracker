@@ -144,7 +144,17 @@ final class ChecksTest extends TestCase
         self::assertIsArray($results);
         self::assertSame(['late', 'late', 'rejected'], array_column(\is_array($results['results'] ?? null) ? $results['results'] : [], 'status'));
         $phone->postJson('/entry/long_jump/sync', ['entries' => [$accepted]], $csrf);
-        self::assertSame(302, $phone->get('/entry')->getStatusCode(), 'Other pages ask to log in again.');
+
+        // Read only: the referee still sees the workshop, without entering anything.
+        self::assertSame(200, $phone->get('/entry/long_jump/tracking?tab=all')->getStatusCode());
+        self::assertStringNotContainsString('Lancer la course', $phone->lastBody);
+        $phone->get('/entry/long_jump/1');
+        self::assertStringContainsString('la saisie est fermée', $phone->lastBody);
+        $phone->get('/entry/long_jump/pack');
+        self::assertStringContainsString('"phase":"finished"', $phone->lastBody);
+        $late = $this->admin->otherBrowser();
+        $login = $late->post('/login', ['username' => 'arbitre', 'password' => 'whistle-2027']);
+        self::assertSame('/referee/name', $login->getHeaderLine('Location'), 'A referee can still log in once the competition is finished.');
 
         $this->admin->get('/results?category=CM1-girl');
         self::assertStringNotContainsString('4,10 m', $this->admin->lastBody, 'Not counted before a decision.');
@@ -164,9 +174,10 @@ final class ChecksTest extends TestCase
         self::assertStringContainsString('Saisie tardive acceptée', $this->admin->lastBody);
         self::assertStringContainsString('Saisie tardive refusée', $this->admin->lastBody);
 
-        // Reopened: the referee phone works again.
+        // Back to preparation: the referee account stops working.
         $this->admin->post('/admin/phase', ['phase' => 'running']);
-        self::assertSame(200, $phone->get('/entry')->getStatusCode());
+        $this->admin->post('/admin/phase', ['phase' => 'preparation']);
+        self::assertSame(302, $phone->get('/entry')->getStatusCode());
     }
 
     private function referee(): WebClient

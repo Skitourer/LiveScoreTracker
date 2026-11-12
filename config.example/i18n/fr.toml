@@ -334,7 +334,7 @@ no_name_yet = "(prénom pas encore saisi)"
 renamed = "Prénom enregistré."
 title = "Compte des arbitres"
 intro = "Tous les arbitres de table se connectent avec le même identifiant et le même mot de passe. Changez le mot de passe à chaque édition."
-inactive_now = "Ce compte ne fonctionne que pendant la phase « compétition en cours »."
+inactive_now = "Ce compte ne fonctionne que pendant la compétition, puis en lecture seule une fois la compétition terminée."
 password = "Mot de passe des arbitres"
 create = "Créer le compte des arbitres"
 phones = "Téléphones connectés : {count}"
@@ -949,3 +949,14 @@ duplicate = "doublon probable"
 too_many_shots = "trop de tirs"
 far_from_median = "loin de la médiane"
 wrong_distance = "distance correcte ?"
+
+[live]
+updated_at = "Mis à jour automatiquement · {time}"
+
+[offline]
+needs_network = "Pas de réseau : cette action en a besoin. Les saisies restent sur le téléphone."
+title = "Hors ligne"
+lead = "Cette page a besoin du réseau, et le téléphone n'en a pas pour l'instant."
+queue = "Les résultats saisis sur ce téléphone sont gardés et partiront dès le retour du réseau."
+back = "Revenir à la page précédente"
+workshops = "Ateliers utilisables sans réseau"

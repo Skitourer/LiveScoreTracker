@@ -28,6 +28,19 @@ const write = (key, value) => {
 export const loadPack = (workshop) => read(PACK_PREFIX + workshop, null);
 export const savePack = (workshop, pack) => write(PACK_PREFIX + workshop, pack);
 
+/** Workshops whose data is on the phone: [{id, name}]. */
+export const listPacks = () => {
+  try {
+    return Object.keys(window.localStorage)
+      .filter((key) => key.startsWith(PACK_PREFIX))
+      .map((key) => read(key, null)?.workshop)
+      .filter((workshop) => workshop?.id)
+      .map((workshop) => ({ id: workshop.id, name: workshop.name ?? workshop.id }));
+  } catch {
+    return [];
+  }
+};
+
 /** Logout: the children's data leaves the phone; the queue stays so nothing is lost. */
 export const forgetPacks = () => {
   try {

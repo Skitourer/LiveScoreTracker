@@ -51,6 +51,8 @@ final class OfflineEntryTest extends TestCase
         self::assertFalse(self::dig($pack, 'children', 1, 'present'));
         self::assertSame('{name} ({bib}) : {result} — essai {number}/{of} enregistré.', self::dig($pack, 'texts', 'entry.recorded'));
         self::assertStringNotContainsString('Martin', json_encode($pack, JSON_THROW_ON_ERROR), 'Only the initial of the last name leaves the server.');
+        self::assertStringContainsString('help-page', self::digString($pack, 'help'), 'The help is kept on the phone.');
+        self::assertSame('Suivi', self::dig($pack, 'texts', 'entry.tracking.title'));
     }
 
     public function testQueuedEntriesAreSavedOnceAndChecked(): void
@@ -85,6 +87,7 @@ final class OfflineEntryTest extends TestCase
 
         $pack = $this->pack('hockey');
         self::assertCount(3, (array) self::dig($pack, 'children', 0, 'attempts'));
+        self::assertTrue(self::dig($pack, 'children', 0, 'attempts', 2, 'k'), 'Marked "to check" in the follow-up.');
         self::assertSame(1700, self::dig($pack, 'children', 0, 'attempts', 0, 'r'));
     }
 
@@ -101,6 +104,23 @@ final class OfflineEntryTest extends TestCase
         $this->admin->post('/admin/phase', ['phase' => 'preparation']);
         $this->admin->postJson('/entry/basketball/sync', ['entries' => [$this->entry(['bib' => 1, 'variant' => $variant, 'measured' => 10])]], $csrf);
         self::assertSame('closed', self::dig(json_decode($this->admin->lastBody, true, 512, JSON_THROW_ON_ERROR), 'results', 0, 'status'));
+    }
+
+    public function testOfflinePageKeepsNothingAboutTheAccount(): void
+    {
+        self::assertSame(200, $this->admin->get('/offline')->getStatusCode());
+        self::assertStringContainsString('Hors ligne', $this->admin->lastBody);
+        self::assertStringNotContainsString('Déconnexion', $this->admin->lastBody);
+        self::assertStringNotContainsString('Big Boss', $this->admin->lastBody);
+        self::assertStringContainsString('const OFFLINE_PAGE = `${BASE}offline`', (string) file_get_contents(\dirname(__DIR__, 2) . '/public/sw.js'));
+    }
+
+    public function testFollowUpPagesRefreshThemselves(): void
+    {
+        foreach (['/checks', '/results', '/missing', '/dashboard', '/entry/hockey/tracking'] as $page) {
+            $this->admin->get($page);
+            self::assertStringContainsString('<div data-live>', $this->admin->lastBody, $page);
+        }
     }
 
     public function testSyncNeedsTheSecurityToken(): void

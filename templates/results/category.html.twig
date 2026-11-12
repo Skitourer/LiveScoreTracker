@@ -14,6 +14,7 @@
         {% endfor %}
     </nav>
 
+<div data-live>
     <h2>{{ t('report.overall') }} · {{ category_label(category) }}</h2>
     {% if children is empty %}
         <p class="meta">{{ t('results.no_child') }}</p>
@@ -112,4 +113,5 @@
             </details>
         {% endfor %}
     {% endif %}
+</div>
 {% endblock %}

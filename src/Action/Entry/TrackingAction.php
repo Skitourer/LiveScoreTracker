@@ -9,6 +9,7 @@ use LiveScoreTracker\Application\EntryDesk;
 use LiveScoreTracker\Domain\Registration\RegistrationStatus;
 use LiveScoreTracker\Domain\Registration\TextCleaner;
 use LiveScoreTracker\Domain\Results\AttemptProgress;
+use LiveScoreTracker\Domain\Security\Phase;
 use LiveScoreTracker\Infrastructure\Persistence\AttemptRepository;
 use LiveScoreTracker\Infrastructure\Persistence\RegistrationRepository;
 use Psr\Http\Message\ResponseInterface;
@@ -68,7 +69,7 @@ final class TrackingAction
             }
             $toCheck = false;
             foreach ($current as $attempt) {
-                $toCheck = $toCheck || $attempt->warnings !== [];
+                $toCheck = $toCheck || ($attempt->isFlagged() && !$attempt->isChecked());
             }
             $rows[] = [
                 'child' => $child,
@@ -90,8 +91,8 @@ final class TrackingAction
             'counts' => $counts,
             'query' => Responder::query($request, 'q'),
             'reason' => $rows === [] && $query !== '' ? $this->whyNotListed($workshop, $query) : null,
-            // Time workshops: tick 1 or 2 children to start a race.
-            'race' => $timed && $this->responder->context->can('enter_results_chosen_event'),
+            // Time workshops, competition running: tick 1 or 2 children to start a race.
+            'race' => $timed && $this->responder->context->can('enter_results_chosen_event') && $this->responder->context->phase === Phase::Running,
             'bibs_per_race' => $timed ? $this->desk->bibsPerRace($workshop) : 0,
         ]);
     }

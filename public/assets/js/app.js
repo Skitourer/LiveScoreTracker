@@ -6,6 +6,8 @@
 import { initCounter } from './counter.js';
 import { initEntryApp } from './entry/app.js';
 import { forgetPacks } from './entry/store.js';
+import { initLiveRefresh } from './live.js';
+import { initOffline } from './offline.js';
 import { initResultInputs } from './result-input.js';
 import { initStopwatch } from './stopwatch.js';
 import { initTrackingRace } from './tracking.js';
@@ -29,6 +31,8 @@ initStopwatch();
 initCounter();
 initTrackingRace();
 initEntryApp();
+initLiveRefresh({ onRefresh: () => initTrackingRace() });
+initOffline();
 
 /**
  * Installable application, entry screens available offline (spec § 8.8).

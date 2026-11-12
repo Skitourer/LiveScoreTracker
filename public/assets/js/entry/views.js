@@ -281,3 +281,60 @@ export const queueView = ({ entries, tx }) =>
           })
           .join('')}</ul>
       </section>`;
+
+export const TRACKING_TABS = ['todo', 'started', 'finished', 'absent', 'all'];
+
+/**
+ * Follow-up of the workshop (spec § 8.6), built from the phone's data so that
+ * it works without network. On a time workshop, ticking 1 or 2 children starts
+ * their race.
+ */
+export const trackingView = ({ rows, tab, counts, query, tx, format, race }) => `
+  <p><a href="#">← ${h(tx('entry.back_to_entry'))}</a></p>
+  <h1>${h(tx('entry.tracking.title'))}</h1>
+  <nav class="chips" aria-label="${h(tx('entry.tracking.title'))}">
+    ${TRACKING_TABS.map(
+      (name) =>
+        `<a href="#tracking/${name}" ${name === tab && !query ? 'aria-current="page"' : ''}>${h(tx(`entry.tracking.tab.${name}`))} (${counts[name]})</a>`,
+    ).join('')}
+  </nav>
+  <form class="check-in-search entry-tracking-search" role="search">
+    <label>${h(tx('entry.tracking.search'))}
+      <input type="search" name="q" value="${h(query)}" autocomplete="off">
+    </label>
+  </form>
+  ${
+    rows.length === 0
+      ? `<p class="meta">${h(query ? tx('entry.tracking.no_match', { query }) : tx(`entry.tracking.empty.${tab}`))}</p>`
+      : `<form class="entry-tracking-race">
+          ${race ? `<p class="meta">${h(tx('entry.tracking.race_hint', { count: race }))}</p>` : ''}
+          <div class="table-scroll"><table>
+            <thead><tr>
+              ${race ? '<th></th>' : ''}
+              <th class="num">${h(tx('entry.bib'))}</th><th>${h(tx('check_in.child'))}</th>
+              <th class="num">${h(tx('entry.attempts_done'))}</th><th class="num">${h(tx('entry.tracking.best'))}</th>
+            </tr></thead>
+            <tbody>${rows
+              .map(
+                ({ child, variant, used, best, toCheck }) => `<tr>
+                ${race ? `<td>${used < variant.attempts ? `<input type="checkbox" name="bibs" value="${h(child.bib)}" aria-label="${h(child.name)}">` : ''}</td>` : ''}
+                <td class="num"><a href="#bib/${h(child.bib)}"><span class="bib">${h(child.bib)}</span></a></td>
+                <td><a href="#bib/${h(child.bib)}">${h(child.name)}</a>
+                  ${child.present ? '' : `<span class="badge muted">${h(tx('entry.not_checked_in'))}</span>`}
+                  ${toCheck ? `<span class="badge warning">${h(tx('entry.to_check'))}</span>` : ''}
+                  <br><small class="muted">${h(variant.label)}</small></td>
+                <td class="num">${used} / ${variant.attempts}</td>
+                <td class="num">${best !== null ? h(format(best, variant)) : used > 0 ? h(tx('entry.foul')) : '–'}</td>
+              </tr>`,
+              )
+              .join('')}</tbody>
+          </table></div>
+          ${race ? `<div class="tracking-race-actions"><button type="submit" class="button large" disabled>${h(tx('entry.tracking.start_race'))}</button></div>` : ''}
+        </form>`
+  }`;
+
+/** Help of the workshop, kept on the phone (spec § 8.7). */
+export const helpView = ({ pack, tx }) => `
+  <p><a href="#">← ${h(tx('entry.back_to_entry'))}</a></p>
+  <h1>${h(tx('entry.help'))}</h1>
+  ${pack.help ?? ''}`;

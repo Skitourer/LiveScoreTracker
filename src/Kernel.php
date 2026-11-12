@@ -36,6 +36,7 @@ use LiveScoreTracker\Action\HealthAction;
 use LiveScoreTracker\Action\HomeAction;
 use LiveScoreTracker\Action\ImportSampleAction;
 use LiveScoreTracker\Action\MigrateAction;
+use LiveScoreTracker\Action\OfflineAction;
 use LiveScoreTracker\Action\Reception\CheckInAction;
 use LiveScoreTracker\Action\Reception\CheckInCardAction;
 use LiveScoreTracker\Action\Reception\ReceptionListAction;
@@ -149,6 +150,7 @@ final class Kernel
 
         $app->get('/', HomeAction::class)->setName('home');
         $app->get('/health', HealthAction::class)->setName('health');
+        $app->get('/offline', OfflineAction::class)->setName('offline');
         $app->post('/internal/migrate', MigrateAction::class)->setName('migrate');
         $app->get('/demo/report', ScoringReportAction::class)->setName('demo-report');
         $app->get('/demo/styleguide', StyleguideAction::class)->setName('demo-styleguide');

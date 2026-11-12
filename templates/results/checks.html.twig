@@ -6,6 +6,7 @@
     <h1>{{ t('checks.title') }}</h1>
     <p class="meta">{{ t('checks.lead') }}</p>
 
+<div data-live>
     <nav class="chips" aria-label="{{ t('checks.title') }}">
         <a href="#to-check">{{ t('checks.to_check') }} ({{ to_check|length }})</a>
         <a href="#ties">{{ t('checks.ties') }} ({{ ties|reduce((sum, c) => sum + c.unresolved|length, 0) }})</a>
@@ -122,4 +123,5 @@
             {% endfor %}
         </ul>
     {% endif %}
+</div>
 {% endblock %}

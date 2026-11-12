@@ -1,0 +1,12 @@
+{# Help of a workshop and contacts: the help page, and the copy kept on the phones (spec § 8.7, § 8.8). #}
+<article class="help-page">
+    {% if help %}{{ help|raw }}{% else %}<p class="meta">{{ t('entry.no_help') }}</p>{% endif %}
+</article>
+{% if contacts is not empty %}
+    <h2>{{ t('entry.contacts') }}</h2>
+    <ul class="contacts">
+        {% for contact in contacts %}
+            <li><strong>{{ t('contact.' ~ contact.role) }}</strong> : {{ contact.name }} — <a class="button small secondary" href="tel:{{ contact.phone|replace({' ': ''}) }}">{{ contact.phone }}</a></li>
+        {% endfor %}
+    </ul>
+{% endif %}

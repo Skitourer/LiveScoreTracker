@@ -4,8 +4,9 @@
  * The workshop page (/entry/<workshop>) holds this app. It works from the
  * workshop's data kept on the phone (pack) and puts every result in a queue
  * that is sent to the server as soon as possible. Screens: bib (home), one
- * child (#bib/12), race (#race/12/15/timer). Corrections, history and the
- * follow-up list stay on the server pages (network needed).
+ * child (#bib/12), race (#race/12/15/timer), follow-up (#tracking/todo) and
+ * help (#help). Corrections and the attempt history stay on the server pages
+ * (network needed).
  */
 import { initCounter } from '../counter.js';
 import { initResultInputs } from '../result-input.js';
@@ -22,7 +23,18 @@ import {
 } from './format.js';
 import { loadPack, loadQueue, updateQueue } from './store.js';
 import { createSync } from './sync.js';
-import { childCard, childView, h, homeView, queueView, raceView, warningList } from './views.js';
+import {
+  childCard,
+  childView,
+  h,
+  helpView,
+  homeView,
+  queueView,
+  raceView,
+  TRACKING_TABS,
+  trackingView,
+  warningList,
+} from './views.js';
 
 const ERRORS = {
   unknown: 'entry.error.unknown_bib',
@@ -81,6 +93,7 @@ export const initEntryApp = () => {
             ? null
             : Math.max(0, entry.measured + modifierTotal(variant, entry.modifiers)),
         at: Math.floor(entry.at / 1000),
+        k: (entry.warnings ?? []).length > 0,
       }));
 
   const attemptsOf = (child, variant) => [...child.attempts, ...localAttempts(child, variant)];
@@ -497,6 +510,110 @@ export const initEntryApp = () => {
     route(true);
   };
 
+  // ---------- Follow-up and help, from the phone's data ----------
+
+  const searchKey = (text) =>
+    String(text ?? '')
+      .normalize('NFD')
+      .replace(/\p{Diacritic}/gu, '')
+      .toLowerCase()
+      .trim();
+
+  const trackingRows = () =>
+    pack.children
+      .flatMap((child) => {
+        const variant = pack.variants[pack.levels[child.level] ?? ''];
+        if (!variant) {
+          return [];
+        }
+        const attempts = attemptsOf(child, variant);
+        const used = usedAttempts(variant, attempts);
+        const tabs = ['all'];
+        if (used >= variant.attempts) {
+          tabs.push('finished');
+        } else {
+          if (used > 0) {
+            tabs.push('started');
+          }
+          tabs.push(child.present ? 'todo' : 'absent');
+        }
+        return [
+          {
+            child,
+            variant,
+            used,
+            best: bestResult(variant, attempts),
+            toCheck: attempts.some((attempt) => attempt.k),
+            tabs,
+          },
+        ];
+      })
+      .sort((a, b) => a.child.bib - b.child.bib);
+
+  let trackingQuery = '';
+
+  const showTracking = (tab) => {
+    const all = trackingRows();
+    const counts = Object.fromEntries(
+      TRACKING_TABS.map((name) => [name, all.filter((row) => row.tabs.includes(name)).length]),
+    );
+    const query = searchKey(trackingQuery);
+    const rows = query
+      ? all.filter(
+          (row) => String(row.child.bib) === query || searchKey(row.child.name).startsWith(query),
+        )
+      : all.filter((row) => row.tabs.includes(tab));
+    const race = pack.workshop.timed && isOpen() ? pack.workshop.bibsPerRace : 0;
+    view.innerHTML = trackingView({
+      rows,
+      tab,
+      counts,
+      query: trackingQuery,
+      tx,
+      format,
+      race,
+    });
+
+    const search = view.querySelector('.entry-tracking-search');
+    search.addEventListener('submit', (event) => event.preventDefault());
+    search.querySelector('input').addEventListener('input', (event) => {
+      trackingQuery = event.target.value;
+      const caret = event.target.selectionStart;
+      showTracking(tab);
+      const input = view.querySelector('.entry-tracking-search input');
+      input.focus();
+      input.setSelectionRange(caret, caret);
+    });
+
+    const form = view.querySelector('.entry-tracking-race');
+    if (race && form) {
+      const boxes = [...form.querySelectorAll('input[type="checkbox"]')];
+      const start = form.querySelector('button[type="submit"]');
+      const update = () => {
+        const ticked = boxes.filter((box) => box.checked).length;
+        for (const box of boxes) {
+          box.disabled = !box.checked && ticked >= race;
+        }
+        start.disabled = ticked === 0;
+      };
+      for (const box of boxes) {
+        box.addEventListener('change', update);
+      }
+      form.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const ticked = boxes.filter((box) => box.checked).map((box) => box.value);
+        if (ticked.length > 0) {
+          location.hash = `race/${ticked[0]}/${ticked[1] ?? '-'}/timer`;
+        }
+      });
+      update();
+    }
+  };
+
+  const showHelp = () => {
+    view.innerHTML = helpView({ pack, tx });
+  };
+
   // ---------- Routing ----------
 
   const route = (force = false) => {
@@ -514,7 +631,15 @@ export const initEntryApp = () => {
     const key = pack.phase === 'finished' ? 'entry.error.finished' : 'entry.error.not_running';
     phaseNotice.innerHTML = isOpen() ? '' : `<p class="notice">${h(tx(key))}</p>`;
     const [screen, ...args] = hash.split('/');
-    if (screen === 'bib' && args[0]) {
+    if (screen === 'tracking') {
+      showTracking(TRACKING_TABS.includes(args[0]) ? args[0] : 'todo');
+      // Fresh data when there is network (the screen is redrawn when it arrives).
+      if (!force && navigator.onLine) {
+        sync.refreshPack();
+      }
+    } else if (screen === 'help') {
+      showHelp();
+    } else if (screen === 'bib' && args[0]) {
       showChild(args[0], viewAbort.signal);
     } else if (screen === 'race' && args[0]) {
       const bibs = [args[0], args[1]].filter((bib) => bib && bib !== '-');
@@ -532,9 +657,14 @@ export const initEntryApp = () => {
     onPack: (fresh) => {
       const first = pack === null;
       pack = fresh;
-      // Refresh the home screen; never interrupt a child or a race being entered.
-      if (first || currentRoute === '') {
+      // Refresh the home, follow-up and help screens; never interrupt a child or
+      // a race being entered, nor a search being typed.
+      const screen = (currentRoute ?? '').split('/')[0];
+      const typing = document.activeElement?.closest?.('.entry-tracking-search');
+      if (first || (['', 'tracking', 'help'].includes(screen) && !typing)) {
+        const scroll = window.scrollY;
         route(true);
+        window.scrollTo(0, scroll);
       }
     },
     onChange: (state) => renderStatus(state),
@@ -552,6 +682,14 @@ export const initEntryApp = () => {
       sync.send();
     }
   });
+
+  // The follow-up and help links of the workshop open the phone's screens.
+  for (const link of document.querySelectorAll('.entry-nav a[href$="/tracking"]')) {
+    link.href = '#tracking';
+  }
+  for (const link of document.querySelectorAll('.entry-nav a[href$="/help"]')) {
+    link.href = '#help';
+  }
 
   fallback?.remove();
   root.hidden = false;

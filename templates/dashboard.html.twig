@@ -5,6 +5,7 @@
 {% block content %}
     <h1>{{ t('dashboard.title') }}</h1>
     <p class="meta">{{ t('dashboard.phase', {phase: t('phase.' ~ phase())}) }}</p>
+<div data-live>
     <ul class="tiles">
         {% for tile in tiles %}
             <li>
@@ -16,4 +17,5 @@
             </li>
         {% endfor %}
     </ul>
+</div>
 {% endblock %}
