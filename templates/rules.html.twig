@@ -1,0 +1,9 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('public.rules') }}{% endblock %}
+
+{% block content %}
+    <p><a href="{{ url_for('home') }}">← {{ t('public.back_home') }}</a></p>
+    <h1>{{ t('public.rules') }}</h1>
+    <article class="help-page">{{ rules|raw }}</article>
+{% endblock %}

@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.20 — 12 novembre 2026
+> Version 1.21 — 12 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -669,6 +669,17 @@ Sujets et corps de tous les emails dans les fichiers de traduction, avec des var
 ---
 
 ## 13. Affichages
+
+### 13.0 Page d'accueil publique (étape 9a)
+
+À l'adresse du site (`/`), **sans connexion**, lisible sur téléphone, **sans donnée personnelle** :
+- **L'édition** : nom, date, horaires, lieu (lien vers la carte OpenStreetMap), organisateur, email de contact (configuration § 12).
+- **Texte de présentation** en Markdown (`pages/<langue>/home.md` dans le dossier de données de l'installation, sinon l'exemple fictif), comme les pages d'aide ; modifiable en ligne à l'étape 12.
+- **Les épreuves** de chaque groupe de niveaux, lues dans la configuration.
+- **Inscriptions**, selon les dates d'ouverture et de fermeture (heure locale de l'installation) et le quota (§ 5.2) : « ouvriront le … », **places restantes sur le quota** avec la date de fermeture, « complet : les nouvelles inscriptions vont en liste d'attente », « closes », ou « dates bientôt annoncées ». Le bouton « Inscrire un enfant » mène au formulaire public (étape 11 ; d'ici là, il est affiché comme « bientôt »). En compétition et après la clôture, ce bloc laisse la place à un message (et plus tard au lien vers l'écran d'avancement et l'espace participant).
+- Liens vers le **règlement** (`/reglement`, Markdown `pages/<langue>/rules.md`, aussi lié depuis le formulaire d'inscription) et vers l'email de contact ; en bas de page, un lien discret « Espace organisation (admins, organisateurs, arbitres) » vers la connexion (aussi « Connexion » dans le bandeau).
+- **Seule la page d'accueil est indexée par les moteurs de recherche, et seulement en production** ; toutes les autres pages, et tout le site de test, restent exclues.
+- L'état technique (base de données, migrations, configuration, version) passe sur la page `/status`, accessible depuis le tableau de bord de l'admin (tuile « État du système »).
 
 ### 13.1 Écran d'avancement (public)
 

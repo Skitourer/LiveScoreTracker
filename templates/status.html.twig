@@ -1,0 +1,36 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('home.system_status') }}{% endblock %}
+
+{% block content %}
+    <h1>{{ t('home.system_status') }}</h1>
+
+    <ul class="status" aria-label="{{ t('home.system_status') }}">
+        <li class="{{ status.database ? 'ok' : 'error' }}">
+            {{ status.database ? t('home.database_ok') : t('home.database_error') }}
+        </li>
+        {% if status.database %}
+            <li class="{{ status.pendingMigrations == 0 ? 'ok' : 'warning' }}">
+                {{ status.pendingMigrations == 0 ? t('home.schema_ok') : t('home.schema_pending', {count: status.pendingMigrations}) }}
+            </li>
+        {% endif %}
+        {% if config.valid %}
+            <li class="ok">
+                {{ t('home.config_ok', {events: config.events, categories: config.categories}) }}
+                {% if config.example %}<span class="badge muted">{{ t('home.config_example') }}</span>{% endif %}
+            </li>
+        {% else %}
+            <li class="error">{{ t('home.config_error') }}</li>
+        {% endif %}
+    </ul>
+
+    {% if showReport %}
+        <p><a class="button" href="{{ url_for('demo-report') }}">{{ t('home.report_link') }}</a></p>
+    {% endif %}
+
+    <p class="meta">
+        {{ t('home.version', {version: build.version, revision: build.revision}) }}
+        {% if build.builtAt %} · {{ t('home.deployed_at', {date: build.builtAt}) }}{% endif %}
+        · {{ t('home.environment', {environment: environment}) }}
+    </p>
+{% endblock %}

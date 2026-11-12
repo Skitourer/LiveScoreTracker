@@ -33,6 +33,7 @@ final class DashboardAction
         ['dashboard.referee_account', '/admin/referee', Permission::ManageAccounts],
         ['dashboard.audit_log', '/admin/audit', Permission::ViewAuditLog],
         ['dashboard.configuration', null, Permission::ManageConfiguration],
+        ['dashboard.system_status', '/status', Permission::ManageConfiguration],
     ];
 
     public function __construct(

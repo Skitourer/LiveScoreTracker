@@ -29,9 +29,12 @@ final class HttpTest extends TestCase
         }
     }
 
-    public function testHomePageShowsPendingMigrationsThenUpToDate(): void
+    public function testStatusPageShowsPendingMigrationsThenUpToDate(): void
     {
-        $body = (string) $this->request('GET', '/')->getBody();
+        $home = (string) $this->request('GET', '/')->getBody();
+        self::assertStringContainsString('Multisport Games 2027', $home, 'The public home page works before the first migration.');
+
+        $body = (string) $this->request('GET', '/status')->getBody();
         self::assertStringContainsString('LiveScoreTracker', $body);
         self::assertStringContainsString('migration(s) en attente', $body);
         self::assertStringContainsString('12 épreuves, 10 catégories', $body);
@@ -39,7 +42,7 @@ final class HttpTest extends TestCase
 
         $this->request('POST', '/internal/migrate', ['X-Deploy-Token' => 'test-token']);
 
-        $body = (string) $this->request('GET', '/')->getBody();
+        $body = (string) $this->request('GET', '/status')->getBody();
         self::assertStringContainsString('à jour', $body);
     }
 
