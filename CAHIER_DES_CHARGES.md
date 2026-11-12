@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.13 — 12 novembre 2026
+> Version 1.14 — 12 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -257,7 +257,6 @@ Précisions :
 | `plausible_range` | valeurs plausibles (avertissement si hors plage) | `[5.00, 12.00]` |
 | `max_value` | (score/compteur) maximum possible | 30 |
 | `modifiers` | liste de bonus/pénalités (§ 7.5) | but marqué : −3 s |
-| `built_in_timer` | `true`/`false` (§ 8.4) | `true` |
 | `bibs_per_timer` | 1 ou 2 (§ 8.4) | 2 |
 | `label` | texte affiché à la saisie (clé de traduction ou texte) | « 30 m » |
 
@@ -347,10 +346,10 @@ Le chrono tourne **dans le téléphone** et fonctionne hors ligne. Le bouton Arr
 
 **Mode chrono classique** : l'arbitre saisit 1 ou 2 dossards puis le temps de chacun, mesuré avec un chronomètre externe.
 
-Les deux modes sont toujours disponibles. La configuration définit le mode proposé par défaut.
+Les deux modes sont toujours disponibles. Le **chrono intégré est proposé par défaut** sur tous les ateliers à temps (l'ancien réglage `built_in_timer` est ignoré).
 
 Précisions :
-- Sur un atelier à temps, l'écran « dossard » propose les champs de la course (le 2ᵉ dossard est facultatif) et deux boutons, **Chrono intégré** et **Chrono classique**, le mode par défaut en premier. Un champ à part ouvre les essais d'un dossard pour les consulter ou les corriger.
+- Sur un atelier à temps, l'écran « dossard » propose les champs de la course (le 2ᵉ dossard est facultatif) et deux boutons : **Chrono intégré** (en premier, bouton principal) et **Chrono classique**. Un champ à part ouvre les essais d'un dossard pour les consulter ou les corriger.
 - Contrôles avant le départ : dossard inconnu, pas du bon niveau ou saisi deux fois → refusé. Deux enfants de variantes différentes (ex. un CP sur 30 m et un CM1 sur 40 m) → possible, avec un message bien visible.
 - Le temps est pris **au moment du toucher** sur le bouton (et non au relâchement), puis arrondi au centième inférieur, comme sur un chronomètre.
 - Le premier temps va au premier dossard saisi ; **Inverser** échange les deux temps. Avec un « N'a pas fini », le seul temps va à l'autre enfant.
@@ -937,7 +936,7 @@ Seules des **données fictives** sont autorisées (exemples de configuration, je
 | Sauvegardes | Serveur de production + copie **chiffrée** sur Drive | Dépôt |
 | Fichiers importés (Excel) | Traités en mémoire puis supprimés | Dépôt, disque après import |
 
-- Le **site d'essai** fonctionne par défaut avec des **données fictives générées** (commande de génération d'un jeu de test : ~100 enfants fictifs, résultats aléatoires réalistes). Des données réelles n'y sont copiées qu'en cas de nécessité ponctuelle, puis effacées.
+- Le **site d'essai** fonctionne par défaut avec des **données fictives générées** (commande de génération d'un jeu de test : ~100 enfants fictifs, résultats aléatoires réalistes). Une page **Données de test** (admin, absente en production) remplace toutes les inscriptions et tous les résultats par 100 enfants fictifs prêts pour le début de la compétition : 95 avec un dossard, 5 en liste d'attente, personne pointé ; il faut taper « EFFACER » pour confirmer. Des données réelles n'y sont copiées qu'en cas de nécessité ponctuelle, puis effacées.
 - Le **dossier de données** est situé **hors du dossier public web** et désigné par une variable d'environnement. Le déploiement **ne touche jamais** ce dossier (exclusion explicite dans le script de déploiement).
 
 ### 25.3 Garde-fous techniques
@@ -1023,7 +1022,6 @@ help = "sprint.md"
   attempts = 1
   foul_mode = "strict"
   plausible_range = [4.00, 12.00]
-  built_in_timer = false
   bibs_per_timer = 2
 
   [[workshops.variants]]
@@ -1035,7 +1033,6 @@ help = "sprint.md"
   attempts = 1
   foul_mode = "strict"
   plausible_range = [5.00, 14.00]
-  built_in_timer = false
   bibs_per_timer = 2
 
 [[workshops]]
@@ -1096,7 +1093,6 @@ help = "hockey.md"
   attempts = 2
   foul_mode = "strict"
   plausible_range = [5.00, 60.00]
-  built_in_timer = true
   bibs_per_timer = 1
   modifiers = [ { id = "goal_scored", value = -3.00 } ]
 
@@ -1108,7 +1104,6 @@ help = "hockey.md"
   attempts = 2
   foul_mode = "strict"
   plausible_range = [5.00, 60.00]
-  built_in_timer = true
   bibs_per_timer = 1
   modifiers = [ { id = "goal_scored", value = -3.00 } ]
 
@@ -1124,7 +1119,6 @@ help = "football.md"
   attempts = 1
   foul_mode = "strict"
   plausible_range = [10.00, 180.00]
-  built_in_timer = true
   bibs_per_timer = 1
 
 [[workshops]]
@@ -1139,7 +1133,6 @@ help = "obstacle_course.md"
   attempts = 1
   foul_mode = "strict"
   plausible_range = [10.00, 180.00]
-  built_in_timer = true
   bibs_per_timer = 1
 
 [[workshops]]

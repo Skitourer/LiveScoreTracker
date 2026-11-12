@@ -18,4 +18,5 @@
         {% endif %}
     </form>
     <p class="meta">{{ t('phase.closing_later') }}</p>
+    {% if test_data %}<p><a class="button small secondary" href="{{ url_for('admin-test-data') }}">{{ t('test_data.title') }}</a></p>{% endif %}
 {% endblock %}

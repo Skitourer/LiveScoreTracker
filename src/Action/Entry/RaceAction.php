@@ -63,7 +63,8 @@ final class RaceAction
 
         $mode = $input('mode');
         if (!\in_array($mode, [self::MODE_TIMER, self::MODE_MANUAL], true)) {
-            $mode = $this->desk->defaultsToTimer($workshop) ? self::MODE_TIMER : self::MODE_MANUAL;
+            // The built-in timer is the default everywhere.
+            $mode = self::MODE_TIMER;
         }
         $lanes = $this->lanes($workshop, [$input('bib1'), $input('bib2')]);
         if (\is_string($lanes)) {

@@ -57,7 +57,6 @@ final class EntryBibAction
             // Time events: a race of 1 or 2 children (spec § 8.4).
             'timed' => $this->desk->isTimed($workshop),
             'bibs_per_race' => $this->desk->bibsPerRace($workshop),
-            'timer_first' => $this->desk->defaultsToTimer($workshop),
         ], $error === null ? 200 : 422);
     }
 }

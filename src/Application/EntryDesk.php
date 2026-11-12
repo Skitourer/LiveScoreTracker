@@ -110,20 +110,6 @@ final class EntryDesk
     }
 
     /**
-     * Mode offered first: the built-in timer if the configuration asks for it, else the external timer.
-     */
-    public function defaultsToTimer(Workshop $workshop): bool
-    {
-        foreach ($workshop->variants as $variant) {
-            if ($variant->measure === Measure::Time && $variant->builtInTimer) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * Levels the workshop is for, in display order.
      *
      * @return list<string>

@@ -3,6 +3,7 @@
 {% block title %}{{ t('workshop.' ~ workshop.id ~ '.name') }}{% endblock %}
 
 {% block content %}
+    {% set nav_here = 'bib' %}
     {% include 'entry/_nav.html.twig' %}
     <p class="meta">{% for level in levels %}{{ label('level.' ~ level) }}{% if not loop.last %} · {% endif %}{% endfor %}</p>
     {% if error %}<p class="flash error">{{ t(error, {bib: bib}) }}</p>{% endif %}
@@ -17,7 +18,7 @@
                     </label>
                 {% endfor %}
             </div>
-            {% for mode in timer_first ? ['timer', 'manual'] : ['manual', 'timer'] %}
+            {% for mode in ['timer', 'manual'] %}
                 <button type="submit" name="mode" value="{{ mode }}" class="button large{{ loop.first ? '' : ' secondary' }}">{{ t('entry.mode_' ~ mode) }}</button>
             {% endfor %}
         </form>

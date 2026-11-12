@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.13 — 12 November 2026
+> Version 1.14 — 12 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -257,7 +257,6 @@ Details:
 | `plausible_range` | plausible values (warning if out of range) | `[5.00, 12.00]` |
 | `max_value` | (score/counter) maximum possible | 30 |
 | `modifiers` | list of bonuses/penalties (§ 7.5) | goal scored: −3 s |
-| `built_in_timer` | `true`/`false` (§ 8.4) | `true` |
 | `bibs_per_timer` | 1 or 2 (§ 8.4) | 2 |
 | `label` | text shown during entry (translation key or text) | "30 m" |
 
@@ -347,10 +346,10 @@ The timer runs **on the phone** and works offline. The Finish button is only act
 
 **Manual timer mode**: the referee enters 1 or 2 bibs, then each child's time, measured with an external stopwatch.
 
-Both modes are always available. The configuration sets the default mode.
+Both modes are always available. The **built-in timer is offered by default** on every time workshop (the former `built_in_timer` setting is ignored).
 
 Details:
-- On a time workshop, the "bib" screen shows the race fields (the 2nd bib is optional) and two buttons, **Built-in timer** and **External stopwatch**, the default mode first. A separate field opens a bib's attempts to view or correct them.
+- On a time workshop, the "bib" screen shows the race fields (the 2nd bib is optional) and two buttons: **Built-in timer** (first, main button) and **External stopwatch**. A separate field opens a bib's attempts to view or correct them.
 - Checks before the start: unknown bib, wrong level or bib typed twice → refused. Two children on different variants (e.g. a CP child on 30 m and a CM1 child on 40 m) → allowed, with a clearly visible message.
 - The time is taken **when the button is touched** (not when released), then rounded down to the hundredth, as on a stopwatch.
 - The first time goes to the first bib typed; **Swap** exchanges the two times. With a "Did not finish", the only time goes to the other child.
@@ -937,7 +936,7 @@ Only **fictitious data** is allowed (example configuration, test data sets, demo
 | Backups | Production server + **encrypted** copy on Drive | Repository |
 | Imported files (spreadsheets) | Processed in memory then deleted | Repository, disk after import |
 
-- The **test site** runs on **generated fictitious data** by default (a command generates a test set: ~100 fictitious children, realistic random results). Real data is only copied there when strictly necessary, then deleted.
+- The **test site** runs on **generated fictitious data** by default (a command generates a test set: ~100 fictitious children, realistic random results). A **Test data** page (admin, absent in production) replaces every registration and result by 100 fictitious children ready for the start of the competition: 95 with a bib, 5 on the waiting list, nobody checked in; typing "EFFACER" confirms it. Real data is only copied there when strictly necessary, then deleted.
 - The **data directory** is **outside the public web directory** and set by an environment variable. Deployment **never touches** this directory (explicit exclusion in the deployment script).
 
 ### 25.3 Technical safeguards
@@ -1023,7 +1022,6 @@ help = "sprint.md"
   attempts = 1
   foul_mode = "strict"
   plausible_range = [4.00, 12.00]
-  built_in_timer = false
   bibs_per_timer = 2
 
   [[workshops.variants]]
@@ -1035,7 +1033,6 @@ help = "sprint.md"
   attempts = 1
   foul_mode = "strict"
   plausible_range = [5.00, 14.00]
-  built_in_timer = false
   bibs_per_timer = 2
 
 [[workshops]]
@@ -1096,7 +1093,6 @@ help = "hockey.md"
   attempts = 2
   foul_mode = "strict"
   plausible_range = [5.00, 60.00]
-  built_in_timer = true
   bibs_per_timer = 1
   modifiers = [ { id = "goal_scored", value = -3.00 } ]
 
@@ -1108,7 +1104,6 @@ help = "hockey.md"
   attempts = 2
   foul_mode = "strict"
   plausible_range = [5.00, 60.00]
-  built_in_timer = true
   bibs_per_timer = 1
   modifiers = [ { id = "goal_scored", value = -3.00 } ]
 
@@ -1124,7 +1119,6 @@ help = "football.md"
   attempts = 1
   foul_mode = "strict"
   plausible_range = [10.00, 180.00]
-  built_in_timer = true
   bibs_per_timer = 1
 
 [[workshops]]
@@ -1139,7 +1133,6 @@ help = "obstacle_course.md"
   attempts = 1
   foul_mode = "strict"
   plausible_range = [10.00, 180.00]
-  built_in_timer = true
   bibs_per_timer = 1
 
 [[workshops]]

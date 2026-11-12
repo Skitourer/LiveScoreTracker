@@ -36,23 +36,36 @@ final class TimerCounterTest extends TestCase
         exec('rm -rf ' . escapeshellarg($this->dataDir));
     }
 
-    public function testBibScreenOffersBothModesInTheConfiguredOrder(): void
+    public function testBibScreenOffersTheBuiltInTimerFirst(): void
     {
-        // Sprint: 2 bibs, external timer first.
+        // Sprint: 2 bibs, built-in timer first (main button).
         $this->admin->get('/entry/sprint');
         self::assertStringContainsString('name="bib2"', $this->admin->lastBody);
-        self::assertLessThan(strpos($this->admin->lastBody, 'value="timer"'), strpos($this->admin->lastBody, 'value="manual"'));
+        self::assertStringContainsString('value="timer" class="button large"', $this->admin->lastBody);
+        self::assertLessThan(strpos($this->admin->lastBody, 'value="manual"'), strpos($this->admin->lastBody, 'value="timer"'));
         self::assertStringContainsString('Voir ou corriger les essais', $this->admin->lastBody);
 
-        // Hockey: 1 bib, built-in timer first.
+        // Hockey: 1 bib; the race opens with the built-in timer when no mode is given.
         $this->admin->get('/entry/hockey');
         self::assertStringNotContainsString('name="bib2"', $this->admin->lastBody);
-        self::assertLessThan(strpos($this->admin->lastBody, 'value="manual"'), strpos($this->admin->lastBody, 'value="timer"'));
+        $this->admin->get('/entry/sprint/race?bib1=1');
+        self::assertStringContainsString('name="mode" value="timer"', $this->admin->lastBody);
 
         // Other events keep the plain bib field.
         $this->admin->get('/entry/long_jump');
         self::assertStringNotContainsString('name="bib1"', $this->admin->lastBody);
         self::assertSame(404, $this->admin->get('/entry/basketball/race?bib1=1')->getStatusCode());
+    }
+
+    public function testEveryEntryScreenLeadsBackToTheWorkshopEntry(): void
+    {
+        $back = 'class="button small" href="/entry/sprint">Saisie</a>';
+        foreach (['/entry/sprint/remaining', '/entry/sprint/1', '/entry/sprint/race?bib1=1', '/entry/sprint/help'] as $page) {
+            $this->admin->get($page);
+            self::assertStringContainsString($back, $this->admin->lastBody, $page);
+        }
+        $this->admin->get('/entry/sprint');
+        self::assertStringNotContainsString($back, $this->admin->lastBody);
     }
 
     public function testRaceOfTwoIsSavedOnlyOnceEverythingIsConfirmed(): void

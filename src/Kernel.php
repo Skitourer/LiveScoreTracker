@@ -10,6 +10,7 @@ use LiveScoreTracker\Action\AccountAction;
 use LiveScoreTracker\Action\Admin\AuditAction;
 use LiveScoreTracker\Action\Admin\PhaseAction;
 use LiveScoreTracker\Action\Admin\RefereeAccountAction;
+use LiveScoreTracker\Action\Admin\TestDataAction;
 use LiveScoreTracker\Action\Admin\UserCreateAction;
 use LiveScoreTracker\Action\Admin\UserEditAction;
 use LiveScoreTracker\Action\Admin\UsersAction;
@@ -194,6 +195,7 @@ final class Kernel
             $admin->map(['GET', 'POST'], '/users/new', UserCreateAction::class)->setName('admin-user-new')->add($guard(Permission::ManageAccounts));
             $admin->map(['GET', 'POST'], '/users/{id:[0-9]+}', UserEditAction::class)->setName('admin-user')->add($guard(Permission::ManageAccounts));
             $admin->map(['GET', 'POST'], '/referee', RefereeAccountAction::class)->setName('admin-referee')->add($guard(Permission::ManageAccounts));
+            $admin->map(['GET', 'POST'], '/test-data', TestDataAction::class)->setName('admin-test-data')->add($guard(Permission::RestoreAndPurge));
             $admin->map(['GET', 'POST'], '/phase', PhaseAction::class)->setName('admin-phase')->add($guard(Permission::ChangePhase));
             $admin->get('/audit', AuditAction::class)->setName('admin-audit')->add($guard(Permission::ViewAuditLog));
         });

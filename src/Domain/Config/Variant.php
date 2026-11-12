@@ -30,7 +30,6 @@ final class Variant
         public readonly ?array $plausibleRange = null,
         public readonly ?int $maxValue = null,
         public readonly array $modifiers = [],
-        public readonly bool $builtInTimer = false,
         public readonly int $bibsPerTimer = 1,
         public readonly ?CounterLimit $limit = null,
         public readonly array $actions = [],
