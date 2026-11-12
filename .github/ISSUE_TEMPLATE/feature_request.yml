@@ -1,0 +1,20 @@
+name: Feature request
+description: Suggest an idea or an improvement.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: need
+    attributes:
+      label: What do you need?
+      description: The situation on competition day (or before / after) that this would help with.
+    validations:
+      required: true
+  - type: textarea
+    id: idea
+    attributes:
+      label: Proposed solution
+      description: How it could work. Mention the specification section if you know it.
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered

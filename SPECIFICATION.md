@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.23 — 12 November 2026
+> Version 1.24 — 12 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -923,6 +923,7 @@ Documentation is written **at a later stage**, once the application is stable, *
 - `README.md` (English) and `README.fr.md` (French), each linking to the other at the top: overview, screenshots on fictitious data, quick start, link to the full documentation.
 - `CONTRIBUTING.md`: contribution rules, conventions, running tests.
 - `CHANGELOG.md`: release history.
+- Already in place (November 2026, before the full documentation): `README.md` and `README.fr.md`, `CONTRIBUTING.md`, `SECURITY.md` (private vulnerability reporting), `CODE_OF_CONDUCT.md`, `CHANGELOG.md`, issue and pull request templates, and the English developer documentation in `docs/development/` (architecture, business core, offline entry).
 
 ### 22.2 Documentation site
 

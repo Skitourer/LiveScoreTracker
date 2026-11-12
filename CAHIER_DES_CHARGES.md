@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.23 — 12 novembre 2026
+> Version 1.24 — 12 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -923,6 +923,7 @@ La documentation est rédigée **dans un second temps**, une fois l'application 
 - `README.md` (anglais) et `README.fr.md` (français), avec un lien croisé en tête de chacun : présentation, captures d'écran sur données fictives, démarrage rapide, lien vers la documentation complète.
 - `CONTRIBUTING.md` : règles de contribution, conventions, lancement des tests.
 - `CHANGELOG.md` : historique des versions.
+- Déjà en place (novembre 2026, avant la documentation complète) : `README.md` et `README.fr.md`, `CONTRIBUTING.md`, `SECURITY.md` (signalement privé des failles), `CODE_OF_CONDUCT.md`, `CHANGELOG.md`, modèles d'issue et de pull request, et la documentation des développeurs en anglais dans `docs/development/` (architecture, cœur métier, saisie hors ligne).
 
 ### 22.2 Site de documentation
 
