@@ -48,6 +48,7 @@ final class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFunction('can', $this->context->can(...)),
             new TwigFunction('phase', fn(): string => $this->context->phase->value),
             new TwigFunction('local_time', $this->localTime(...)),
+            new TwigFunction('long_date', $this->longDate(...)),
             new TwigFunction('referee_name', $this->context->refereeName(...)),
             new TwigFunction('flashes', fn(): array => $this->context->hasSession() ? $this->context->session()->takeFlashes() : []),
         ];
@@ -79,6 +80,29 @@ final class TwigExtension extends AbstractExtension implements GlobalsInterface
     /**
      * Stored UTC time ('YYYY-MM-DD HH:MM:SS') shown in the installation's time zone: "11/11/2026 17:40".
      */
+    /**
+     * "dimanche 6 juin 2027" (with the time: "… à 08:00") in the page's language,
+     * in the date's own time zone; dd/mm/yyyy when the intl extension is missing.
+     */
+    public function longDate(?\DateTimeImmutable $date, bool $withTime = false): string
+    {
+        if ($date === null) {
+            return '';
+        }
+        if (!class_exists(\IntlDateFormatter::class)) {
+            return $date->format($withTime ? 'd/m/Y H:i' : 'd/m/Y');
+        }
+        $formatter = new \IntlDateFormatter(
+            $this->translator->locale(),
+            \IntlDateFormatter::FULL,
+            $withTime ? \IntlDateFormatter::SHORT : \IntlDateFormatter::NONE,
+            $date->getTimezone(),
+        );
+        $text = $formatter->format($date);
+
+        return \is_string($text) ? $text : $date->format('d/m/Y');
+    }
+
     public function localTime(?string $utc): string
     {
         if ($utc === null || $utc === '') {

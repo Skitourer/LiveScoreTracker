@@ -1,35 +1,61 @@
 {% extends 'layout.html.twig' %}
 
+{% block robots %}{{ indexable|default(false) ? 'index, follow' : 'noindex, nofollow' }}{% endblock %}
+{% block title %}{{ edition is defined ? edition.name : t('app.name') }}{% endblock %}
+
 {% block content %}
-    <h1>{{ t('app.name') }}</h1>
-    <p class="lead">{{ t('home.lead') }}</p>
+    {% if config is null %}
+        <h1>{{ t('app.name') }}</h1>
+        <p class="lead">{{ t('public.not_ready') }}</p>
+        <p><a href="{{ url_for('status') }}">{{ t('home.system_status') }}</a></p>
+    {% else %}
+        <header class="public-hero">
+            <h1>{{ edition.name }}</h1>
+            <p class="lead">{{ long_date(edition.date)|capitalize }}{% if edition.start %} · {{ t('public.hours', {start: edition.start|slice(0, 5), end: (edition.end ?? '')|slice(0, 5)}) }}{% endif %}</p>
+            {% if edition.venue %}<p>{{ edition.venue }} · <a href="https://www.openstreetmap.org/search?query={{ edition.venue|url_encode }}" rel="noopener">{{ t('public.map') }}</a></p>{% endif %}
+            <p class="meta">{{ t('public.organized_by', {organizer: edition.organizer}) }}</p>
+        </header>
 
-    <ul class="status" aria-label="{{ t('home.system_status') }}">
-        <li class="{{ status.database ? 'ok' : 'error' }}">
-            {{ status.database ? t('home.database_ok') : t('home.database_error') }}
-        </li>
-        {% if status.database %}
-            <li class="{{ status.pendingMigrations == 0 ? 'ok' : 'warning' }}">
-                {{ status.pendingMigrations == 0 ? t('home.schema_ok') : t('home.schema_pending', {count: status.pendingMigrations}) }}
-            </li>
+        {% if registration %}
+            <section class="card public-registration">
+                <h2>{{ t('public.registration') }}</h2>
+                {% if phase == 'running' %}
+                    <p>{{ t('public.running') }}</p>
+                {% elseif phase == 'finished' %}
+                    <p>{{ t('public.finished') }}</p>
+                {% else %}
+                    {% set state = registration.state %}
+                    {% if state == 'upcoming' %}
+                        <p>{{ t('public.state.upcoming', {date: long_date(registration.opens_at, true)}) }}</p>
+                    {% elseif state == 'open' or state == 'full' %}
+                        <p class="public-places">{{ state == 'full' ? t('public.state.full') : t('public.places_left', {count: registration.remaining, quota: registration.quota}) }}</p>
+                        {% if registration.closes_at %}<p class="meta">{{ t('public.closes', {date: long_date(registration.closes_at, true)}) }}</p>{% endif %}
+                        {# The online form comes with step 11. #}
+                        <p><span class="button disabled" aria-disabled="true">{{ t('public.register') }}</span> <small class="muted">{{ t('dashboard.coming_soon') }}</small></p>
+                    {% elseif state == 'closed' %}
+                        <p>{{ t('public.state.closed') }}</p>
+                    {% else %}
+                        <p>{{ t('public.state.unscheduled') }}</p>
+                    {% endif %}
+                {% endif %}
+            </section>
         {% endif %}
-        {% if config.valid %}
-            <li class="ok">
-                {{ t('home.config_ok', {events: config.events, categories: config.categories}) }}
-                {% if config.example %}<span class="badge muted">{{ t('home.config_example') }}</span>{% endif %}
-            </li>
-        {% else %}
-            <li class="error">{{ t('home.config_error') }}</li>
-        {% endif %}
-    </ul>
 
-    {% if showReport %}
-        <p><a class="button" href="{{ url_for('demo-report') }}">{{ t('home.report_link') }}</a></p>
+        {% if presentation %}
+            <article class="help-page public-presentation">{{ presentation|raw }}</article>
+        {% endif %}
+
+        <h2>{{ t('public.events') }}</h2>
+        {% for group in groups %}
+            <h3>{% for level in group.levels %}{{ label('level.' ~ level) }}{% if not loop.last %} · {% endif %}{% endfor %}</h3>
+            <ul class="public-events">
+                {% for variant in group.variants %}<li>{{ event_label(variant) }}</li>{% endfor %}
+            </ul>
+        {% endfor %}
+
+        <p class="toolbar">
+            {% if has_rules %}<a class="button secondary" href="{{ url_for('rules') }}">{{ t('public.rules') }}</a>{% endif %}
+            {% if edition.contactEmail %}<a class="button secondary" href="mailto:{{ edition.contactEmail }}">{{ t('public.contact') }}</a>{% endif %}
+        </p>
     {% endif %}
-
-    <p class="meta">
-        {{ t('home.version', {version: build.version, revision: build.revision}) }}
-        {% if build.builtAt %} · {{ t('home.deployed_at', {date: build.builtAt}) }}{% endif %}
-        · {{ t('home.environment', {environment: environment}) }}
-    </p>
 {% endblock %}

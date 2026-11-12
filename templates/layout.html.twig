@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="color-scheme" content="light dark">
-    <meta name="robots" content="noindex, nofollow">
+    <meta name="robots" content="{% block robots %}noindex, nofollow{% endblock %}">
     <title>{% block title %}{{ t('app.name') }}{% endblock %}</title>
     <link rel="manifest" href="{{ base_path() }}/manifest.webmanifest">
     <meta name="theme-color" content="#1f5fbf">
@@ -31,7 +31,7 @@
                     <button type="submit" class="link">{{ t('nav.logout') }}</button>
                 </form>
             {% else %}
-                <a href="{{ url_for('login') }}">{{ t('nav.login') }}</a>
+                <a href="{{ url_for('login') }}">{{ t('public.volunteers') }}</a>
             {% endif %}
         </nav>{% endblock %}
     </header>

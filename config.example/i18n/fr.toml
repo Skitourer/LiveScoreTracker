@@ -260,6 +260,7 @@ checks = "Contrôles"
 referee_account = "Compte des arbitres"
 audit_log = "Journal d'audit"
 configuration = "Configuration"
+system_status = "État du système"
 
 [phase]
 preparation = "préparation"
@@ -960,3 +961,26 @@ lead = "Cette page a besoin du réseau, et le téléphone n'en a pas pour l'inst
 queue = "Les résultats saisis sur ce téléphone sont gardés et partiront dès le retour du réseau."
 back = "Revenir à la page précédente"
 workshops = "Ateliers utilisables sans réseau"
+
+[public]
+not_ready = "Le site est en cours d'installation."
+hours = "de {start} à {end}"
+map = "voir sur la carte"
+organized_by = "Organisé par {organizer}"
+registration = "Inscriptions"
+running = "La compétition est en cours. Bonne journée à tous les participants !"
+finished = "La compétition est terminée. Merci à tous les participants et aux bénévoles !"
+places_left = "{count} place(s) restante(s) sur {quota}"
+closes = "Inscriptions ouvertes jusqu'au {date}."
+register = "Inscrire un enfant"
+events = "Les épreuves"
+rules = "Règlement"
+contact = "Nous écrire"
+volunteers = "Connexion des bénévoles"
+back_home = "Accueil"
+
+[public.state]
+upcoming = "Les inscriptions ouvriront le {date}."
+full = "Complet : les nouvelles inscriptions vont en liste d'attente."
+closed = "Les inscriptions sont closes."
+unscheduled = "Les dates d'inscription seront bientôt annoncées."

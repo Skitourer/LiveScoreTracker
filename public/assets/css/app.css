@@ -475,6 +475,7 @@ a.tile {
 
 div.card,
 form.card,
+section.card,
 details.card {
   margin: var(--space-3) 0;
   padding: var(--space-2) var(--space-3);
@@ -951,4 +952,27 @@ pre.details {
 
 .live-stamp {
   margin-top: var(--space-3);
+}
+
+/* ---------- Public home page (spec § 13.0) ---------- */
+.public-hero h1 {
+  margin-bottom: var(--space-2);
+}
+
+.public-hero p {
+  margin: var(--space-1) 0;
+}
+
+.public-places {
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-strong);
+}
+
+.button.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.public-events {
+  padding-left: var(--space-5);
 }

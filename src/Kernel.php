@@ -48,7 +48,9 @@ use LiveScoreTracker\Action\Registration\RegistrationsAction;
 use LiveScoreTracker\Action\Results\ChecksAction;
 use LiveScoreTracker\Action\Results\MissingEventsAction;
 use LiveScoreTracker\Action\Results\ResultsAction;
+use LiveScoreTracker\Action\RulesAction;
 use LiveScoreTracker\Action\ScoringReportAction;
+use LiveScoreTracker\Action\StatusAction;
 use LiveScoreTracker\Action\StyleguideAction;
 use LiveScoreTracker\Domain\Config\CompetitionConfig;
 use LiveScoreTracker\Domain\Config\InvalidConfig;
@@ -151,6 +153,8 @@ final class Kernel
         $app->get('/', HomeAction::class)->setName('home');
         $app->get('/health', HealthAction::class)->setName('health');
         $app->get('/offline', OfflineAction::class)->setName('offline');
+        $app->get('/status', StatusAction::class)->setName('status');
+        $app->get('/reglement', RulesAction::class)->setName('rules');
         $app->post('/internal/migrate', MigrateAction::class)->setName('migrate');
         $app->get('/demo/report', ScoringReportAction::class)->setName('demo-report');
         $app->get('/demo/styleguide', StyleguideAction::class)->setName('demo-styleguide');
