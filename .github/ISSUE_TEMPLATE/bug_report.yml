@@ -1,0 +1,46 @@
+name: Bug report
+description: Something does not work as expected.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for reporting! **Do not include any real personal data** (names, birth dates, emails…): use fictitious data only.
+        For a security vulnerability, do not open an issue: see the security policy.
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you did, what you expected, and what happened instead.
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Log in as …
+        2. Open …
+        3. …
+    validations:
+      required: true
+  - type: dropdown
+    id: role
+    attributes:
+      label: Role
+      options: [Admin, Organizer, Referee, Participant, Not logged in]
+  - type: dropdown
+    id: phase
+    attributes:
+      label: Competition phase
+      options: [Preparation, Running, Finished, Not relevant]
+  - type: input
+    id: device
+    attributes:
+      label: Device and browser
+      placeholder: e.g. Android 14, Chrome 131 — offline or online
+  - type: input
+    id: version
+    attributes:
+      label: Version or commit
+      description: Shown on the system status page (/status).
