@@ -10,6 +10,7 @@ use LiveScoreTracker\Action\AccountAction;
 use LiveScoreTracker\Action\Admin\AuditAction;
 use LiveScoreTracker\Action\Admin\PhaseAction;
 use LiveScoreTracker\Action\Admin\RefereeAccountAction;
+use LiveScoreTracker\Action\Admin\TestDataAction;
 use LiveScoreTracker\Action\Admin\UserCreateAction;
 use LiveScoreTracker\Action\Admin\UserEditAction;
 use LiveScoreTracker\Action\Admin\UsersAction;
@@ -25,7 +26,8 @@ use LiveScoreTracker\Action\Auth\TwoFactorSetupAction;
 use LiveScoreTracker\Action\DashboardAction;
 use LiveScoreTracker\Action\Entry\EntryBibAction;
 use LiveScoreTracker\Action\Entry\EntryChildAction;
-use LiveScoreTracker\Action\Entry\RemainingBibsAction;
+use LiveScoreTracker\Action\Entry\RaceAction;
+use LiveScoreTracker\Action\Entry\TrackingAction;
 use LiveScoreTracker\Action\Entry\WorkshopChoiceAction;
 use LiveScoreTracker\Action\Entry\WorkshopHelpAction;
 use LiveScoreTracker\Action\HealthAction;
@@ -181,8 +183,9 @@ final class Kernel
         // Result entry at the workshops (spec § 8)
         $app->get('/entry', WorkshopChoiceAction::class)->setName('entry')->add($guard(Permission::EnterResultsChosenEvent));
         $app->get('/entry/{workshop:[a-z0-9_]+}', EntryBibAction::class)->setName('entry-workshop')->add($guard(Permission::EnterResultsChosenEvent));
-        $app->get('/entry/{workshop:[a-z0-9_]+}/remaining', RemainingBibsAction::class)->setName('entry-remaining')->add($guard(Permission::ViewRemainingBibs));
+        $app->get('/entry/{workshop:[a-z0-9_]+}/tracking', TrackingAction::class)->setName('entry-tracking')->add($guard(Permission::ViewRemainingBibs));
         $app->get('/entry/{workshop:[a-z0-9_]+}/help', WorkshopHelpAction::class)->setName('entry-help')->add($guard(Permission::ViewWorkshopHelp));
+        $app->map(['GET', 'POST'], '/entry/{workshop:[a-z0-9_]+}/race', RaceAction::class)->setName('entry-race')->add($guard(Permission::EnterResultsChosenEvent));
         $app->map(['GET', 'POST'], '/entry/{workshop:[a-z0-9_]+}/{bib:[0-9]+}', EntryChildAction::class)->setName('entry-child')->add($guard(Permission::EnterResultsChosenEvent));
 
         // Administration
@@ -192,6 +195,7 @@ final class Kernel
             $admin->map(['GET', 'POST'], '/users/new', UserCreateAction::class)->setName('admin-user-new')->add($guard(Permission::ManageAccounts));
             $admin->map(['GET', 'POST'], '/users/{id:[0-9]+}', UserEditAction::class)->setName('admin-user')->add($guard(Permission::ManageAccounts));
             $admin->map(['GET', 'POST'], '/referee', RefereeAccountAction::class)->setName('admin-referee')->add($guard(Permission::ManageAccounts));
+            $admin->map(['GET', 'POST'], '/test-data', TestDataAction::class)->setName('admin-test-data')->add($guard(Permission::RestoreAndPurge));
             $admin->map(['GET', 'POST'], '/phase', PhaseAction::class)->setName('admin-phase')->add($guard(Permission::ChangePhase));
             $admin->get('/audit', AuditAction::class)->setName('admin-audit')->add($guard(Permission::ViewAuditLog));
         });

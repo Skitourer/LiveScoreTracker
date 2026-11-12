@@ -38,9 +38,9 @@ final class WebClient
         $this->mailer = new LogMailer(null);
     }
 
-    public static function migrated(string $dataDir): self
+    public static function migrated(string $dataDir, string $environment = 'test'): self
     {
-        $client = new self($dataDir);
+        $client = new self($dataDir, $environment);
         (new Migrator(ConnectionFactory::create($client->settings()), \dirname(__DIR__, 2) . '/migrations'))->migrate();
 
         return $client;

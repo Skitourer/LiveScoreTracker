@@ -5,8 +5,10 @@ declare(strict_types=1);
 namespace LiveScoreTracker\Action\Admin;
 
 use LiveScoreTracker\Action\Support\Responder;
+use LiveScoreTracker\Domain\Security\Permission;
 use LiveScoreTracker\Domain\Security\Phase;
 use LiveScoreTracker\Infrastructure\Persistence\AppState;
+use LiveScoreTracker\Infrastructure\Settings;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 
@@ -22,6 +24,7 @@ final class PhaseAction
     public function __construct(
         private readonly Responder $responder,
         private readonly AppState $appState,
+        private readonly Settings $settings,
     ) {}
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
@@ -39,6 +42,10 @@ final class PhaseAction
             return $this->responder->redirect($response, '/admin/phase');
         }
 
-        return $this->responder->render($response, 'admin/phase.html.twig', ['current' => $current]);
+        return $this->responder->render($response, 'admin/phase.html.twig', [
+            'current' => $current,
+            // Test sites: link to the fictitious data reset.
+            'test_data' => !$this->settings->isProduction() && $this->responder->context->can(Permission::RestoreAndPurge),
+        ]);
     }
 }

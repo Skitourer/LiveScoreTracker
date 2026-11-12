@@ -138,34 +138,38 @@ final class EntryTest extends TestCase
         self::assertStringContainsString('Aucun essai', $this->admin->lastBody);
     }
 
-    public function testRemainingBibsAndHelp(): void
+    public function testWorkshopFollowUpAndHelp(): void
     {
-        $this->admin->post('/check-in/2', ['mark' => 'checked_in', 'done' => '1']);
-        $this->admin->get('/entry/hockey/remaining');
+        // Zoé (1) checked in, Hugo (2) not yet.
+        $this->admin->get('/entry/hockey/tracking');
         self::assertStringContainsString('Zoé M.', $this->admin->lastBody);
+        self::assertStringNotContainsString('Hugo D.', $this->admin->lastBody);
+        self::assertStringContainsString('Non pointés (1)', $this->admin->lastBody);
+        $this->admin->get('/entry/hockey/tracking?tab=absent');
         self::assertStringContainsString('Hugo D.', $this->admin->lastBody);
 
-        // Hockey: 2 attempts. One done: still listed, with 1 / 2.
+        // Hockey: 2 attempts. One done: to do and started, with 1 / 2 and the best result.
         $this->record($this->admin, ['value' => '2000'], 'hockey', 1);
-        $this->admin->get('/entry/hockey/remaining');
+        $this->admin->get('/entry/hockey/tracking?tab=started');
         self::assertStringContainsString('1 / 2', $this->admin->lastBody);
+        self::assertStringContainsString('20,00 s', $this->admin->lastBody);
         $this->record($this->admin, ['value' => '1900'], 'hockey', 1);
-        $this->admin->get('/entry/hockey/remaining');
+        $this->admin->get('/entry/hockey/tracking');
         self::assertStringNotContainsString('href="/entry/hockey/1"', $this->admin->lastBody);
-        self::assertStringContainsString('<strong>1</strong> terminés', $this->admin->lastBody);
-        $this->admin->get('/entry/hockey/remaining?q=hu');
-        self::assertStringContainsString('Hugo D.', $this->admin->lastBody);
+        self::assertStringContainsString('Terminés (1)', $this->admin->lastBody);
+        $this->admin->get('/entry/hockey/tracking?tab=finished');
+        self::assertStringContainsString('19,00 s', $this->admin->lastBody);
+        self::assertStringNotContainsString('name="bibs[]" value="1"', $this->admin->lastBody, 'A finished child cannot be ticked for a race.');
 
-        // A bib typed in the search gives the real reason when it is not listed.
-        $this->admin->get('/entry/long_jump/remaining?q=2');
+        // The search covers every child; a bib not found gives the real reason.
+        $this->admin->get('/entry/hockey/tracking?q=hu');
+        self::assertStringContainsString('Hugo D.', $this->admin->lastBody);
+        $this->admin->get('/entry/long_jump/tracking?q=2');
         self::assertStringContainsString('pas du bon niveau', $this->admin->lastBody);
-        self::assertStringNotContainsString('ont terminé cet atelier', $this->admin->lastBody);
-        $this->admin->get('/entry/hockey/remaining?q=1');
-        self::assertStringContainsString('Le dossard 1 a déjà terminé', $this->admin->lastBody);
-        $this->admin->get('/entry/hockey/remaining?q=99');
+        $this->admin->get('/entry/hockey/tracking?q=99');
         self::assertStringContainsString('Dossard 99 inconnu', $this->admin->lastBody);
-        $this->admin->get('/entry/hockey/remaining?q=zz');
-        self::assertStringContainsString('Aucun enfant restant ne correspond', $this->admin->lastBody);
+        $this->admin->get('/entry/hockey/tracking?q=zz');
+        self::assertStringContainsString('Aucun enfant ne correspond', $this->admin->lastBody);
 
         $this->admin->get('/entry/hockey/help');
         self::assertStringContainsString('<h2>Matériel</h2>', $this->admin->lastBody);

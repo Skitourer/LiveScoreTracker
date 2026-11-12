@@ -15,7 +15,9 @@ final class StoredAttempt
 {
     /**
      * @param array<string, int> $modifiers modifier id => times applied
-     * @param list<string>       $warnings  warnings confirmed when it was entered ("to check")
+     * @param list<string>         $warnings  warnings confirmed when it was entered ("to check")
+     * @param array<string, mixed> $details   how the value was obtained: "source" (timer, timer_edited,
+     *                                        counter) and, for a counter, "actions" (id => count) and "missed"
      */
     public function __construct(
         public readonly int $id,
@@ -30,6 +32,7 @@ final class StoredAttempt
         public readonly string $enteredAt,
         public readonly ?string $username,
         public readonly ?string $refereeName,
+        public readonly array $details = [],
         public readonly ?string $replacedAt = null,
         public readonly ?string $deletedAt = null,
         public readonly ?string $deletedBy = null,
@@ -46,6 +49,16 @@ final class StoredAttempt
     public function isCurrent(): bool
     {
         return $this->replacedAt === null && $this->deletedAt === null;
+    }
+
+    /**
+     * "timer", "timer_edited" (timer value changed by hand before validation), "counter", or null (typed by hand).
+     */
+    public function source(): ?string
+    {
+        $source = $this->details['source'] ?? null;
+
+        return \is_string($source) ? $source : null;
     }
 
     public function isCorrection(): bool

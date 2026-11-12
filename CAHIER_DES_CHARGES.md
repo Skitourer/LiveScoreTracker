@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.12 — 11 novembre 2026
+> Version 1.15 — 12 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -77,7 +77,7 @@ Il est recommandé d'avoir **au moins 2 admins**, pour permettre la réinitialis
 | Émargement entrée et sortie | ✅ | ✅ | | |
 | Saisie/correction de résultats — toutes épreuves | ✅ | ✅ | | |
 | Saisie/correction de résultats — épreuve choisie | ✅ | ✅ | ✅ | |
-| Liste des dossards restants (épreuve) | ✅ | ✅ | ✅ | |
+| Suivi de l'atelier (dossards restants, passés) | ✅ | ✅ | ✅ | |
 | Page d'aide de l'atelier | ✅ | ✅ | ✅ | |
 | Écrans de suivi (avancement, épreuves manquantes, contrôles) | ✅ | ✅ | | |
 | Résultats et scores par épreuve/catégorie, classements | ✅ | ✅ | | |
@@ -232,7 +232,7 @@ Précisions :
 ### 6.3 Statuts de présence
 
 - **Absent** : inscrit mais dossard jamais remis. Il est exclu de tout (listes de passage, barèmes, classements) et n'apparaît que dans un récapitulatif « absents ».
-- **Présent** : dossard remis. Il apparaît dans les listes « dossards restants » des ateliers.
+- **Présent** : dossard remis. Il apparaît dans les listes « Suivi » des ateliers.
 
 ---
 
@@ -257,7 +257,6 @@ Précisions :
 | `plausible_range` | valeurs plausibles (avertissement si hors plage) | `[5.00, 12.00]` |
 | `max_value` | (score/compteur) maximum possible | 30 |
 | `modifiers` | liste de bonus/pénalités (§ 7.5) | but marqué : −3 s |
-| `built_in_timer` | `true`/`false` (§ 8.4) | `true` |
 | `bibs_per_timer` | 1 ou 2 (§ 8.4) | 2 |
 | `label` | texte affiché à la saisie (clé de traduction ou texte) | « 30 m » |
 
@@ -319,7 +318,7 @@ Précisions :
 - Un résultat enregistré avec un avertissement confirmé est marqué **« à vérifier »** (tableau de bord des contrôles, étape 8).
 - Chaque saisie porte un identifiant unique créé avec le formulaire : un double envoi (double appui, réseau lent) n'enregistre qu'une fois.
 - Un enfant non pointé peut être **marqué présent** depuis l'écran de saisie, après confirmation.
-- Les épreuves à chrono et en mode compteur se saisissent pour l'instant comme un résultat standard (temps mesuré avec un chronomètre externe, total des points) ; le chrono intégré et le compteur arrivent à l'étape 6.
+- Les épreuves à temps se saisissent par **course** (§ 8.4) et les épreuves en mode compteur avec le **compteur** (§ 8.5). L'écran d'un seul enfant reste disponible pour consulter et corriger ses essais.
 
 ### 8.3 Correction
 
@@ -347,7 +346,17 @@ Le chrono tourne **dans le téléphone** et fonctionne hors ligne. Le bouton Arr
 
 **Mode chrono classique** : l'arbitre saisit 1 ou 2 dossards puis le temps de chacun, mesuré avec un chronomètre externe.
 
-Les deux modes sont toujours disponibles. La configuration définit le mode proposé par défaut.
+Les deux modes sont toujours disponibles. Le **chrono intégré est proposé par défaut** sur tous les ateliers à temps (l'ancien réglage `built_in_timer` est ignoré).
+
+Précisions :
+- Sur un atelier à temps, l'écran « dossard » propose les champs de la course (le 2ᵉ dossard est facultatif) et deux boutons : **Chrono intégré** (en premier, bouton principal) et **Chrono classique**. Un champ à part ouvre les essais d'un dossard pour les consulter ou les corriger.
+- Contrôles avant le départ : dossard inconnu, pas du bon niveau ou saisi deux fois → refusé. Deux enfants de variantes différentes (ex. un CP sur 30 m et un CM1 sur 40 m) → possible, avec un message bien visible.
+- Le temps est pris **au moment du toucher** sur le bouton (et non au relâchement), puis arrondi au centième inférieur, comme sur un chronomètre.
+- Le premier temps va au premier dossard saisi ; **Inverser** échange les deux temps. Avec un « N'a pas fini », le seul temps va à l'autre enfant.
+- La course est validée **en bloc** : rien n'est enregistré tant que les deux temps ne sont pas lisibles et les avertissements (§ 10.1) confirmés.
+- Chaque temps garde la trace de son origine : **chrono intégré**, ou **chrono intégré, temps modifié à la main** si l'arbitre l'a changé avant de valider (visible dans l'historique des essais).
+- Quitter la page pendant une course demande une confirmation.
+- Sans JavaScript, l'écran fonctionne comme le mode chrono classique.
 
 ### 8.5 Saisie en mode compteur
 
@@ -359,9 +368,26 @@ Les deux modes sont toujours disponibles. La configuration définit le mode prop
 
 Saisie directe du total possible en secours.
 
-### 8.6 Dossards restants
+Précisions :
+- Un bouton **Terminer maintenant** arrête le comptage avant la fin (incident).
+- Le récapitulatif montre le nombre de chaque action dans des champs **modifiables**, avec le total recalculé ; c'est aussi l'écran de correction.
+- Le résultat enregistré est le total des points, avec le **détail des actions** (ex. « Panier ×3, Cercle ×2, Cadre ×1 »), affiché dans l'historique des essais.
+- Plus de tirs que le nombre autorisé → avertissement (§ 10.1).
+- Le son et la vibration dépendent du téléphone (pas de vibration sur iPhone ; pas de son si le téléphone est en silencieux).
+- Sans JavaScript, l'arbitre tape directement le nombre de chaque action.
 
-Écran listant, pour l'atelier choisi, les **enfants présents** des niveaux concernés qui **n'ont pas terminé** l'épreuve (aucun essai, ou essais restants), avec le nombre d'essais déjà faits. Tri par dossard, recherche.
+### 8.6 Suivi de l'atelier
+
+Écran **« Suivi »** listant, pour l'atelier choisi, les **enfants inscrits** des niveaux concernés, répartis en onglets avec leur nombre :
+- **À faire** : pointés, avec des essais restants ;
+- **En cours** : au moins un essai fait, mais pas tous ;
+- **Terminés** : tous les essais faits ;
+- **Non pointés** : pas encore arrivés à l'accueil ;
+- **Tous**.
+
+Une ligne par enfant : dossard, prénom, épreuve (ex. 30 m / 40 m), essais faits sur essais permis, meilleur résultat, badges « non pointé » et « à vérifier ». Tri par dossard. La recherche (dossard ou prénom) porte sur tous les enfants ; un dossard introuvable donne la raison (inconnu, pas du bon niveau).
+
+Sur un atelier à temps, une case à cocher par enfant non terminé et un bouton **« Lancer la course »** ouvrent directement la course (§ 8.4) des 1 ou 2 enfants cochés.
 
 ### 8.7 Page d'aide de l'atelier
 
@@ -476,6 +502,8 @@ Les vérifications sont des **avertissements non bloquants**, sauf mention contr
 | Valeur très éloignée de la médiane de la catégorie (une fois quelques résultats disponibles) | Avertissement |
 | **Mauvaise distance probable** : temps plus proche de la distribution de l'autre variante (ex. temps d'un CE1 typique du 40 m) | Avertissement « Distance correcte ? » |
 | Doublon probable (même dossard, même épreuve, même valeur à quelques secondes d'intervalle) | Avertissement ; dédoublonnage à la synchronisation |
+| Mode compteur : plus de tirs que le nombre autorisé | Avertissement |
+| Course : même dossard saisi deux fois | **Bloquant** |
 
 ### 10.2 Contrôles globaux
 
@@ -917,7 +945,7 @@ Seules des **données fictives** sont autorisées (exemples de configuration, je
 | Sauvegardes | Serveur de production + copie **chiffrée** sur Drive | Dépôt |
 | Fichiers importés (Excel) | Traités en mémoire puis supprimés | Dépôt, disque après import |
 
-- Le **site d'essai** fonctionne par défaut avec des **données fictives générées** (commande de génération d'un jeu de test : ~100 enfants fictifs, résultats aléatoires réalistes). Des données réelles n'y sont copiées qu'en cas de nécessité ponctuelle, puis effacées.
+- Le **site d'essai** fonctionne par défaut avec des **données fictives générées** (commande de génération d'un jeu de test : ~100 enfants fictifs, résultats aléatoires réalistes). Une page **Données de test** (admin, absente en production) remplace toutes les inscriptions et tous les résultats par 100 enfants fictifs prêts pour le début de la compétition : 95 avec un dossard dont 90 présents (dossard remis), 5 en liste d'attente ; il faut taper « EFFACER » pour confirmer. Des données réelles n'y sont copiées qu'en cas de nécessité ponctuelle, puis effacées.
 - Le **dossier de données** est situé **hors du dossier public web** et désigné par une variable d'environnement. Le déploiement **ne touche jamais** ce dossier (exclusion explicite dans le script de déploiement).
 
 ### 25.3 Garde-fous techniques
@@ -1003,7 +1031,6 @@ help = "sprint.md"
   attempts = 1
   foul_mode = "strict"
   plausible_range = [4.00, 12.00]
-  built_in_timer = false
   bibs_per_timer = 2
 
   [[workshops.variants]]
@@ -1015,7 +1042,6 @@ help = "sprint.md"
   attempts = 1
   foul_mode = "strict"
   plausible_range = [5.00, 14.00]
-  built_in_timer = false
   bibs_per_timer = 2
 
 [[workshops]]
@@ -1076,7 +1102,6 @@ help = "hockey.md"
   attempts = 2
   foul_mode = "strict"
   plausible_range = [5.00, 60.00]
-  built_in_timer = true
   bibs_per_timer = 1
   modifiers = [ { id = "goal_scored", value = -3.00 } ]
 
@@ -1088,7 +1113,6 @@ help = "hockey.md"
   attempts = 2
   foul_mode = "strict"
   plausible_range = [5.00, 60.00]
-  built_in_timer = true
   bibs_per_timer = 1
   modifiers = [ { id = "goal_scored", value = -3.00 } ]
 
@@ -1104,7 +1128,6 @@ help = "football.md"
   attempts = 1
   foul_mode = "strict"
   plausible_range = [10.00, 180.00]
-  built_in_timer = true
   bibs_per_timer = 1
 
 [[workshops]]
@@ -1119,7 +1142,6 @@ help = "obstacle_course.md"
   attempts = 1
   foul_mode = "strict"
   plausible_range = [10.00, 180.00]
-  built_in_timer = true
   bibs_per_timer = 1
 
 [[workshops]]

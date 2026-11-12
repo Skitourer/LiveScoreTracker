@@ -663,3 +663,178 @@ pre.details {
 .help-page img {
   max-width: 100%;
 }
+
+/* ---------- Races on time events: built-in timer (spec § 8.4) ---------- */
+.race-start {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-3) 0;
+}
+
+.race-bibs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: var(--space-3);
+}
+
+.race-bibs input {
+  width: 100%;
+}
+
+.race-lanes {
+  display: grid;
+  gap: var(--space-2);
+  margin: var(--space-3) 0;
+  padding: 0;
+  list-style: none;
+}
+
+.race-lane {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  padding: var(--space-3);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.race-lane .bib {
+  color: var(--color-text);
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-heavy);
+}
+
+.race-name {
+  font-size: var(--font-size-xxl);
+  font-weight: var(--font-weight-heavy);
+}
+
+.stopwatch {
+  display: grid;
+  gap: var(--space-3);
+  margin: var(--space-4) 0;
+}
+
+.stopwatch-clock,
+.counter-clock {
+  display: block;
+  font-size: var(--font-size-clock);
+  font-weight: var(--font-weight-heavy);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+
+.stopwatch-go {
+  min-height: var(--touch-target-big);
+  font-size: var(--font-size-xxl);
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.stopwatch-dnf {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: var(--space-2);
+}
+
+.stopwatch-dnf .button[aria-pressed='true'] {
+  border-color: var(--color-error);
+  background: var(--color-error);
+  color: var(--color-accent-text);
+}
+
+.race-result legend .bib {
+  margin-right: var(--space-2);
+}
+
+.race-place {
+  margin: 0;
+  color: var(--color-ok);
+  font-weight: var(--font-weight-strong);
+}
+
+.race-form .button.danger,
+.stopwatch .button.danger {
+  width: 100%;
+  text-align: center;
+}
+
+/* ---------- Counter events (spec § 8.5) ---------- */
+.counter {
+  margin: var(--space-3) 0;
+}
+
+.counter-status {
+  margin: 0;
+}
+
+.counter-total {
+  display: block;
+  font-size: var(--font-size-display);
+  font-weight: var(--font-weight-heavy);
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.counter-start {
+  margin: var(--space-3) 0;
+}
+
+.counter-actions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(8rem, 1fr));
+  gap: var(--space-3);
+  margin: var(--space-3) 0;
+}
+
+.counter-action {
+  display: grid;
+  min-height: var(--touch-target-big);
+  padding: var(--space-3);
+  border: var(--border-width-strong) solid var(--color-accent);
+  border-radius: var(--radius-lg);
+  background: var(--color-accent);
+  color: var(--color-accent-text);
+  font: inherit;
+  font-size: var(--font-size-xl);
+  font-weight: var(--font-weight-heavy);
+  cursor: pointer;
+  touch-action: manipulation;
+  user-select: none;
+}
+
+.counter-action.missed {
+  background: transparent;
+  color: var(--color-accent);
+}
+
+.counter-action:disabled {
+  border-color: var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-muted);
+  cursor: default;
+}
+
+.counter-count {
+  font-size: var(--font-size-xxl);
+  font-variant-numeric: tabular-nums;
+}
+
+.counter-direct {
+  margin: var(--space-3) 0;
+}
+
+/* The hidden attribute wins over the display of buttons and panels (no !important allowed). */
+[hidden][hidden] {
+  display: none;
+}
+
+/* ---------- Workshop follow-up (spec § 8.6) ---------- */
+.tracking-race-actions {
+  position: sticky;
+  bottom: 0;
+  padding: var(--space-3) 0;
+  background: var(--color-bg);
+}

@@ -1,0 +1,66 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('entry.tracking.title') }}{% endblock %}
+
+{% block content %}
+    {% set nav_here = 'tracking' %}
+    {% include 'entry/_nav.html.twig' %}
+    <h1>{{ t('entry.tracking.title') }}</h1>
+
+    <nav class="chips" aria-label="{{ t('entry.tracking.title') }}">
+        {% for name in tabs %}
+            <a href="{{ url_for('entry-tracking', {workshop: workshop.id}) }}?tab={{ name }}" {% if name == tab and not query %}aria-current="page"{% endif %}>{{ t('entry.tracking.tab.' ~ name) }} ({{ counts[name] }})</a>
+        {% endfor %}
+    </nav>
+
+    <form method="get" class="check-in-search" role="search">
+        <label>{{ t('entry.tracking.search') }}
+            <input type="search" name="q" value="{{ query }}" autocomplete="off">
+        </label>
+        <button type="submit" class="button secondary">{{ t('check_in.search') }}</button>
+    </form>
+
+    {% if reason %}
+        <p class="flash error">{{ t(reason, {bib: query, query: query}) }}</p>
+    {% elseif rows is empty %}
+        <p class="meta">{{ t('entry.tracking.empty.' ~ tab) }}</p>
+    {% else %}
+        {% if race %}
+            {# Time workshop: tick 1 or 2 children, then start their race. #}
+            <form method="get" action="{{ url_for('entry-race', {workshop: workshop.id}) }}" class="tracking-race" data-max="{{ bibs_per_race }}">
+            <p class="meta">{{ t('entry.tracking.race_hint', {count: bibs_per_race}) }}</p>
+        {% endif %}
+        <div class="table-scroll">
+            <table>
+                <thead><tr>
+                    {% if race %}<th></th>{% endif %}
+                    <th class="num">{{ t('entry.bib') }}</th><th>{{ t('check_in.child') }}</th><th>{{ t('entry.tracking.event') }}</th>
+                    <th class="num">{{ t('entry.attempts_done') }}</th><th class="num">{{ t('entry.tracking.best') }}</th>
+                </tr></thead>
+                <tbody>
+                    {% for row in rows %}
+                        {% set child = row.child %}
+                        <tr>
+                            {% if race %}<td>{% if not row.finished %}<input type="checkbox" name="bibs[]" value="{{ child.bib }}" aria-label="{{ child.publicName() }}">{% endif %}</td>{% endif %}
+                            <td class="num"><a href="{{ url_for('entry-child', {workshop: workshop.id, bib: child.bib}) }}"><span class="bib">{{ child.bib }}</span></a></td>
+                            <td>
+                                <a href="{{ url_for('entry-child', {workshop: workshop.id, bib: child.bib}) }}">{{ child.publicName() }}</a>
+                                {% if not child.isPresent() %}<span class="badge muted">{{ t('entry.not_checked_in') }}</span>{% endif %}
+                                {% if row.to_check %}<span class="badge warning">{{ t('entry.to_check') }}</span>{% endif %}
+                            </td>
+                            <td>{{ event_label(row.variant) }}</td>
+                            <td class="num">{{ row.used }} / {{ row.variant.attempts }}</td>
+                            <td class="num">{% if row.best is not null %}{{ result(row.best, row.variant) }}{% elseif row.used > 0 %}{{ t('entry.foul') }}{% else %}–{% endif %}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if race %}
+            <div class="tracking-race-actions">
+                <button type="submit" name="mode" value="timer" class="button large">{{ t('entry.tracking.start_race') }}</button>
+            </div>
+            </form>
+        {% endif %}
+    {% endif %}
+{% endblock %}

@@ -31,6 +31,7 @@
   --font-size-xl: 1.3rem;
   --font-size-xxl: 1.75rem;
   --font-size-display: 2.5rem;
+  --font-size-clock: 4.5rem;
   --font-weight-normal: 400;
   --font-weight-strong: 600;
   --font-weight-heavy: 700;
@@ -53,6 +54,7 @@
   --border-width-strong: 2px;
   --accent-bar-width: 4px;
   --touch-target: 44px;
+  --touch-target-big: 88px;
   --content-width: 40rem;
   --content-width-wide: 64rem;
   --form-width: 26rem;

@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace LiveScoreTracker\Application;
 
 use LiveScoreTracker\Domain\Config\CompetitionConfig;
+use LiveScoreTracker\Domain\Config\Measure;
 use LiveScoreTracker\Domain\Config\Variant;
 use LiveScoreTracker\Domain\Config\Workshop;
 use LiveScoreTracker\Domain\Registration\Registration;
@@ -77,6 +78,35 @@ final class EntryDesk
     public function progress(Registration $child, Variant $variant): AttemptProgress
     {
         return new AttemptProgress($variant, $this->attempts->current($child->id, $variant->id()));
+    }
+
+    /**
+     * Time events: entered by race of 1 or 2 children, with the phone's timer or an external one (spec § 8.4).
+     */
+    public function isTimed(Workshop $workshop): bool
+    {
+        foreach ($workshop->variants as $variant) {
+            if ($variant->measure === Measure::Time) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    /**
+     * Children per race (1 or 2): the most any variant of the workshop allows.
+     */
+    public function bibsPerRace(Workshop $workshop): int
+    {
+        $bibs = 1;
+        foreach ($workshop->variants as $variant) {
+            if ($variant->measure === Measure::Time) {
+                $bibs = max($bibs, $variant->bibsPerTimer);
+            }
+        }
+
+        return min($bibs, 2);
     }
 
     /**

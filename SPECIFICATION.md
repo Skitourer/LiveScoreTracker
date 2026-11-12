@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.12 — 11 November 2026
+> Version 1.15 — 12 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -77,7 +77,7 @@ Having **at least 2 admins** is recommended, so that they can reset each other's
 | Check-in and check-out | ✅ | ✅ | | |
 | Enter/correct results — all events | ✅ | ✅ | | |
 | Enter/correct results — selected event | ✅ | ✅ | ✅ | |
-| Remaining bibs list (event) | ✅ | ✅ | ✅ | |
+| Workshop follow-up (remaining and done bibs) | ✅ | ✅ | ✅ | |
 | Workshop help page | ✅ | ✅ | ✅ | |
 | Monitoring screens (progress, missing events, checks) | ✅ | ✅ | | |
 | Results and scores per event/category, rankings | ✅ | ✅ | | |
@@ -232,7 +232,7 @@ Details:
 ### 6.3 Attendance statuses
 
 - **Absent**: registered but bib never handed out. Excluded from everything (entry lists, scoring, rankings); only appears in an "absentees" summary.
-- **Present**: bib handed out. Appears in the workshops' "remaining bibs" lists.
+- **Present**: bib handed out. Appears in the workshops' "Follow-up" lists.
 
 ---
 
@@ -257,7 +257,6 @@ Details:
 | `plausible_range` | plausible values (warning if out of range) | `[5.00, 12.00]` |
 | `max_value` | (score/counter) maximum possible | 30 |
 | `modifiers` | list of bonuses/penalties (§ 7.5) | goal scored: −3 s |
-| `built_in_timer` | `true`/`false` (§ 8.4) | `true` |
 | `bibs_per_timer` | 1 or 2 (§ 8.4) | 2 |
 | `label` | text shown during entry (translation key or text) | "30 m" |
 
@@ -319,7 +318,7 @@ Details:
 - A result saved with a confirmed warning is flagged **"to check"** (checks dashboard, step 8).
 - Each entry carries a unique id created with the form: sending it twice (double tap, slow network) saves it once.
 - A child not checked in can be **marked present** from the entry screen, after confirmation.
-- Timed and counter events are entered as a standard result for now (time measured with an external stopwatch, total points); the built-in timer and the counter come in step 6.
+- Time events are entered by **race** (§ 8.4) and counter events with the **counter** (§ 8.5). The single-child screen remains available to view and correct a child's attempts.
 
 ### 8.3 Correction
 
@@ -347,7 +346,17 @@ The timer runs **on the phone** and works offline. The Finish button is only act
 
 **Manual timer mode**: the referee enters 1 or 2 bibs, then each child's time, measured with an external stopwatch.
 
-Both modes are always available. The configuration sets the default mode.
+Both modes are always available. The **built-in timer is offered by default** on every time workshop (the former `built_in_timer` setting is ignored).
+
+Details:
+- On a time workshop, the "bib" screen shows the race fields (the 2nd bib is optional) and two buttons: **Built-in timer** (first, main button) and **External stopwatch**. A separate field opens a bib's attempts to view or correct them.
+- Checks before the start: unknown bib, wrong level or bib typed twice → refused. Two children on different variants (e.g. a CP child on 30 m and a CM1 child on 40 m) → allowed, with a clearly visible message.
+- The time is taken **when the button is touched** (not when released), then rounded down to the hundredth, as on a stopwatch.
+- The first time goes to the first bib typed; **Swap** exchanges the two times. With a "Did not finish", the only time goes to the other child.
+- The race is approved **as a whole**: nothing is saved until both times are readable and the warnings (§ 10.1) confirmed.
+- Each time records where it came from: **built-in timer**, or **built-in timer, time edited by hand** when the referee changed it before approval (shown in the attempt history).
+- Leaving the page during a race asks for confirmation.
+- Without JavaScript, the screen works as the external stopwatch mode.
 
 ### 8.5 Counter-mode entry
 
@@ -359,9 +368,26 @@ Both modes are always available. The configuration sets the default mode.
 
 Direct entry of the total is possible as a fallback.
 
-### 8.6 Remaining bibs
+Details:
+- A **Stop now** button ends the count early (incident).
+- The summary shows the count of each action in **editable** fields, with the total recomputed; it is also the correction screen.
+- The saved result is the total of the points, with the **detail of the actions** (e.g. "Basket ×3, Rim ×2, Board ×1"), shown in the attempt history.
+- More shots than allowed → warning (§ 10.1).
+- Sound and vibration depend on the phone (no vibration on iPhone; no sound when the phone is on silent).
+- Without JavaScript, the referee types the count of each action.
 
-Screen listing, for the chosen workshop, the **present children** of the relevant levels who **have not finished** the event (no attempt, or attempts left), with the number of attempts already made. Sorted by bib, searchable.
+### 8.6 Workshop follow-up
+
+**"Follow-up"** screen listing, for the chosen workshop, the **registered children** of the relevant levels, in tabs showing their number:
+- **To do**: checked in, with attempts left;
+- **Started**: at least one attempt made, but not all;
+- **Finished**: all attempts made;
+- **Not checked in**: not yet arrived at reception;
+- **All**.
+
+One row per child: bib, first name, event (e.g. 30 m / 40 m), attempts made out of attempts allowed, best result, "not checked in" and "to check" badges. Sorted by bib. The search (bib or first name) covers every child; a bib not found gives the reason (unknown, wrong level).
+
+On a time workshop, a checkbox per unfinished child and a **"Start the race"** button open the race (§ 8.4) of the 1 or 2 ticked children directly.
 
 ### 8.7 Workshop help page
 
@@ -476,6 +502,8 @@ Checks are **non-blocking warnings** unless stated otherwise. The affected resul
 | Value far from the category median (once some results exist) | Warning |
 | **Probable wrong distance**: time closer to the other variant's distribution (e.g. a CE1 time typical of the 40 m) | Warning "Correct distance?" |
 | Probable duplicate (same bib, same event, same value within a few seconds) | Warning; deduplication during sync |
+| Counter mode: more shots than allowed | Warning |
+| Race: same bib typed twice | **Blocking** |
 
 ### 10.2 Global checks
 
@@ -917,7 +945,7 @@ Only **fictitious data** is allowed (example configuration, test data sets, demo
 | Backups | Production server + **encrypted** copy on Drive | Repository |
 | Imported files (spreadsheets) | Processed in memory then deleted | Repository, disk after import |
 
-- The **test site** runs on **generated fictitious data** by default (a command generates a test set: ~100 fictitious children, realistic random results). Real data is only copied there when strictly necessary, then deleted.
+- The **test site** runs on **generated fictitious data** by default (a command generates a test set: ~100 fictitious children, realistic random results). A **Test data** page (admin, absent in production) replaces every registration and result by 100 fictitious children ready for the start of the competition: 95 with a bib including 90 present (bib handed out), 5 on the waiting list; typing "EFFACER" confirms it. Real data is only copied there when strictly necessary, then deleted.
 - The **data directory** is **outside the public web directory** and set by an environment variable. Deployment **never touches** this directory (explicit exclusion in the deployment script).
 
 ### 25.3 Technical safeguards
@@ -1003,7 +1031,6 @@ help = "sprint.md"
   attempts = 1
   foul_mode = "strict"
   plausible_range = [4.00, 12.00]
-  built_in_timer = false
   bibs_per_timer = 2
 
   [[workshops.variants]]
@@ -1015,7 +1042,6 @@ help = "sprint.md"
   attempts = 1
   foul_mode = "strict"
   plausible_range = [5.00, 14.00]
-  built_in_timer = false
   bibs_per_timer = 2
 
 [[workshops]]
@@ -1076,7 +1102,6 @@ help = "hockey.md"
   attempts = 2
   foul_mode = "strict"
   plausible_range = [5.00, 60.00]
-  built_in_timer = true
   bibs_per_timer = 1
   modifiers = [ { id = "goal_scored", value = -3.00 } ]
 
@@ -1088,7 +1113,6 @@ help = "hockey.md"
   attempts = 2
   foul_mode = "strict"
   plausible_range = [5.00, 60.00]
-  built_in_timer = true
   bibs_per_timer = 1
   modifiers = [ { id = "goal_scored", value = -3.00 } ]
 
@@ -1104,7 +1128,6 @@ help = "football.md"
   attempts = 1
   foul_mode = "strict"
   plausible_range = [10.00, 180.00]
-  built_in_timer = true
   bibs_per_timer = 1
 
 [[workshops]]
@@ -1119,7 +1142,6 @@ help = "obstacle_course.md"
   attempts = 1
   foul_mode = "strict"
   plausible_range = [10.00, 180.00]
-  built_in_timer = true
   bibs_per_timer = 1
 
 [[workshops]]

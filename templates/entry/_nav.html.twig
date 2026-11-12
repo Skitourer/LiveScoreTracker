@@ -1,7 +1,8 @@
 <nav class="entry-nav">
     <a class="entry-workshop" href="{{ url_for('entry-workshop', {workshop: workshop.id}) }}">{{ t('workshop.' ~ workshop.id ~ '.name') }}</a>
     <span class="toolbar">
-        {% if can('view_remaining_bibs') %}<a class="button small secondary" href="{{ url_for('entry-remaining', {workshop: workshop.id}) }}">{{ t('entry.remaining') }}</a>{% endif %}
+        {% if nav_here is not defined or nav_here != 'bib' %}<a class="button small" href="{{ url_for('entry-workshop', {workshop: workshop.id}) }}">{{ t('entry.back_to_entry') }}</a>{% endif %}
+        {% if can('view_remaining_bibs') %}<a class="button small secondary" href="{{ url_for('entry-tracking', {workshop: workshop.id}) }}">{{ t('entry.tracking.title') }}</a>{% endif %}
         {% if can('view_workshop_help') %}<a class="button small secondary" href="{{ url_for('entry-help', {workshop: workshop.id}) }}">{{ t('entry.help') }}</a>{% endif %}
         <a class="button small secondary" href="{{ url_for('entry') }}?change=1">{{ t('entry.change_workshop') }}</a>
     </span>

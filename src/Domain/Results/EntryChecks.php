@@ -18,6 +18,7 @@ final class EntryChecks
     public const IMPLAUSIBLE = 'implausible';
     public const ABOVE_MAX = 'above_max';
     public const DUPLICATE = 'duplicate';
+    public const TOO_MANY_SHOTS = 'too_many_shots';
 
     /** Same value for the same child within this delay: probably entered twice. */
     public const DUPLICATE_SECONDS = 120;

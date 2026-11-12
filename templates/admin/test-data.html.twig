@@ -1,0 +1,17 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('test_data.title') }}{% endblock %}
+
+{% block content %}
+    <h1>{{ t('test_data.title') }}</h1>
+    <p class="lead">{{ t('test_data.lead') }}</p>
+    <p class="notice warning">{{ t('test_data.warning') }}</p>
+    <form method="post" class="form" data-confirm="{{ t('test_data.confirm') }}">
+        {{ csrf_field() }}
+        <label>{{ t('test_data.type_word', {word: word}) }}
+            <input type="text" name="confirmation" autocomplete="off" required>
+        </label>
+        <button type="submit" class="button danger">{{ t('test_data.button') }}</button>
+    </form>
+    <p><a href="{{ url_for('admin-phase') }}">{{ t('phase.title') }}</a></p>
+{% endblock %}

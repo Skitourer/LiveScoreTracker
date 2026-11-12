@@ -49,7 +49,6 @@ help = "sprint.md"
   attempts = 1
   foul_mode = "strict"
   plausible_range = [4.00, 12.00]
-  built_in_timer = false
   bibs_per_timer = 2
 
   [[workshops.variants]]
@@ -61,7 +60,6 @@ help = "sprint.md"
   attempts = 1
   foul_mode = "strict"
   plausible_range = [5.00, 14.00]
-  built_in_timer = false
   bibs_per_timer = 2
 
 [[workshops]]
@@ -122,7 +120,6 @@ help = "hockey.md"
   attempts = 2
   foul_mode = "strict"
   plausible_range = [5.00, 60.00]
-  built_in_timer = true
   bibs_per_timer = 1
   modifiers = [ { id = "goal_scored", value = -3.00 } ]
 
@@ -134,7 +131,6 @@ help = "hockey.md"
   attempts = 2
   foul_mode = "strict"
   plausible_range = [5.00, 60.00]
-  built_in_timer = true
   bibs_per_timer = 1
   modifiers = [ { id = "goal_scored", value = -3.00 } ]
 
@@ -150,7 +146,6 @@ help = "football.md"
   attempts = 1
   foul_mode = "strict"
   plausible_range = [10.00, 180.00]
-  built_in_timer = true
   bibs_per_timer = 1
 
 [[workshops]]
@@ -165,7 +160,6 @@ help = "obstacle_course.md"
   attempts = 1
   foul_mode = "strict"
   plausible_range = [10.00, 180.00]
-  built_in_timer = true
   bibs_per_timer = 1
 
 [[workshops]]

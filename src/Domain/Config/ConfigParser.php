@@ -294,6 +294,8 @@ final class ConfigParser
      */
     private function variant(array $v, string $path, string $workshopId, array $groups, ScoringRules $globalScoring): ?Variant
     {
+        // "built_in_timer" is no longer used (the built-in timer is always offered first, spec § 8.4);
+        // it stays accepted so that existing configuration files remain valid.
         $this->allowKeys($v, $path, [
             'group', 'label', 'measure', 'better', 'time_format', 'attempts', 'foul_mode', 'plausible_range',
             'max_value', 'modifiers', 'built_in_timer', 'bibs_per_timer', 'limit', 'actions',
@@ -362,7 +364,6 @@ final class ConfigParser
             plausibleRange: $this->range($v, $path, $measure),
             maxValue: $maxValue,
             modifiers: $isCounter ? $this->noneAllowed($v, 'modifiers', $path) : $this->modifiers($v, $path, $measure),
-            builtInTimer: $this->bool($v, 'built_in_timer', $path, false),
             bibsPerTimer: $bibsPerTimer,
             limit: $isCounter ? $this->limit($v, $path) : $this->noLimit($v, $path),
             actions: $isCounter ? $this->actions($v, $path) : $this->noneAllowed($v, 'actions', $path),
