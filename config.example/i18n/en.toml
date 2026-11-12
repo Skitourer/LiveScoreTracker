@@ -804,13 +804,13 @@ timer_edited = "built-in timer, time edited by hand"
 
 [test_data]
 title = "Test data"
-lead = "Replaces every registration by 100 fictitious children ready for the start of the competition: 95 registered with a bib, 5 on the waiting list, nobody checked in yet, no result."
+lead = "Replaces every registration by 100 fictitious children ready for the start of the competition: 95 registered with a bib, 90 of them already present (bib handed out), 5 on the waiting list, no result."
 warning = "Every registration, the registration history and every result are erased. Accounts, configuration, phase and log are kept. This page does not exist on the production site."
 type_word = "To confirm, type {word}"
 button = "Erase and recreate the test data"
 confirm = "Erase every registration and every result?"
 not_confirmed = "Type {word} to confirm."
-done = "Test data recreated: {registered} children with a bib, {waitlisted} on the waiting list."
+done = "Test data recreated: {registered} children with a bib, {present} of them present, {waitlisted} on the waiting list."
 
 [entry.tracking]
 title = "Follow-up"

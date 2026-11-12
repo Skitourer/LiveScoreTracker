@@ -37,7 +37,7 @@ final class TestDataTest extends TestCase
         self::assertStringContainsString('Tapez EFFACER', $admin->get('/admin/test-data')->getBody()->__toString());
 
         $admin->post('/admin/test-data', ['confirmation' => 'effacer']);
-        self::assertStringContainsString('95 enfants avec un dossard, 5 en liste', $admin->get('/admin/test-data')->getBody()->__toString());
+        self::assertStringContainsString('95 enfants avec un dossard dont 90 présents, 5 en liste', $admin->get('/admin/test-data')->getBody()->__toString());
         $admin->get('/registrations');
         self::assertSame(5, substr_count($admin->lastBody, 'liste d&#039;attente</span>'));
 

@@ -945,7 +945,7 @@ Seules des **données fictives** sont autorisées (exemples de configuration, je
 | Sauvegardes | Serveur de production + copie **chiffrée** sur Drive | Dépôt |
 | Fichiers importés (Excel) | Traités en mémoire puis supprimés | Dépôt, disque après import |
 
-- Le **site d'essai** fonctionne par défaut avec des **données fictives générées** (commande de génération d'un jeu de test : ~100 enfants fictifs, résultats aléatoires réalistes). Une page **Données de test** (admin, absente en production) remplace toutes les inscriptions et tous les résultats par 100 enfants fictifs prêts pour le début de la compétition : 95 avec un dossard, 5 en liste d'attente, personne pointé ; il faut taper « EFFACER » pour confirmer. Des données réelles n'y sont copiées qu'en cas de nécessité ponctuelle, puis effacées.
+- Le **site d'essai** fonctionne par défaut avec des **données fictives générées** (commande de génération d'un jeu de test : ~100 enfants fictifs, résultats aléatoires réalistes). Une page **Données de test** (admin, absente en production) remplace toutes les inscriptions et tous les résultats par 100 enfants fictifs prêts pour le début de la compétition : 95 avec un dossard dont 90 présents (dossard remis), 5 en liste d'attente ; il faut taper « EFFACER » pour confirmer. Des données réelles n'y sont copiées qu'en cas de nécessité ponctuelle, puis effacées.
 - Le **dossier de données** est situé **hors du dossier public web** et désigné par une variable d'environnement. Le déploiement **ne touche jamais** ce dossier (exclusion explicite dans le script de déploiement).
 
 ### 25.3 Garde-fous techniques

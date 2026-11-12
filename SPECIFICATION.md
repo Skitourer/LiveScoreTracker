@@ -945,7 +945,7 @@ Only **fictitious data** is allowed (example configuration, test data sets, demo
 | Backups | Production server + **encrypted** copy on Drive | Repository |
 | Imported files (spreadsheets) | Processed in memory then deleted | Repository, disk after import |
 
-- The **test site** runs on **generated fictitious data** by default (a command generates a test set: ~100 fictitious children, realistic random results). A **Test data** page (admin, absent in production) replaces every registration and result by 100 fictitious children ready for the start of the competition: 95 with a bib, 5 on the waiting list, nobody checked in; typing "EFFACER" confirms it. Real data is only copied there when strictly necessary, then deleted.
+- The **test site** runs on **generated fictitious data** by default (a command generates a test set: ~100 fictitious children, realistic random results). A **Test data** page (admin, absent in production) replaces every registration and result by 100 fictitious children ready for the start of the competition: 95 with a bib including 90 present (bib handed out), 5 on the waiting list; typing "EFFACER" confirms it. Real data is only copied there when strictly necessary, then deleted.
 - The **data directory** is **outside the public web directory** and set by an environment variable. Deployment **never touches** this directory (explicit exclusion in the deployment script).
 
 ### 25.3 Technical safeguards

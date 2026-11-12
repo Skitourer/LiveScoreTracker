@@ -13,7 +13,7 @@ use Slim\Exception\HttpNotFoundException;
 
 /**
  * Test sites only: replaces every registration and result by 100 fictitious
- * children ready for the start of the competition (95 with a bib). The admin
+ * children ready for the start of the competition (95 with a bib, 90 present). The admin
  * types a confirmation word, as everything is erased. Not available in production.
  */
 final class TestDataAction

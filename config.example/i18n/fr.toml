@@ -804,13 +804,13 @@ timer_edited = "chrono intégré, temps modifié à la main"
 
 [test_data]
 title = "Données de test"
-lead = "Remplace toutes les inscriptions par 100 enfants fictifs prêts pour le début de la compétition : 95 inscrits avec un dossard, 5 en liste d'attente, personne n'est encore pointé, aucun résultat."
+lead = "Remplace toutes les inscriptions par 100 enfants fictifs prêts pour le début de la compétition : 95 inscrits avec un dossard dont 90 déjà présents (dossard remis), 5 en liste d'attente, aucun résultat."
 warning = "Toutes les inscriptions, l'historique des inscriptions et tous les résultats sont effacés. Les comptes, la configuration, la phase et le journal sont conservés. Cette page n'existe pas sur le site de production."
 type_word = "Pour confirmer, tapez {word}"
 button = "Effacer et recréer les données de test"
 confirm = "Effacer toutes les inscriptions et tous les résultats ?"
 not_confirmed = "Tapez {word} pour confirmer."
-done = "Données de test recréées : {registered} enfants avec un dossard, {waitlisted} en liste d'attente."
+done = "Données de test recréées : {registered} enfants avec un dossard dont {present} présents, {waitlisted} en liste d'attente."
 
 [entry.tracking]
 title = "Suivi"
