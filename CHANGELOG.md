@@ -26,5 +26,6 @@ Each step of the development plan (specification § 23) is one or more pull requ
 
 ### Fixed
 
+- License year set to 2026, the year the project was published.
 - Exhausted attempts are blocked; every "Arrival" tap gives feedback and the last arrival can be undone (#12).
 - The test deployment now includes the example help and public pages (#14).

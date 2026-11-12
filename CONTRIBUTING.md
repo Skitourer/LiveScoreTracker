@@ -52,7 +52,7 @@ Useful commands:
 ## Pull requests
 
 1. Create a branch from `main`: `feat/…` for a feature, `fix/…` for a fix, `docs/…` for documentation.
-2. Keep the pull request focused on one subject, with tests and, when behavior changes, the specification update.
+2. Keep the pull request focused on one subject, with tests and the documentation it affects: the specification when behavior changes, `docs/development/` when the architecture or a mechanism described there changes, the README when setup or features change, and a line in `CHANGELOG.md` (section "Unreleased").
 3. Run `composer qa` and `npm run lint` before pushing.
 4. Fill in the pull request template: what changes, how to try it, what was checked.
 5. Continuous integration must be green before merging. Branches `feat/**` and `fix/**` of the main repository are also deployed to the test site, on fictitious data, so that the maintainer can try them.
