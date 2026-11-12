@@ -26,6 +26,8 @@ use LiveScoreTracker\Action\Auth\TwoFactorSetupAction;
 use LiveScoreTracker\Action\DashboardAction;
 use LiveScoreTracker\Action\Entry\EntryBibAction;
 use LiveScoreTracker\Action\Entry\EntryChildAction;
+use LiveScoreTracker\Action\Entry\EntryPackAction;
+use LiveScoreTracker\Action\Entry\EntrySyncAction;
 use LiveScoreTracker\Action\Entry\RaceAction;
 use LiveScoreTracker\Action\Entry\TrackingAction;
 use LiveScoreTracker\Action\Entry\WorkshopChoiceAction;
@@ -185,6 +187,8 @@ final class Kernel
         $app->get('/entry/{workshop:[a-z0-9_]+}', EntryBibAction::class)->setName('entry-workshop')->add($guard(Permission::EnterResultsChosenEvent));
         $app->get('/entry/{workshop:[a-z0-9_]+}/tracking', TrackingAction::class)->setName('entry-tracking')->add($guard(Permission::ViewRemainingBibs));
         $app->get('/entry/{workshop:[a-z0-9_]+}/help', WorkshopHelpAction::class)->setName('entry-help')->add($guard(Permission::ViewWorkshopHelp));
+        $app->get('/entry/{workshop:[a-z0-9_]+}/pack', EntryPackAction::class)->setName('entry-pack')->add($guard(Permission::EnterResultsChosenEvent));
+        $app->post('/entry/{workshop:[a-z0-9_]+}/sync', EntrySyncAction::class)->setName('entry-sync')->add($guard(Permission::EnterResultsChosenEvent));
         $app->map(['GET', 'POST'], '/entry/{workshop:[a-z0-9_]+}/race', RaceAction::class)->setName('entry-race')->add($guard(Permission::EnterResultsChosenEvent));
         $app->map(['GET', 'POST'], '/entry/{workshop:[a-z0-9_]+}/{bib:[0-9]+}', EntryChildAction::class)->setName('entry-child')->add($guard(Permission::EnterResultsChosenEvent));
 
@@ -271,6 +275,8 @@ final class Kernel
                     self::service($c, RequestContext::class),
                     $settings->timezone,
                 ));
+                // Versions the offline cache of the phones (spec § 8.8).
+                $twig->getEnvironment()->addGlobal('app_revision', self::service($c, BuildInfo::class)->revision);
 
                 return $twig;
             },

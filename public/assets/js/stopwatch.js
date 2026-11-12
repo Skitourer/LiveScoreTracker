@@ -12,9 +12,9 @@
  */
 import { clockText, refreshInterpreted, toDigits } from './result-input.js';
 
-export const initStopwatch = () => {
-  const panel = document.querySelector('section.stopwatch');
-  const form = document.querySelector('form.race-form');
+export const initStopwatch = (root = document, { signal } = {}) => {
+  const panel = root.querySelector('section.stopwatch');
+  const form = root.querySelector('form.race-form');
   if (!panel || !form) {
     return;
   }
@@ -196,11 +196,16 @@ export const initStopwatch = () => {
   form.addEventListener('submit', () => {
     submitting = true;
   });
-  window.addEventListener('beforeunload', (event) => {
-    if (!submitting && (state === 'running' || (state === 'review' && arrivals.length > 0))) {
-      event.preventDefault();
-    }
-  });
+  signal?.addEventListener('abort', () => cancelAnimationFrame(frame));
+  window.addEventListener(
+    'beforeunload',
+    (event) => {
+      if (!submitting && (state === 'running' || (state === 'review' && arrivals.length > 0))) {
+        event.preventDefault();
+      }
+    },
+    { signal },
+  );
 
   show();
 };

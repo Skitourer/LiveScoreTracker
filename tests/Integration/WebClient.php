@@ -115,15 +115,33 @@ final class WebClient
     }
 
     /**
+     * A JSON request as sent by the phones' scripts, with the security token in a header.
+     *
+     * @param array<string, mixed> $data
+     */
+    public function postJson(string $path, array $data, string $csrf): ResponseInterface
+    {
+        return $this->request('POST', $path, json: $data, headers: ['X-CSRF-Token' => $csrf]);
+    }
+
+    /**
      * @param array<string, string>                $form
      * @param array<string, UploadedFileInterface> $files
+     * @param array<string, mixed>|null            $json
+     * @param array<string, string>                $headers
      */
-    public function request(string $method, string $path, array $form = [], array $files = []): ResponseInterface
+    public function request(string $method, string $path, array $form = [], array $files = [], ?array $json = null, array $headers = []): ResponseInterface
     {
         $request = (new ServerRequestFactory())->createServerRequest($method, 'https://lst.example.test' . $path, ['REMOTE_ADDR' => $this->ip]);
         parse_str((string) parse_url($path, PHP_URL_QUERY), $query);
         $request = $request->withQueryParams($query)->withCookieParams($this->cookies)->withHeader('User-Agent', 'WebClient test');
-        if ($method === 'POST') {
+        foreach ($headers as $name => $value) {
+            $request = $request->withHeader($name, $value);
+        }
+        if ($json !== null) {
+            $request = $request->withHeader('Content-Type', 'application/json')
+                ->withBody((new StreamFactory())->createStream(json_encode($json, JSON_THROW_ON_ERROR)));
+        } elseif ($method === 'POST') {
             $request = $request->withParsedBody($form)->withUploadedFiles($files)
                 ->withHeader('Content-Type', $files === [] ? 'application/x-www-form-urlencoded' : 'multipart/form-data; boundary=test');
         }

@@ -32,9 +32,9 @@ const vibrate = (pattern) => {
 const minutesSeconds = (seconds) =>
   `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
 
-export const initCounter = () => {
-  const panel = document.querySelector('div.counter');
-  const summary = document.querySelector('fieldset.counter-counts');
+export const initCounter = (root = document, { signal } = {}) => {
+  const panel = root.querySelector('div.counter');
+  const summary = root.querySelector('fieldset.counter-counts');
   if (!panel || !summary) {
     return;
   }
@@ -180,11 +180,16 @@ export const initCounter = () => {
   panel.closest('form')?.addEventListener('submit', () => {
     state = 'submitted';
   });
-  window.addEventListener('beforeunload', (event) => {
-    if (state === 'running' || (state === 'ended' && history.length > 0)) {
-      event.preventDefault();
-    }
-  });
+  signal?.addEventListener('abort', () => cancelAnimationFrame(frame));
+  window.addEventListener(
+    'beforeunload',
+    (event) => {
+      if (state === 'running' || (state === 'ended' && history.length > 0)) {
+        event.preventDefault();
+      }
+    },
+    { signal },
+  );
 
   panel.hidden = false;
   render();

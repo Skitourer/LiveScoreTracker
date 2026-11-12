@@ -27,7 +27,7 @@
     {% else %}
         {% if race %}
             {# Time workshop: tick 1 or 2 children, then start their race. #}
-            <form method="get" action="{{ url_for('entry-race', {workshop: workshop.id}) }}" class="tracking-race" data-max="{{ bibs_per_race }}">
+            <form method="get" action="{{ url_for('entry-race', {workshop: workshop.id}) }}" class="tracking-race" data-max="{{ bibs_per_race }}" data-app="{{ url_for('entry-workshop', {workshop: workshop.id}) }}">
             <p class="meta">{{ t('entry.tracking.race_hint', {count: bibs_per_race}) }}</p>
         {% endif %}
         <div class="table-scroll">

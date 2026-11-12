@@ -81,8 +81,8 @@ export const refreshInterpreted = (input) => {
   }
 };
 
-export const initResultInputs = () => {
-  for (const input of document.querySelectorAll('input.result-input')) {
+export const initResultInputs = (root = document) => {
+  for (const input of root.querySelectorAll('input.result-input')) {
     input.addEventListener('input', () => refreshInterpreted(input));
   }
 };

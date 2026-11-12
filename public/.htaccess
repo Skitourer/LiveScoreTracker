@@ -19,3 +19,13 @@ Options -Indexes
     Header always set Referrer-Policy "same-origin"
     Header always set X-Frame-Options "DENY"
 </IfModule>
+
+# Installable application (spec § 8.8): manifest type, and the service worker always checked for updates.
+<IfModule mod_mime.c>
+    AddType application/manifest+json .webmanifest
+</IfModule>
+<IfModule mod_headers.c>
+    <Files "sw.js">
+        Header set Cache-Control "no-cache"
+    </Files>
+</IfModule>
