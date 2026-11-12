@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.14 — 12 November 2026
+> Version 1.15 — 12 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -77,7 +77,7 @@ Having **at least 2 admins** is recommended, so that they can reset each other's
 | Check-in and check-out | ✅ | ✅ | | |
 | Enter/correct results — all events | ✅ | ✅ | | |
 | Enter/correct results — selected event | ✅ | ✅ | ✅ | |
-| Remaining bibs list (event) | ✅ | ✅ | ✅ | |
+| Workshop follow-up (remaining and done bibs) | ✅ | ✅ | ✅ | |
 | Workshop help page | ✅ | ✅ | ✅ | |
 | Monitoring screens (progress, missing events, checks) | ✅ | ✅ | | |
 | Results and scores per event/category, rankings | ✅ | ✅ | | |
@@ -232,7 +232,7 @@ Details:
 ### 6.3 Attendance statuses
 
 - **Absent**: registered but bib never handed out. Excluded from everything (entry lists, scoring, rankings); only appears in an "absentees" summary.
-- **Present**: bib handed out. Appears in the workshops' "remaining bibs" lists.
+- **Present**: bib handed out. Appears in the workshops' "Follow-up" lists.
 
 ---
 
@@ -376,9 +376,18 @@ Details:
 - Sound and vibration depend on the phone (no vibration on iPhone; no sound when the phone is on silent).
 - Without JavaScript, the referee types the count of each action.
 
-### 8.6 Remaining bibs
+### 8.6 Workshop follow-up
 
-Screen listing, for the chosen workshop, the **present children** of the relevant levels who **have not finished** the event (no attempt, or attempts left), with the number of attempts already made. Sorted by bib, searchable.
+**"Follow-up"** screen listing, for the chosen workshop, the **registered children** of the relevant levels, in tabs showing their number:
+- **To do**: checked in, with attempts left;
+- **Started**: at least one attempt made, but not all;
+- **Finished**: all attempts made;
+- **Not checked in**: not yet arrived at reception;
+- **All**.
+
+One row per child: bib, first name, event (e.g. 30 m / 40 m), attempts made out of attempts allowed, best result, "not checked in" and "to check" badges. Sorted by bib. The search (bib or first name) covers every child; a bib not found gives the reason (unknown, wrong level).
+
+On a time workshop, a checkbox per unfinished child and a **"Start the race"** button open the race (§ 8.4) of the 1 or 2 ticked children directly.
 
 ### 8.7 Workshop help page
 

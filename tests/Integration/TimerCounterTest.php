@@ -60,7 +60,7 @@ final class TimerCounterTest extends TestCase
     public function testEveryEntryScreenLeadsBackToTheWorkshopEntry(): void
     {
         $back = 'class="button small" href="/entry/sprint">Saisie</a>';
-        foreach (['/entry/sprint/remaining', '/entry/sprint/1', '/entry/sprint/race?bib1=1', '/entry/sprint/help'] as $page) {
+        foreach (['/entry/sprint/tracking', '/entry/sprint/1', '/entry/sprint/race?bib1=1', '/entry/sprint/help'] as $page) {
             $this->admin->get($page);
             self::assertStringContainsString($back, $this->admin->lastBody, $page);
         }
@@ -123,6 +123,24 @@ final class TimerCounterTest extends TestCase
         self::assertStringContainsString('<strong>17,00 s</strong>', $this->admin->lastBody);
         self::assertStringContainsString('Essais terminés (2/2)', $this->admin->lastBody);
         self::assertStringNotContainsString('chrono intégré', $this->admin->lastBody, 'Typed times are not marked as timed.');
+    }
+
+    public function testRaceFromTheFollowUpList(): void
+    {
+        $this->admin->get('/entry/sprint/tracking');
+        self::assertStringContainsString('name="bibs[]" value="1"', $this->admin->lastBody);
+        self::assertStringContainsString('Lancer la course', $this->admin->lastBody);
+        $this->admin->get('/entry/sprint/race?bibs[]=1&bibs[]=2&mode=timer');
+        self::assertStringContainsString('Zoé M.', $this->admin->lastBody);
+        self::assertStringContainsString('Hugo D.', $this->admin->lastBody);
+        self::assertStringContainsString('name="bib2" value="2"', $this->admin->lastBody);
+
+        $this->admin->get('/entry/sprint/race?bibs[]=1&bibs[]=2&bibs[]=3');
+        self::assertStringContainsString('au plus 2 enfant', $this->admin->get('/entry/sprint/tracking')->getBody()->__toString());
+
+        // Not a time workshop: no ticking.
+        $this->admin->get('/entry/long_jump/tracking');
+        self::assertStringNotContainsString('name="bibs[]"', $this->admin->lastBody);
     }
 
     public function testRaceBibsAreCheckedBeforeTheStart(): void

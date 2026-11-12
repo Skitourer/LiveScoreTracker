@@ -830,3 +830,11 @@ pre.details {
 [hidden][hidden] {
   display: none;
 }
+
+/* ---------- Workshop follow-up (spec § 8.6) ---------- */
+.tracking-race-actions {
+  position: sticky;
+  bottom: 0;
+  padding: var(--space-3) 0;
+  background: var(--color-bg);
+}

@@ -6,6 +6,7 @@
 import { initCounter } from './counter.js';
 import { initResultInputs } from './result-input.js';
 import { initStopwatch } from './stopwatch.js';
+import { initTrackingRace } from './tracking.js';
 
 document.documentElement.classList.add('js');
 
@@ -24,6 +25,7 @@ document.addEventListener('submit', (event) => {
 initResultInputs();
 initStopwatch();
 initCounter();
+initTrackingRace();
 
 /**
  * Keep the screen on while entering results (spec § 8.1), where the browser allows it.

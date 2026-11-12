@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.14 — 12 novembre 2026
+> Version 1.15 — 12 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -77,7 +77,7 @@ Il est recommandé d'avoir **au moins 2 admins**, pour permettre la réinitialis
 | Émargement entrée et sortie | ✅ | ✅ | | |
 | Saisie/correction de résultats — toutes épreuves | ✅ | ✅ | | |
 | Saisie/correction de résultats — épreuve choisie | ✅ | ✅ | ✅ | |
-| Liste des dossards restants (épreuve) | ✅ | ✅ | ✅ | |
+| Suivi de l'atelier (dossards restants, passés) | ✅ | ✅ | ✅ | |
 | Page d'aide de l'atelier | ✅ | ✅ | ✅ | |
 | Écrans de suivi (avancement, épreuves manquantes, contrôles) | ✅ | ✅ | | |
 | Résultats et scores par épreuve/catégorie, classements | ✅ | ✅ | | |
@@ -232,7 +232,7 @@ Précisions :
 ### 6.3 Statuts de présence
 
 - **Absent** : inscrit mais dossard jamais remis. Il est exclu de tout (listes de passage, barèmes, classements) et n'apparaît que dans un récapitulatif « absents ».
-- **Présent** : dossard remis. Il apparaît dans les listes « dossards restants » des ateliers.
+- **Présent** : dossard remis. Il apparaît dans les listes « Suivi » des ateliers.
 
 ---
 
@@ -376,9 +376,18 @@ Précisions :
 - Le son et la vibration dépendent du téléphone (pas de vibration sur iPhone ; pas de son si le téléphone est en silencieux).
 - Sans JavaScript, l'arbitre tape directement le nombre de chaque action.
 
-### 8.6 Dossards restants
+### 8.6 Suivi de l'atelier
 
-Écran listant, pour l'atelier choisi, les **enfants présents** des niveaux concernés qui **n'ont pas terminé** l'épreuve (aucun essai, ou essais restants), avec le nombre d'essais déjà faits. Tri par dossard, recherche.
+Écran **« Suivi »** listant, pour l'atelier choisi, les **enfants inscrits** des niveaux concernés, répartis en onglets avec leur nombre :
+- **À faire** : pointés, avec des essais restants ;
+- **En cours** : au moins un essai fait, mais pas tous ;
+- **Terminés** : tous les essais faits ;
+- **Non pointés** : pas encore arrivés à l'accueil ;
+- **Tous**.
+
+Une ligne par enfant : dossard, prénom, épreuve (ex. 30 m / 40 m), essais faits sur essais permis, meilleur résultat, badges « non pointé » et « à vérifier ». Tri par dossard. La recherche (dossard ou prénom) porte sur tous les enfants ; un dossard introuvable donne la raison (inconnu, pas du bon niveau).
+
+Sur un atelier à temps, une case à cocher par enfant non terminé et un bouton **« Lancer la course »** ouvrent directement la course (§ 8.4) des 1 ou 2 enfants cochés.
 
 ### 8.7 Page d'aide de l'atelier
 

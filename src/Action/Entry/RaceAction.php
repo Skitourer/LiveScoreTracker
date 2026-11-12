@@ -66,7 +66,19 @@ final class RaceAction
             // The built-in timer is the default everywhere.
             $mode = self::MODE_TIMER;
         }
-        $lanes = $this->lanes($workshop, [$input('bib1'), $input('bib2')]);
+        $bibs = [$input('bib1'), $input('bib2')];
+        // From the follow-up list: the ticked children (spec § 8.6).
+        $ticked = $request->getQueryParams()['bibs'] ?? null;
+        if (!$isPost && \is_array($ticked)) {
+            $ticked = array_values(array_filter($ticked, \is_string(...)));
+            if (\count($ticked) > $this->desk->bibsPerRace($workshop)) {
+                $this->responder->flash('error', 'entry.error.too_many_bibs', ['count' => $this->desk->bibsPerRace($workshop)]);
+
+                return $this->responder->redirect($response, $back . '/tracking');
+            }
+            $bibs = [$ticked[0] ?? '', $ticked[1] ?? ''];
+        }
+        $lanes = $this->lanes($workshop, $bibs);
         if (\is_string($lanes)) {
             return $this->responder->redirect($response, $back);
         }

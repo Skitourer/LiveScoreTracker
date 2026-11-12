@@ -27,7 +27,7 @@ use LiveScoreTracker\Action\DashboardAction;
 use LiveScoreTracker\Action\Entry\EntryBibAction;
 use LiveScoreTracker\Action\Entry\EntryChildAction;
 use LiveScoreTracker\Action\Entry\RaceAction;
-use LiveScoreTracker\Action\Entry\RemainingBibsAction;
+use LiveScoreTracker\Action\Entry\TrackingAction;
 use LiveScoreTracker\Action\Entry\WorkshopChoiceAction;
 use LiveScoreTracker\Action\Entry\WorkshopHelpAction;
 use LiveScoreTracker\Action\HealthAction;
@@ -183,7 +183,7 @@ final class Kernel
         // Result entry at the workshops (spec § 8)
         $app->get('/entry', WorkshopChoiceAction::class)->setName('entry')->add($guard(Permission::EnterResultsChosenEvent));
         $app->get('/entry/{workshop:[a-z0-9_]+}', EntryBibAction::class)->setName('entry-workshop')->add($guard(Permission::EnterResultsChosenEvent));
-        $app->get('/entry/{workshop:[a-z0-9_]+}/remaining', RemainingBibsAction::class)->setName('entry-remaining')->add($guard(Permission::ViewRemainingBibs));
+        $app->get('/entry/{workshop:[a-z0-9_]+}/tracking', TrackingAction::class)->setName('entry-tracking')->add($guard(Permission::ViewRemainingBibs));
         $app->get('/entry/{workshop:[a-z0-9_]+}/help', WorkshopHelpAction::class)->setName('entry-help')->add($guard(Permission::ViewWorkshopHelp));
         $app->map(['GET', 'POST'], '/entry/{workshop:[a-z0-9_]+}/race', RaceAction::class)->setName('entry-race')->add($guard(Permission::EnterResultsChosenEvent));
         $app->map(['GET', 'POST'], '/entry/{workshop:[a-z0-9_]+}/{bib:[0-9]+}', EntryChildAction::class)->setName('entry-child')->add($guard(Permission::EnterResultsChosenEvent));
