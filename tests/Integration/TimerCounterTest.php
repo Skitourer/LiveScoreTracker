@@ -158,6 +158,12 @@ final class TimerCounterTest extends TestCase
         self::assertStringContainsString('40 m', $this->admin->lastBody);
         self::assertStringContainsString('pas la même épreuve', $this->admin->lastBody);
 
+        // A child who has done every attempt cannot run again (sprint: 1 attempt).
+        $this->admin->get('/entry/sprint/race?bib1=1');
+        $this->admin->post('/entry/sprint/race', [...$this->raceForm(), '1_value' => '812']);
+        $this->admin->get('/entry/sprint/race?bib1=1&bib2=3');
+        self::assertStringContainsString('a déjà fait tous ses essais', $this->admin->get('/entry/sprint')->getBody()->__toString());
+
         // Outside the "running" phase the race can be prepared but not saved.
         $this->admin->post('/admin/phase', ['phase' => 'preparation']);
         $this->admin->get('/entry/sprint/race?bib1=1');
