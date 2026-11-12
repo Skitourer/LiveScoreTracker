@@ -39,7 +39,7 @@ final class PublicHomeTest extends TestCase
         self::assertStringContainsString('Sprint 40 m', $body);
         self::assertStringContainsString('href="/reglement"', $body);
         self::assertStringContainsString('mailto:contact@example.org', $body);
-        self::assertStringContainsString('>Connexion des bénévoles</a>', $body);
+        self::assertStringContainsString('<a href="/login">Espace organisation (admins, organisateurs, arbitres)</a>', $body);
         // Example dates: registration opens on 15 March 2027.
         self::assertStringContainsString('Les inscriptions ouvriront le lundi 15 mars 2027', $body);
         self::assertStringContainsString('content="noindex, nofollow"', $body, 'Test sites stay out of search engines.');
@@ -53,6 +53,14 @@ final class PublicHomeTest extends TestCase
         self::assertStringContainsString('content="index, follow"', $production->lastBody);
         $production->get('/reglement');
         self::assertStringContainsString('content="noindex, nofollow"', $production->lastBody);
+    }
+
+    public function testExamplePagesAreDeployed(): void
+    {
+        // The deployment leaves Markdown files out, except these (the home page needs them).
+        $workflow = (string) file_get_contents(\dirname(__DIR__, 2) . '/.github/workflows/deploy-test.yml');
+        self::assertStringContainsString('--include-glob config.example/pages/*/*.md', $workflow);
+        self::assertStringContainsString('--include-glob config.example/help/*/*.md', $workflow);
     }
 
     public function testRulesPage(): void

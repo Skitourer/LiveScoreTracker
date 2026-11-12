@@ -976,7 +976,7 @@ register = "Inscrire un enfant"
 events = "Les épreuves"
 rules = "Règlement"
 contact = "Nous écrire"
-volunteers = "Connexion des bénévoles"
+volunteers = "Espace organisation (admins, organisateurs, arbitres)"
 back_home = "Accueil"
 
 [public.state]

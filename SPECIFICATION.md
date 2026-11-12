@@ -677,7 +677,7 @@ At the site's address (`/`), **without login**, readable on a phone, **with no p
 - **Presentation text** in Markdown (`pages/<language>/home.md` in the installation's data folder, else the fictitious example), like the help pages; editable online in step 12.
 - **The events** of each level group, read from the configuration.
 - **Registration**, according to the opening and closing dates (local time of the installation) and the quota (§ 5.2): "opens on …", **places left out of the quota** with the closing date, "full: new registrations go to the waiting list", "closed", or "dates announced soon". The "Register a child" button leads to the public form (step 11; until then it shows as "coming soon"). During the competition and after closing, this block gives way to a message (and later to the link to the progress screen and the participant space).
-- Links to the **rules** (`/reglement`, Markdown `pages/<language>/rules.md`, also linked from the registration form) and to the contact email; "Volunteers' login" in the top bar.
+- Links to the **rules** (`/reglement`, Markdown `pages/<language>/rules.md`, also linked from the registration form) and to the contact email; at the bottom, a discreet "Organization space (admins, organizers, referees)" link to the login (also "Log in" in the top bar).
 - **Only the home page is indexed by search engines, and only in production**; every other page, and the whole test site, stay excluded.
 - The technical status (database, migrations, configuration, version) moves to the `/status` page, reached from the admin's dashboard ("System status" tile).
 

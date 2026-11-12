@@ -57,5 +57,6 @@
             {% if has_rules %}<a class="button secondary" href="{{ url_for('rules') }}">{{ t('public.rules') }}</a>{% endif %}
             {% if edition.contactEmail %}<a class="button secondary" href="mailto:{{ edition.contactEmail }}">{{ t('public.contact') }}</a>{% endif %}
         </p>
+        <p class="meta public-staff"><a href="{{ url_for(logged_in() ? 'dashboard' : 'login') }}">{{ logged_in() ? t('dashboard.title') : t('public.volunteers') }}</a></p>
     {% endif %}
 {% endblock %}

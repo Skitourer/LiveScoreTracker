@@ -976,7 +976,7 @@ register = "Register a child"
 events = "The events"
 rules = "Rules"
 contact = "Contact us"
-volunteers = "Volunteers' login"
+volunteers = "Organization space (admins, organizers, referees)"
 back_home = "Home"
 
 [public.state]

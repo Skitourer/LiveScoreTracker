@@ -67,6 +67,7 @@ jobs:
           printf '%s\n%s\n' "$GITHUB_SHA" "$(date -u '+%Y-%m-%d %H:%M UTC')" > REVISION
 
       # Only code is sent: .env, data/ and server backups are never touched (spec § 25.2).
+      # Markdown files are left out, except the example help and public pages the site displays.
       # lftp runs in an Alpine container so the job does not depend on Ubuntu's package mirrors.
       - name: Upload by SFTP
         if: steps.config.outputs.ready == 'true'
@@ -81,7 +82,7 @@ jobs:
           set net:timeout 30
           open --env-password -u "$SFTP_USERNAME" "sftp://$SFTP_HOST"
           mkdir -p -f $REMOTE_DIR
-          mirror --reverse --delete --parallel=4 --verbose=1 --exclude-glob .git* --exclude-glob .github/ --exclude-glob .githooks/ --exclude-glob node_modules/ --exclude-glob tests/ --exclude-glob scripts/ --exclude-glob docs/ --exclude-glob data/ --exclude-glob .env --exclude-glob .env.* --include-glob .env.example --exclude-glob *.md --exclude-glob package.json --exclude-glob package-lock.json --exclude-glob eslint.config.js --exclude-glob .prettierrc.json --exclude-glob .editorconfig --exclude-glob .php-cs-fixer.dist.php --exclude-glob phpstan.dist.neon --exclude-glob phpunit.xml.dist --exclude-glob .phpstan-cache/ --exclude-glob .phpunit.cache/ ./ $REMOTE_DIR/
+          mirror --reverse --delete --parallel=4 --verbose=1 --exclude-glob .git* --exclude-glob .github/ --exclude-glob .githooks/ --exclude-glob node_modules/ --exclude-glob tests/ --exclude-glob scripts/ --exclude-glob docs/ --exclude-glob data/ --exclude-glob .env --exclude-glob .env.* --include-glob .env.example --exclude-glob *.md --include-glob config.example/help/*/*.md --include-glob config.example/pages/*/*.md --exclude-glob package.json --exclude-glob package-lock.json --exclude-glob eslint.config.js --exclude-glob .prettierrc.json --exclude-glob .editorconfig --exclude-glob .php-cs-fixer.dist.php --exclude-glob phpstan.dist.neon --exclude-glob phpunit.xml.dist --exclude-glob .phpstan-cache/ --exclude-glob .phpunit.cache/ ./ $REMOTE_DIR/
           bye
           EOF
           docker run --rm \
