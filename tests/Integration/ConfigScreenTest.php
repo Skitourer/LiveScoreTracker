@@ -30,7 +30,7 @@ final class ConfigScreenTest extends TestCase
     {
         $page = $this->admin->get('/admin/config');
         self::assertSame(200, $page->getStatusCode());
-        self::assertStringContainsString('Multisport Games 2027', $this->admin->lastBody);
+        self::assertStringContainsString('Olympiades fictives 2027', $this->admin->lastBody);
         self::assertFileDoesNotExist($this->dataDir . '/competition.toml');
 
         $form = $this->editionForm(['name' => 'Jeux 2027', 'venue' => 'Stade fictif']);
@@ -85,7 +85,7 @@ final class ConfigScreenTest extends TestCase
 
     public function testImportShowsTheChangesBeforeApplying(): void
     {
-        $toml = str_replace('Multisport Games 2027', 'Imported Games', (string) file_get_contents(\dirname(__DIR__, 2) . '/config.example/competition.toml'));
+        $toml = str_replace('Olympiades fictives 2027', 'Imported Games', (string) file_get_contents(\dirname(__DIR__, 2) . '/config.example/competition.toml'));
         $file = $this->dataDir . '/import.toml';
         file_put_contents($file, $toml);
         $this->admin->upload('/admin/config/file', 'file', $file, 'competition.toml', ['op' => 'import']);
@@ -95,7 +95,7 @@ final class ConfigScreenTest extends TestCase
         $this->admin->post('/admin/config/file', ['op' => 'confirm', 'source' => 'import', 'toml' => $toml]);
         self::assertStringContainsString('Imported Games', (string) file_get_contents($this->dataDir . '/competition.toml'));
         // The comments of an imported file are kept.
-        self::assertStringContainsString('# ---------- Workshops ----------', (string) file_get_contents($this->dataDir . '/competition.toml'));
+        self::assertStringContainsString('# ---------- Ateliers ----------', (string) file_get_contents($this->dataDir . '/competition.toml'));
     }
 
     public function testFrozenTabsWhileTheCompetitionIsRunning(): void
@@ -125,8 +125,8 @@ final class ConfigScreenTest extends TestCase
     private function editionForm(array $changes): array
     {
         return $changes + [
-            'name' => 'Multisport Games 2027', 'organizer' => 'Springfield School Sports Club', 'date' => '2027-06-06',
-            'start' => '09:00', 'end' => '12:00', 'venue' => 'Springfield Municipal Stadium',
+            'name' => 'Olympiades fictives 2027', 'organizer' => 'Association sportive fictive', 'date' => '2027-06-06',
+            'start' => '09:00', 'end' => '12:00', 'venue' => 'Stade municipal fictif',
             'contact_email' => 'contact@example.org', 'default_locale' => 'fr',
         ];
     }

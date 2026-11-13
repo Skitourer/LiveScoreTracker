@@ -1,4 +1,4 @@
-An outdoor sports morning for children from **CP to CM2** at the Springfield and Shelbyville schools: running, hurdles, throwing, jumping, ball games… Every child does all the events of their level, at their own pace.
+An outdoor sports morning for children from **CP to CM2** at the Tilleuls and Marronniers schools: running, hurdles, throwing, jumping, ball games… Every child does all the events of their level, at their own pace.
 
 - Open to every child from CP to CM2 at a participating school.
 - A responsible adult stays with the child for the whole morning.

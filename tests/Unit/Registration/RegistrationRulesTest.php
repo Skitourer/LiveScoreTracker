@@ -66,7 +66,7 @@ final class RegistrationRulesTest extends TestCase
         self::assertSame('CM1', $matcher->level('cm 1'));
         self::assertSame('CE2', $matcher->level('Ce2'));
         self::assertNull($matcher->level('6e'));
-        self::assertSame('Springfield Elementary', $matcher->school('springfield  elementary'));
+        self::assertSame('École des Tilleuls', $matcher->school('école des  TILLEULS'));
         self::assertNull($matcher->school('Unknown School'));
     }
 
@@ -122,7 +122,7 @@ final class RegistrationRulesTest extends TestCase
             'first_name' => 'zoé',
             'birth_date' => '14/03/2017',
             'gender' => 'Fille',
-            'school' => 'Springfield Elementary',
+            'school' => 'École des Tilleuls',
             'level' => 'cm1',
             'guardian_name' => 'Anne Martin',
             'guardian_phone' => '611223344',

@@ -112,7 +112,7 @@ final class RegistrationsTest extends TestCase
         self::assertCount(1, $this->admin->mailer->sent);
         $mail = $this->admin->mailer->sent[0];
         self::assertSame('anne@example.org', $mail['to']);
-        self::assertSame('Multisport Games 2027 : inscription de Zoé confirmée', $mail['subject']);
+        self::assertSame('Olympiades fictives 2027 : inscription de Zoé confirmée', $mail['subject']);
         self::assertStringContainsString('Bonjour Anne Martin', $mail['body']);
         self::assertStringContainsString('Numéro de dossard : 1.', $mail['body']);
         self::assertStringContainsString('dimanche 6 juin 2027', $mail['body']);
@@ -143,10 +143,10 @@ final class RegistrationsTest extends TestCase
     public function testCorrectionIsRecordedInTheHistory(): void
     {
         $this->add();
-        $this->admin->post('/registrations/1', ['op' => 'update', ...self::form(['school' => 'Shelbyville Elementary', 'volunteer' => ''])]);
+        $this->admin->post('/registrations/1', ['op' => 'update', ...self::form(['school' => 'École des Marronniers', 'volunteer' => ''])]);
         $this->admin->get('/registrations/1');
         self::assertStringContainsString('Fiche corrigée', $this->admin->lastBody);
-        self::assertStringContainsString('Springfield Elementary → Shelbyville Elementary', $this->admin->lastBody);
+        self::assertStringContainsString('École des Tilleuls → École des Marronniers', $this->admin->lastBody);
         self::assertStringContainsString('Volontaire : oui → non', $this->admin->lastBody);
     }
 
@@ -216,8 +216,8 @@ final class RegistrationsTest extends TestCase
     public function testCsvImportWithFrenchSeparatorAndLatin1(): void
     {
         $csv = $this->dataDir . '/inscriptions.csv';
-        $content = "Child last name;Child first name;Child birth date;Gender;Class;School;Guardian full name;Guardian phone;Contact email;Volunteer\n"
-            . "Lefèvre;Inès;02/04/2020;Fille;CP;Springfield Elementary;Marc Lefèvre;0601020304;marc@example.org;oui\n";
+        $content = "Nom de l'enfant;Prénom de l'enfant;Date de naissance;Catégorie;Classe;École;Nom du responsable légal;Téléphone du responsable légal;Email de contact;Bénévole\n"
+            . "Lefèvre;Inès;02/04/2020;Fille;CP;École des Tilleuls;Marc Lefèvre;0601020304;marc@example.org;oui\n";
         file_put_contents($csv, mb_convert_encoding($content, 'Windows-1252', 'UTF-8'));
 
         $this->admin->upload('/registrations/import', 'file', $csv, 'inscriptions.csv');
@@ -266,7 +266,7 @@ final class RegistrationsTest extends TestCase
             'first_name' => 'Zoé',
             'birth_date' => '2017-03-14',
             'gender' => 'girl',
-            'school' => 'Springfield Elementary',
+            'school' => 'École des Tilleuls',
             'level' => 'CM1',
             'guardian_name' => 'Anne Martin',
             'guardian_phone' => '0611223344',

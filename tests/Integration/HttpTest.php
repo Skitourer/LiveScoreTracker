@@ -32,7 +32,7 @@ final class HttpTest extends TestCase
     public function testStatusPageShowsPendingMigrationsThenUpToDate(): void
     {
         $home = (string) $this->request('GET', '/')->getBody();
-        self::assertStringContainsString('Multisport Games 2027', $home, 'The public home page works before the first migration.');
+        self::assertStringContainsString('Olympiades fictives 2027', $home, 'The public home page works before the first migration.');
 
         $body = (string) $this->request('GET', '/status')->getBody();
         self::assertStringContainsString('LiveScoreTracker', $body);

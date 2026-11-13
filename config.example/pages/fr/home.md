@@ -1,4 +1,4 @@
-Une matinée de sport en plein air pour les enfants du **CP au CM2** des écoles de Springfield et Shelbyville : course, haies, lancer, saut, jeux de ballon… Chaque enfant fait toutes les épreuves de son niveau, à son rythme.
+Une matinée de sport en plein air pour les enfants du **CP au CM2** des écoles des Tilleuls et des Marronniers : course, haies, lancer, saut, jeux de ballon… Chaque enfant fait toutes les épreuves de son niveau, à son rythme.
 
 - Ouvert à tous les enfants scolarisés du CP au CM2 dans une école participante.
 - Un adulte responsable accompagne l'enfant pendant toute la matinée.

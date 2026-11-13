@@ -114,7 +114,32 @@ final class ConfigStore
      */
     public static function encode(array $data): string
     {
-        return "# Written by the configuration screen.\n\n" . (string) Toml::encode($data);
+        $toml = (string) Toml::encode($data);
+        // The encoder writes single-line texts as literal strings ('…'), which
+        // cannot hold an apostrophe ("Nom de l'enfant"): use a basic string instead.
+        foreach (self::apostropheTexts($data) as $text) {
+            $basic = '"' . strtr($text, ['\\' => '\\\\', '"' => '\\"']) . '"';
+            $toml = str_replace("'" . $text . "'", $basic, $toml);
+        }
+
+        return "# Fichier écrit par l'écran de configuration.\n\n" . $toml;
+    }
+
+    /**
+     * @param array<mixed> $data
+     *
+     * @return list<string>
+     */
+    private static function apostropheTexts(array $data): array
+    {
+        $texts = [];
+        array_walk_recursive($data, static function (mixed $value) use (&$texts): void {
+            if (\is_string($value) && str_contains($value, "'") && !str_contains($value, "\n")) {
+                $texts[] = $value;
+            }
+        });
+
+        return array_values(array_unique($texts));
     }
 
     /**

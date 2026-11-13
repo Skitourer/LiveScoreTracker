@@ -1055,19 +1055,19 @@ This example follows the event structure of a real edition, but **all identifyin
 
 ```toml
 [edition]
-name = "Multisport Games 2027"
-organizer = "Springfield School Sports Club"
+name = "Olympiades fictives 2027"
+organizer = "Association sportive fictive"
 date = 2027-06-06
 start = 09:00:00
 end = 12:00:00
-venue = "Springfield Municipal Stadium"
+venue = "Stade municipal fictif"
 contact_email = "contact@example.org"
 default_locale = "fr"
 
 [participants]
 levels = ["CP", "CE1", "CE2", "CM1", "CM2"]
 genders = ["girl", "boy"]
-schools = ["Springfield Elementary", "Shelbyville Elementary"]
+schools = ["École des Tilleuls", "École des Marronniers"]
 
 [level_groups]
 junior = ["CP", "CE1"]
@@ -1247,27 +1247,27 @@ help = "basketball.md"
 # Maps internal fields to the column headers of the source file.
 
 [import.columns]
-last_name = "Child last name"
-first_name = "Child first name"
-birth_date = "Child birth date"
-gender = "Gender"
-school = "School"
-level = "Class"
-guardian_name = "Guardian full name"
-guardian_phone = "Guardian phone"
-guardian_email = "Contact email"
-volunteer = "Volunteer"
+last_name = "Nom de l'enfant"
+first_name = "Prénom de l'enfant"
+birth_date = "Date de naissance"
+gender = "Catégorie"
+school = "École"
+level = "Classe"
+guardian_name = "Nom du responsable légal"
+guardian_phone = "Téléphone du responsable légal"
+guardian_email = "Email de contact"
+volunteer = "Bénévole"
 
 # ---------- Contacts shown on help pages ----------
 
 [[contacts]]
 role = "data_entry"
-name = "Jane Doe"
+name = "Camille Fournier"
 phone = "+33 6 00 00 00 01"
 
 [[contacts]]
 role = "general"
-name = "John Smith"
+name = "Paul Garnier"
 phone = "+33 6 00 00 00 02"
 ```
 

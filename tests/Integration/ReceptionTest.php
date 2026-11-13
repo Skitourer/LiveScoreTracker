@@ -146,7 +146,7 @@ final class ReceptionTest extends TestCase
             'first_name' => $firstName,
             'birth_date' => '2017-03-14',
             'gender' => $gender,
-            'school' => 'Springfield Elementary',
+            'school' => 'École des Tilleuls',
             'level' => 'CM1',
             'guardian_name' => 'Anne ' . $lastName,
             'guardian_phone' => '0611223344',

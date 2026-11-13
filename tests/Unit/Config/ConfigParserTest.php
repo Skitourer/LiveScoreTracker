@@ -71,7 +71,7 @@ final class ConfigParserTest extends TestCase
         self::assertSame(90, $basket->limit->value);
         self::assertSame(['basket' => 3, 'rim' => 2, 'board' => 1], array_column(array_map(static fn($a) => (array) $a, $basket->actions), 'points', 'id'));
 
-        self::assertSame('Child last name', $config->importColumns['last_name']);
+        self::assertSame("Nom de l'enfant", $config->importColumns['last_name']);
         self::assertSame('data_entry', $config->contacts[0]->role);
         self::assertSame('2027-06-06', $config->edition->date->format('Y-m-d'));
         self::assertSame('09:00', $config->edition->start);

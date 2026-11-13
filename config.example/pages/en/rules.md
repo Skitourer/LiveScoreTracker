@@ -1,7 +1,7 @@
 *Fictitious example rules: replace them with your edition's.*
 
 ## Article 1 — Organization
-The competition is organized by the Springfield School Sports Club, on the Sunday morning shown on the home page.
+The competition is organized by the Association sportive fictive, on the Sunday morning shown on the home page.
 
 ## Article 2 — Participants
 It is open to children from CP to CM2 at a participating school, within the places available. Beyond that, registrations go to the waiting list.

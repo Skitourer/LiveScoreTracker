@@ -217,7 +217,7 @@ final class EntryTest extends TestCase
     {
         $response = $this->admin->post('/registrations/new', [
             'last_name' => $lastName, 'first_name' => $firstName, 'birth_date' => $birthDate, 'gender' => 'girl',
-            'school' => 'Springfield Elementary', 'level' => $level, 'guardian_name' => 'Anne ' . $lastName,
+            'school' => 'École des Tilleuls', 'level' => $level, 'guardian_name' => 'Anne ' . $lastName,
             'guardian_phone' => '0611223344', 'guardian_email' => 'parent@example.org', 'volunteer' => '0',
         ]);
         self::assertSame(303, $response->getStatusCode(), $this->admin->lastBody);

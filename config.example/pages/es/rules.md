@@ -1,7 +1,7 @@
 *Reglamento de ejemplo ficticio: sustitúyalo por el de su edición.*
 
 ## Artículo 1 — Organización
-La competición la organiza el Springfield School Sports Club, el domingo por la mañana indicado en la página de inicio.
+La competición la organiza el Association sportive fictive, el domingo por la mañana indicado en la página de inicio.
 
 ## Artículo 2 — Participantes
 Está abierta a los niños de CP a CM2 inscritos en una escuela participante, hasta completar las plazas disponibles. Después, las inscripciones pasan a la lista de espera.

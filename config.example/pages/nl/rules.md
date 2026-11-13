@@ -1,7 +1,7 @@
 *Fictief voorbeeldreglement: vervang het door dat van uw editie.*
 
 ## Artikel 1 — Organisatie
-De wedstrijd wordt georganiseerd door de Springfield School Sports Club, op de zondagochtend die op de startpagina staat.
+De wedstrijd wordt georganiseerd door de Association sportive fictive, op de zondagochtend die op de startpagina staat.
 
 ## Artikel 2 — Deelnemers
 Hij staat open voor kinderen van CP tot CM2 die ingeschreven zijn op een deelnemende school, zolang er plaatsen zijn. Daarna komen inschrijvingen op de wachtlijst.
