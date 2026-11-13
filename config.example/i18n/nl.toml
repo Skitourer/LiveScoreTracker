@@ -1,0 +1,190 @@
+# Dutch texts of the public registration pages and of the emails sent to
+# families (spec § 5.1). Other texts fall back to English. Any key can be
+# overridden by the i18n/nl.toml file of the installation's data folder.
+
+[nav]
+login = "Inloggen"
+
+[gender.girl]
+one = "Meisje"
+many = "Meisjes"
+
+[gender.boy]
+one = "Jongen"
+many = "Jongens"
+
+[registration]
+guardian = "Wettelijke vertegenwoordiger van het kind"
+optional = "optioneel"
+volunteer_label = "Wil helpen bij het bemannen van een kraam"
+confirm_warnings = "Ik heb het gecontroleerd: toch opslaan"
+date_invalid = "Ongeldige geboortedatum: ‘{value}’."
+gender_unknown = "Onbekend geslacht: ‘{value}’."
+level_unknown = "Onbekende klas: ‘{value}’."
+school_unknown = "School staat niet in de lijst: ‘{value}’."
+phone_invalid = "Ongeldig telefoonnummer: ‘{value}’ (10 cijfers beginnend met 0, of internationaal formaat +33 6…)."
+phone_format = "10 cijfers beginnend met 0, of internationaal formaat (+33 6…)"
+email_format = "Volledig e-mailadres, bijvoorbeeld voornaam.achternaam@voorbeeld.nl"
+email_invalid = "Ongeldig e-mailadres: ‘{value}’."
+age_unusual = "Ongebruikelijke geboortedatum voor een kind in {level} (meestal geboren in {year})."
+
+[registration.field]
+last_name = "Achternaam"
+first_name = "Voornaam"
+birth_date = "Geboortedatum"
+gender = "Geslacht"
+level = "Klas"
+school = "School"
+guardian_name = "Voor- en achternaam van de wettelijke vertegenwoordiger"
+guardian_phone = "Telefoon"
+guardian_email = "E-mail"
+
+[registration.required]
+last_name = "De achternaam is verplicht."
+first_name = "De voornaam is verplicht."
+birth_date = "De geboortedatum is verplicht."
+gender = "Het geslacht is verplicht."
+school = "De school is verplicht."
+level = "De klas is verplicht."
+guardian_name = "De naam van de wettelijke vertegenwoordiger is verplicht."
+guardian_phone = "Het telefoonnummer is verplicht."
+guardian_email = "Het e-mailadres is verplicht."
+
+[public.state]
+upcoming = "De inschrijving opent op {date}."
+full = "Vol: nieuwe inschrijvingen komen op de wachtlijst."
+closed = "De inschrijving is gesloten."
+unscheduled = "De inschrijvingsdata worden binnenkort bekendgemaakt."
+
+[signup]
+title = "Een kind inschrijven"
+lead = "Vul per kind één formulier in. Daarna ontvangt u een e-mail om de inschrijving te bevestigen."
+language = "Taal"
+child = "Het kind"
+level_hint = "Klas van het kind dit schooljaar (Frans schoolsysteem): CP (6-7 jaar), CE1 (7-8), CE2 (8-9), CM1 (9-10), CM2 (10-11)."
+responsibility = "Ik begrijp dat het kind tijdens het hele evenement onder de volledige verantwoordelijkheid van de begeleidende volwassene valt."
+rules_accept = "Ik heb het reglement gelezen en ga ermee akkoord."
+rules_link = "Het reglement lezen"
+submit = "Inschrijving versturen"
+privacy_title = "Uw persoonsgegevens"
+privacy = "De gegevens in dit formulier worden verzameld door {organizer} om het evenement te organiseren: inschrijving, ontvangst, uitslagen en contact met de wettelijke vertegenwoordiger. Ze worden aan niemand anders doorgegeven en in Frankrijk opgeslagen. De uitslagen worden getoond met de voornaam en de eerste letter van de achternaam van het kind. Alle gegevens worden een maand na het evenement verwijderd. Om ze in te zien, te verbeteren of te laten verwijderen, schrijft u naar {contact}."
+required_responsibility = "Vink het vakje over de verantwoordelijkheid van de volwassene aan."
+required_rules = "Ga akkoord met het reglement."
+duplicate = "Dit kind is al ingeschreven of wordt al ingeschreven. Voor vragen: {contact}."
+too_fast = "Het formulier is te snel verstuurd. Controleer de gegevens en verstuur het opnieuw."
+too_many = "Te veel inschrijvingen vanaf deze verbinding. Probeer het over een uur opnieuw."
+full_notice = "Het maximale aantal deelnemers is bereikt: nieuwe inschrijvingen komen op de wachtlijst."
+sent_title = "Controleer uw mailbox"
+sent = "Er is een e-mail verstuurd naar {email}. Klik binnen {hours} uur op de link in die e-mail om de inschrijving van {first_name} te bevestigen. Kijk ook in uw map met ongewenste e-mail."
+sent_failed = "De aanvraag is opgeslagen, maar de e-mail kon niet naar {email} worden verstuurd. Neem contact op met de organisatie."
+another = "Nog een kind inschrijven"
+back_home = "Terug naar de startpagina"
+
+[signup.result.verified]
+title = "Inschrijving bevestigd"
+text = "De inschrijving van {first_name} is bevestigd. Rugnummer: {bib}. U hebt een bevestigingsmail ontvangen."
+
+[signup.result.waitlisted]
+title = "Wachtlijst"
+text = "Het maximale aantal deelnemers is bereikt: {first_name} staat op de wachtlijst. We schrijven u als er een plaats vrijkomt."
+
+[signup.result.already]
+title = "Al bevestigd"
+text = "Deze inschrijving is al bevestigd."
+
+[signup.result.expired]
+title = "Link verlopen"
+text = "Deze link is niet meer geldig: de inschrijving is niet binnen 48 uur bevestigd. Vul het formulier opnieuw in."
+
+[signup.result.invalid]
+title = "Ongeldige link"
+text = "Deze link is niet geldig. Controleer of hij volledig is gekopieerd."
+
+[signup.withdraw]
+title = "Inschrijving annuleren"
+question = "Wilt u de inschrijving van {child} echt annuleren?"
+confirm = "Ja, inschrijving annuleren"
+done = "De inschrijving van {first_name} is geannuleerd. Bedankt dat u het ons hebt laten weten."
+closed = "De wedstrijd is begonnen: neem contact op met de organisatie om de inschrijving te annuleren ({contact})."
+invalid = "Deze link is niet geldig of is al gebruikt. Voor vragen: {contact}."
+
+[email.signup_verify]
+subject = "{edition}: bevestig de inschrijving van {first_name}"
+body = """
+Beste {guardian},
+
+U hebt gevraagd om {child} ({level}) in te schrijven voor {edition}, op {date}.
+
+Klik binnen 48 uur op deze link om de inschrijving te bevestigen:
+{link}
+
+Zonder bevestiging wordt de aanvraag geannuleerd. Hebt u deze aanvraag niet gedaan, negeer dit bericht dan.
+
+{organizer}
+"""
+
+[email.registration_confirmed]
+subject = "{edition}: inschrijving van {first_name} bevestigd"
+volunteer = """
+U hebt aangeboden te helpen bij een kraam: hartelijk dank! De organisatie neemt vóór het evenement contact met u op.
+"""
+withdraw = """
+Als {first_name} niet meer kan komen, annuleer dan de inschrijving zodat de plaats vrijkomt:
+{link}"""
+body = """
+Beste {guardian},
+
+De inschrijving van {child} ({level}) voor {edition} is bevestigd.
+Rugnummer: {bib}.
+
+Tot {date} in {venue}, ontvangst vanaf {start}.
+{volunteer}
+Ter herinnering: het kind blijft tijdens het hele evenement onder de volledige verantwoordelijkheid van de begeleidende volwassene.
+
+Voor vragen: {contact}
+
+{withdraw}
+
+Tot binnenkort,
+{organizer}
+"""
+
+[email.signup_waitlisted]
+subject = "{edition}: {first_name} staat op de wachtlijst"
+withdraw = """
+Om de aanvraag in te trekken:
+{link}"""
+body = """
+Beste {guardian},
+
+De inschrijving van {child} ({level}) voor {edition} is opgeslagen, maar het maximale aantal deelnemers is bereikt: {first_name} staat op de wachtlijst. We schrijven u als er een plaats vrijkomt.
+
+Voor vragen: {contact}
+
+{withdraw}
+
+{organizer}
+"""
+
+[email.signup_withdrawn]
+subject = "{edition}: inschrijving van {first_name} geannuleerd"
+body = """
+Beste {guardian},
+
+De inschrijving van {child} voor {edition} is geannuleerd. Bedankt dat u het ons hebt laten weten.
+
+Voor vragen: {contact}
+
+{organizer}
+"""
+
+[level]
+CP = "CP"
+CE1 = "CE1"
+CE2 = "CE2"
+CM1 = "CM1"
+CM2 = "CM2"
+
+[public]
+rules = "Reglement"
+back_home = "Startpagina"

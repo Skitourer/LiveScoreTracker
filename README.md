@@ -10,7 +10,7 @@ It is a mobile-first web application in PHP (Slim 4) with MySQL, designed for ch
 
 ## Features
 
-- **Registrations**: admin entry, spreadsheet import and export, waiting list, bibs, confirmation emails (public online form coming).
+- **Registrations**: public online form in 10 languages with email verification, waiting list and withdrawal link; admin entry, spreadsheet import and export, bibs, confirmation emails (in the family's language and in French).
 - **Check-in**: printable reception list (PDF), arrival and departure on a phone.
 - **Result entry** on the referees' phones: attempts, fouls, modifiers, built-in stopwatch for 1–2 runners, counter mode, corrections with full history.
 - **Offline first**: the phone builds its own entry screens, follow-up and help from a workshop pack, queues the entries and sends them when the network is back (idempotent sync).

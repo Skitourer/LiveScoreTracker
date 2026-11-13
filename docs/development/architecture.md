@@ -53,7 +53,7 @@ Then the route's **Action** reads the request, calls the application services an
 
 - **Environment** (`.env`, read by `Settings`): environment, URL, time zone, data folder, database, deployment token, SMTP. Secrets live only there and in encrypted GitHub secrets.
 - **Competition** (`competition.toml`): edition, levels and level groups, genders, schools, registration window and quota, scoring rules, workshops and their variants (one per level group), import columns, contacts. Parsed and validated by `Domain/Config/ConfigParser` into immutable value objects (`CompetitionConfig`, `Workshop`, `Variant`…). `php bin/console.php config:check` reports every error with its path.
-- **Texts**: `i18n/fr.toml` and `i18n/en.toml` (keys must exist in both), help pages `help/<lang>/<workshop>.md`, public pages `pages/<lang>/home.md` and `rules.md`.
+- **Texts**: `i18n/fr.toml` and `i18n/en.toml` (keys must exist in both; partial catalogs `it`, `de`, `nl`, `es`, `pt`, `uk`, `zh`, `ar` cover the public registration pages and family emails, checked by `TranslationTest`), help pages `help/<lang>/<workshop>.md`, public pages `pages/<lang>/home.md` and `rules.md`.
 
 Each file is looked up first in the installation's **data folder** (outside the web root, never deployed), then in `config.example/`. The repository therefore only ever contains the fictitious example.
 

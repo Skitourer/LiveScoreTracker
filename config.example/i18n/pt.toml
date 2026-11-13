@@ -1,0 +1,190 @@
+# Portuguese texts of the public registration pages and of the emails sent to
+# families (spec § 5.1). Other texts fall back to English. Any key can be
+# overridden by the i18n/pt.toml file of the installation's data folder.
+
+[nav]
+login = "Entrar"
+
+[gender.girl]
+one = "Menina"
+many = "Meninas"
+
+[gender.boy]
+one = "Menino"
+many = "Meninos"
+
+[registration]
+guardian = "Representante legal da criança"
+optional = "opcional"
+volunteer_label = "Voluntário para ajudar a cuidar de um posto"
+confirm_warnings = "Verifiquei: guardar mesmo assim"
+date_invalid = "Data de nascimento inválida: «{value}»."
+gender_unknown = "Sexo não reconhecido: «{value}»."
+level_unknown = "Ano escolar não reconhecido: «{value}»."
+school_unknown = "Escola que não consta da lista: «{value}»."
+phone_invalid = "Número de telefone inválido: «{value}» (10 algarismos começados por 0, ou formato internacional +33 6…)."
+phone_format = "10 algarismos começados por 0, ou formato internacional (+33 6…)"
+email_format = "Endereço de email completo, por exemplo nome.apelido@exemplo.pt"
+email_invalid = "Endereço de email inválido: «{value}»."
+age_unusual = "Data de nascimento invulgar para uma criança do {level} (normalmente nascida em {year})."
+
+[registration.field]
+last_name = "Apelido"
+first_name = "Nome próprio"
+birth_date = "Data de nascimento"
+gender = "Sexo"
+level = "Ano escolar"
+school = "Escola"
+guardian_name = "Nome completo do representante legal"
+guardian_phone = "Telefone"
+guardian_email = "Email"
+
+[registration.required]
+last_name = "O apelido é obrigatório."
+first_name = "O nome próprio é obrigatório."
+birth_date = "A data de nascimento é obrigatória."
+gender = "O sexo é obrigatório."
+school = "A escola é obrigatória."
+level = "O ano escolar é obrigatório."
+guardian_name = "O nome do representante legal é obrigatório."
+guardian_phone = "O telefone é obrigatório."
+guardian_email = "O email é obrigatório."
+
+[public.state]
+upcoming = "As inscrições abrem a {date}."
+full = "Completo: as novas inscrições vão para a lista de espera."
+closed = "As inscrições estão encerradas."
+unscheduled = "As datas de inscrição serão anunciadas em breve."
+
+[signup]
+title = "Inscrever uma criança"
+lead = "Preencha um formulário por criança. Depois receberá um email para confirmar a inscrição."
+language = "Língua"
+child = "A criança"
+level_hint = "Ano escolar da criança este ano (sistema escolar francês): CP (6-7 anos), CE1 (7-8), CE2 (8-9), CM1 (9-10), CM2 (10-11)."
+responsibility = "Compreendo que a criança fica sob a inteira responsabilidade do adulto que a acompanha durante todo o evento."
+rules_accept = "Li e aceito o regulamento."
+rules_link = "Ler o regulamento"
+submit = "Enviar a inscrição"
+privacy_title = "Os seus dados pessoais"
+privacy = "As informações deste formulário são recolhidas por {organizer} para organizar o evento: inscrição, receção, resultados e contacto com o representante legal. Não são transmitidas a mais ninguém e estão alojadas em França. Os resultados são apresentados com o nome próprio e a inicial do apelido da criança. Todos os dados são apagados um mês depois do evento. Para os consultar, corrigir ou pedir que sejam apagados, escreva para {contact}."
+required_responsibility = "Assinale a caixa sobre a responsabilidade do adulto."
+required_rules = "Aceite o regulamento."
+duplicate = "Esta criança já está inscrita ou em processo de inscrição. Para qualquer questão: {contact}."
+too_fast = "O formulário foi enviado depressa demais. Verifique as informações e volte a enviá-lo."
+too_many = "Demasiadas inscrições enviadas a partir desta ligação. Tente novamente dentro de uma hora."
+full_notice = "Foi atingido o número máximo de participantes: as novas inscrições vão para a lista de espera."
+sent_title = "Verifique o seu email"
+sent = "Foi enviado um email para {email}. Clique na ligação que contém dentro de {hours} horas para confirmar a inscrição de {first_name}. Verifique também a pasta de correio não solicitado."
+sent_failed = "O pedido está registado, mas não foi possível enviar o email para {email}. Contacte a organização."
+another = "Inscrever outra criança"
+back_home = "Voltar à página inicial"
+
+[signup.result.verified]
+title = "Inscrição confirmada"
+text = "A inscrição de {first_name} está confirmada. Número de dorsal: {bib}. Foi-lhe enviado um email de confirmação."
+
+[signup.result.waitlisted]
+title = "Lista de espera"
+text = "Foi atingido o número máximo de participantes: {first_name} está na lista de espera. Escreveremos se vagar um lugar."
+
+[signup.result.already]
+title = "Já confirmada"
+text = "Esta inscrição já foi confirmada."
+
+[signup.result.expired]
+title = "Ligação expirada"
+text = "Esta ligação já não é válida: a inscrição não foi confirmada no prazo de 48 horas. Preencha novamente o formulário."
+
+[signup.result.invalid]
+title = "Ligação inválida"
+text = "Esta ligação não é válida. Verifique se foi copiada por inteiro."
+
+[signup.withdraw]
+title = "Cancelar a inscrição"
+question = "Quer mesmo cancelar a inscrição de {child}?"
+confirm = "Sim, cancelar a inscrição"
+done = "A inscrição de {first_name} foi cancelada. Obrigado por nos avisar."
+closed = "A competição já começou: para cancelar a inscrição, contacte a organização ({contact})."
+invalid = "Esta ligação não é válida ou já foi utilizada. Para qualquer questão: {contact}."
+
+[email.signup_verify]
+subject = "{edition}: confirme a inscrição de {first_name}"
+body = """
+Olá {guardian},
+
+Pediu a inscrição de {child} ({level}) em {edition}, a {date}.
+
+Para a confirmar, clique nesta ligação no prazo de 48 horas:
+{link}
+
+Sem confirmação, o pedido será cancelado. Se não fez este pedido, ignore esta mensagem.
+
+{organizer}
+"""
+
+[email.registration_confirmed]
+subject = "{edition}: inscrição de {first_name} confirmada"
+volunteer = """
+Ofereceu-se como voluntário para ajudar num posto: obrigado! A equipa organizadora entrará em contacto consigo antes do evento.
+"""
+withdraw = """
+Se {first_name} já não puder vir, cancele a inscrição para libertar o lugar:
+{link}"""
+body = """
+Olá {guardian},
+
+A inscrição de {child} ({level}) em {edition} está confirmada.
+Número de dorsal: {bib}.
+
+Encontro a {date} em {venue}, receção a partir das {start}.
+{volunteer}
+Lembrete: a criança fica sob a inteira responsabilidade do adulto que a acompanha durante todo o evento.
+
+Para qualquer questão: {contact}
+
+{withdraw}
+
+Até breve,
+{organizer}
+"""
+
+[email.signup_waitlisted]
+subject = "{edition}: {first_name} está na lista de espera"
+withdraw = """
+Para retirar o pedido:
+{link}"""
+body = """
+Olá {guardian},
+
+O pedido de inscrição de {child} ({level}) em {edition} está registado, mas foi atingido o número máximo de participantes: {first_name} está na lista de espera. Escreveremos se vagar um lugar.
+
+Para qualquer questão: {contact}
+
+{withdraw}
+
+{organizer}
+"""
+
+[email.signup_withdrawn]
+subject = "{edition}: inscrição de {first_name} cancelada"
+body = """
+Olá {guardian},
+
+A inscrição de {child} em {edition} foi cancelada. Obrigado por nos avisar.
+
+Para qualquer questão: {contact}
+
+{organizer}
+"""
+
+[level]
+CP = "CP"
+CE1 = "CE1"
+CE2 = "CE2"
+CM1 = "CM1"
+CM2 = "CM2"
+
+[public]
+rules = "Regulamento"
+back_home = "Página inicial"

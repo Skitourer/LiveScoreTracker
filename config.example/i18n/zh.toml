@@ -1,0 +1,190 @@
+# Simplified Chinese texts of the public registration pages and of the emails sent to
+# families (spec § 5.1). Other texts fall back to English. Any key can be
+# overridden by the i18n/zh.toml file of the installation's data folder.
+
+[nav]
+login = "登录"
+
+[gender.girl]
+one = "女孩"
+many = "女孩"
+
+[gender.boy]
+one = "男孩"
+many = "男孩"
+
+[registration]
+guardian = "孩子的法定监护人"
+optional = "选填"
+volunteer_label = "愿意协助负责一个摊位"
+confirm_warnings = "我已核实，仍然保存"
+date_invalid = "出生日期无效：“{value}”。"
+gender_unknown = "无法识别的性别：“{value}”。"
+level_unknown = "无法识别的年级：“{value}”。"
+school_unknown = "学校不在列表中：“{value}”。"
+phone_invalid = "电话号码无效：“{value}”（以 0 开头的 10 位数字，或国际格式 +33 6…）。"
+phone_format = "以 0 开头的 10 位数字，或国际格式（+33 6…）"
+email_format = "完整的电子邮箱地址，例如 prenom.nom@example.com"
+email_invalid = "电子邮箱地址无效：“{value}”。"
+age_unusual = "该出生日期对于 {level} 年级的孩子不常见（通常出生于 {year} 年）。"
+
+[registration.field]
+last_name = "姓"
+first_name = "名"
+birth_date = "出生日期"
+gender = "性别"
+level = "年级"
+school = "学校"
+guardian_name = "法定监护人姓名"
+guardian_phone = "电话"
+guardian_email = "电子邮箱"
+
+[registration.required]
+last_name = "请填写姓。"
+first_name = "请填写名。"
+birth_date = "请填写出生日期。"
+gender = "请选择性别。"
+school = "请选择学校。"
+level = "请选择年级。"
+guardian_name = "请填写法定监护人姓名。"
+guardian_phone = "请填写电话。"
+guardian_email = "请填写电子邮箱。"
+
+[public.state]
+upcoming = "报名将于 {date} 开始。"
+full = "名额已满：新的报名将进入候补名单。"
+closed = "报名已截止。"
+unscheduled = "报名日期即将公布。"
+
+[signup]
+title = "为孩子报名"
+lead = "每个孩子请填写一份表格。之后您会收到一封确认报名的邮件。"
+language = "语言"
+child = "孩子信息"
+level_hint = "孩子本学年所在年级（法国学制）：CP（6–7 岁）、CE1（7–8 岁）、CE2（8–9 岁）、CM1（9–10 岁）、CM2（10–11 岁）。"
+responsibility = "我已了解：活动期间，孩子始终由陪同的成人全权负责。"
+rules_accept = "我已阅读并接受活动规则。"
+rules_link = "阅读活动规则"
+submit = "提交报名"
+privacy_title = "您的个人信息"
+privacy = "本表格中的信息由 {organizer} 收集，用于组织本次活动：报名、接待、成绩以及与法定监护人的联系。这些信息不会提供给任何第三方，并存储在法国。成绩只显示孩子的名字和姓氏首字母。所有数据将在活动结束一个月后删除。如需查看、更正或删除您的数据，请写信至 {contact}。"
+required_responsibility = "请勾选关于成人责任的选项。"
+required_rules = "请接受活动规则。"
+duplicate = "该孩子已报名或正在报名中。如有疑问：{contact}。"
+too_fast = "表格提交过快。请检查信息后重新提交。"
+too_many = "此网络连接提交的报名过多，请一小时后再试。"
+full_notice = "参加人数已满：新的报名将进入候补名单。"
+sent_title = "请查收邮件"
+sent = "我们已向 {email} 发送了一封邮件。请在 {hours} 小时内点击邮件中的链接，确认 {first_name} 的报名。也请查看垃圾邮件文件夹。"
+sent_failed = "报名申请已保存，但邮件未能发送到 {email}。请联系主办方。"
+another = "为另一个孩子报名"
+back_home = "返回首页"
+
+[signup.result.verified]
+title = "报名已确认"
+text = "{first_name} 的报名已确认。号码布编号：{bib}。确认邮件已发送给您。"
+
+[signup.result.waitlisted]
+title = "候补名单"
+text = "参加人数已满：{first_name} 已列入候补名单。如有空出的名额，我们会写信通知您。"
+
+[signup.result.already]
+title = "已确认"
+text = "此报名已经确认过了。"
+
+[signup.result.expired]
+title = "链接已过期"
+text = "此链接已失效：报名未在 48 小时内确认。请重新填写表格。"
+
+[signup.result.invalid]
+title = "链接无效"
+text = "此链接无效。请检查链接是否完整复制。"
+
+[signup.withdraw]
+title = "取消报名"
+question = "您确定要取消 {child} 的报名吗？"
+confirm = "是的，取消报名"
+done = "{first_name} 的报名已取消。感谢您通知我们。"
+closed = "比赛已经开始：如需取消报名，请联系主办方（{contact}）。"
+invalid = "此链接无效或已被使用。如有疑问：{contact}。"
+
+[email.signup_verify]
+subject = "{edition}：请确认 {first_name} 的报名"
+body = """
+{guardian}，您好：
+
+您申请为 {child}（{level}）报名参加 {edition}，活动日期为 {date}。
+
+请在 48 小时内点击以下链接确认报名：
+{link}
+
+如未确认，该申请将被取消。如果这不是您本人提交的申请，请忽略此邮件。
+
+{organizer}
+"""
+
+[email.registration_confirmed]
+subject = "{edition}：{first_name} 的报名已确认"
+volunteer = """
+感谢您自愿协助负责摊位！组委会将在活动前与您联系。
+"""
+withdraw = """
+如果 {first_name} 无法参加，请取消报名以便把名额让给其他孩子：
+{link}"""
+body = """
+{guardian}，您好：
+
+{child}（{level}）参加 {edition} 的报名已确认。
+号码布编号：{bib}。
+
+活动时间：{date}，地点：{venue}，{start} 开始接待。
+{volunteer}
+提醒：活动期间，孩子始终由陪同的成人全权负责。
+
+如有疑问：{contact}
+
+{withdraw}
+
+期待与您相见！
+{organizer}
+"""
+
+[email.signup_waitlisted]
+subject = "{edition}：{first_name} 已列入候补名单"
+withdraw = """
+如需撤回申请：
+{link}"""
+body = """
+{guardian}，您好：
+
+我们已收到 {child}（{level}）参加 {edition} 的报名申请，但参加人数已满：{first_name} 已列入候补名单。如有空出的名额，我们会写信通知您。
+
+如有疑问：{contact}
+
+{withdraw}
+
+{organizer}
+"""
+
+[email.signup_withdrawn]
+subject = "{edition}：{first_name} 的报名已取消"
+body = """
+{guardian}，您好：
+
+{child} 参加 {edition} 的报名已取消。感谢您通知我们。
+
+如有疑问：{contact}
+
+{organizer}
+"""
+
+[level]
+CP = "CP"
+CE1 = "CE1"
+CE2 = "CE2"
+CM1 = "CM1"
+CM2 = "CM2"
+
+[public]
+rules = "活动规则"
+back_home = "首页"

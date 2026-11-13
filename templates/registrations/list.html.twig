@@ -10,7 +10,22 @@
         <li><strong>{{ counts.pending_verification }}</strong> {{ t('registration.counter.pending') }}</li>
         {% if counts.withdrawn > 0 %}<li><strong>{{ counts.withdrawn }}</strong> {{ t('registration.counter.withdrawn') }}</li>{% endif %}
     </ul>
+    <p class="meta">{{ t('registration.window.now', {state: t('public.state_short.' ~ window.state)}) }}{% if window.forced %} · {{ t('registration.window.forced_note') }}{% endif %}</p>
+    {% if can('manage_registration_window') %}
+        <form method="post" action="{{ url_for('registration-window') }}" class="form registration-window">
+            {{ csrf_field() }}
+            <label>{{ t('registration.window.title') }}
+                <select name="state">
+                    {% for choice in ['', 'open', 'closed'] %}
+                        <option value="{{ choice }}" {% if window.forced == choice %}selected{% endif %}>{{ t('registration.window.choice.' ~ (choice ?: 'auto')) }}</option>
+                    {% endfor %}
+                </select>
+            </label>
+            <button type="submit" class="button secondary">{{ t('registration.window.apply') }}</button>
+        </form>
+    {% endif %}
     <div class="toolbar">
+        <a class="button secondary" href="{{ refresh }}">⟳ {{ t('registration.refresh') }}</a>
         {% if can('add_on_site') %}<a class="button" href="{{ url_for('registration-new') }}">{{ t('registration.add') }}</a>{% endif %}
         {% if can('import_spreadsheets') %}<a class="button secondary" href="{{ url_for('registration-import') }}">{{ t('import.title') }}</a>{% endif %}
         <a class="button secondary" href="{{ url_for('registration-export') }}">{{ t('registration.export') }}</a>

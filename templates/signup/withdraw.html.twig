@@ -1,0 +1,22 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('signup.withdraw.title') }}{% endblock %}
+{% block flashes %}{% endblock %}
+
+{% block content %}
+    <h1>{{ t('signup.withdraw.title') }}</h1>
+    {% if state == 'confirm' %}
+        <p>{{ t('signup.withdraw.question', {child: child}) }}</p>
+        <form method="post" action="{{ url_for('signup-withdraw', {token: token}) }}" class="form">
+            {{ csrf_field() }}
+            <div class="toolbar"><button type="submit" class="button danger">{{ t('signup.withdraw.confirm') }}</button></div>
+        </form>
+    {% elseif state == 'done' %}
+        <p class="notice">{{ t('signup.withdraw.done', {first_name: first_name}) }}</p>
+    {% elseif state == 'closed' %}
+        <p class="notice warning">{{ t('signup.withdraw.closed', {contact: contact}) }}</p>
+    {% else %}
+        <p class="notice warning">{{ t('signup.withdraw.invalid', {contact: contact}) }}</p>
+    {% endif %}
+    <p><a href="{{ url_for('home') }}">{{ t('signup.back_home') }}</a></p>
+{% endblock %}

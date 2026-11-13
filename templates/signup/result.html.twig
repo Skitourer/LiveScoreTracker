@@ -1,0 +1,13 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('signup.result.' ~ outcome ~ '.title') }}{% endblock %}
+{% block flashes %}{% endblock %}
+
+{% block content %}
+    <h1>{{ t('signup.result.' ~ outcome ~ '.title') }}</h1>
+    <p class="notice{{ outcome in ['expired', 'invalid'] ? ' warning' : '' }}">{{ t('signup.result.' ~ outcome ~ '.text', {first_name: first_name, bib: bib ?? '–'}) }}</p>
+    <p class="toolbar">
+        {% if outcome == 'expired' %}<a class="button" href="{{ url_for('signup') }}">{{ t('signup.title') }}</a>{% endif %}
+        <a class="button secondary" href="{{ url_for('home') }}">{{ t('signup.back_home') }}</a>
+    </p>
+{% endblock %}

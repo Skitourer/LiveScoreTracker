@@ -45,6 +45,7 @@ final class Settings
         public readonly string $mailFrom = '',
         public readonly string $mailFromName = '',
         public readonly string $timezone = 'Europe/Paris',
+        public readonly string $notifyEmail = '',
     ) {
         if (!\in_array($dbDriver, [self::DRIVER_SQLITE, self::DRIVER_MYSQL], true)) {
             throw new InvalidArgumentException(\sprintf('Unsupported DB_DRIVER "%s".', $dbDriver));
@@ -89,6 +90,7 @@ final class Settings
             mailPassword: $read('MAIL_PASSWORD'),
             mailFrom: $read('MAIL_FROM'),
             mailFromName: $read('MAIL_FROM_NAME', 'LiveScoreTracker'),
+            notifyEmail: $read('NOTIFY_EMAIL'),
             timezone: \in_array($read('APP_TIMEZONE', 'Europe/Paris'), timezone_identifiers_list(), true) ? $read('APP_TIMEZONE', 'Europe/Paris') : 'UTC',
         );
     }

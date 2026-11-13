@@ -1,0 +1,48 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('signup.title') }} · {{ edition.name }}{% endblock %}
+{% block flashes %}{% endblock %}
+
+{% block content %}
+    {% include 'signup/_languages.html.twig' %}
+    <h1>{{ t('signup.title') }}</h1>
+    <p class="lead">{{ edition.name }} · {{ long_date(edition.date)|capitalize }}</p>
+
+    {% if not open %}
+        <p class="notice">
+            {% if window.state == 'upcoming' %}{{ t('public.state.upcoming', {date: long_date(window.opens_at, true)}) }}
+            {% elseif window.state == 'unscheduled' %}{{ t('public.state.unscheduled') }}
+            {% else %}{{ t('public.state.closed') }}{% endif %}
+        </p>
+        <p><a href="{{ url_for('home') }}">{{ t('signup.back_home') }}</a></p>
+    {% else %}
+        <p>{{ t('signup.lead') }}</p>
+        {% if window.state == 'full' %}<p class="notice warning">{{ t('signup.full_notice') }}</p>{% endif %}
+        {% include 'partials/errors.html.twig' %}
+        <form method="post" action="{{ url_for('signup') }}" class="form wide-form">
+            {{ csrf_field() }}
+            <div class="signup-trap" aria-hidden="true">
+                <label>Website <input type="text" name="website" value="" tabindex="-1" autocomplete="off"></label>
+            </div>
+            <h2>{{ t('signup.child') }}</h2>
+            {% include 'registrations/_fields.html.twig' with {birthOptional: false, levelHint: t('signup.level_hint')} %}
+            <label class="choice"><input type="checkbox" name="responsibility" value="1" required {% if responsibility %}checked{% endif %}> {{ t('signup.responsibility') }}</label>
+            <label class="choice"><input type="checkbox" name="rules" value="1" required {% if rules %}checked{% endif %}>
+                <span>{{ t('signup.rules_accept') }}</span>
+            </label>
+            {% if rules_html %}
+                <details class="signup-rules">
+                    <summary>{{ t('signup.rules_link') }}</summary>
+                    <article class="help-page">{{ rules_html|raw }}</article>
+                </details>
+            {% endif %}
+            <div class="toolbar">
+                <button type="submit" class="button">{{ t('signup.submit') }}</button>
+            </div>
+        </form>
+        <section class="signup-privacy" aria-labelledby="privacy-title">
+            <h2 id="privacy-title">{{ t('signup.privacy_title') }}</h2>
+            <p>{{ t('signup.privacy', {organizer: edition.organizer, contact: edition.contactEmail ?? edition.organizer}) }}</p>
+        </section>
+    {% endif %}
+{% endblock %}

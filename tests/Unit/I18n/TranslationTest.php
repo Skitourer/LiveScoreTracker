@@ -11,6 +11,7 @@ use LiveScoreTracker\Domain\Config\ScoringRules;
 use LiveScoreTracker\Domain\Config\TimeFormat;
 use LiveScoreTracker\Domain\Config\Variant;
 use LiveScoreTracker\Infrastructure\I18n\CatalogLoader;
+use LiveScoreTracker\Infrastructure\I18n\PublicLanguages;
 use LiveScoreTracker\Infrastructure\I18n\Translator;
 use LiveScoreTracker\Presentation\ResultFormatter;
 use PHPUnit\Framework\TestCase;
@@ -29,6 +30,51 @@ final class TranslationTest extends TestCase
 
         self::assertSame($fr, $en);
         self::assertNotEmpty($fr);
+    }
+
+    public function testEachPublicLanguageTranslatesTheRegistrationPagesAndEmails(): void
+    {
+        $loader = new CatalogLoader([self::GENERIC]);
+        $fr = $loader->load('fr');
+        $public = array_filter(
+            $fr,
+            static fn(string $key): bool => preg_match('/^(signup\\.|email\\.(signup_|registration_confirmed\\.)|registration\\.(required|field\\.(last_name|first_name|birth_date|gender|level|school|guardian_))|public\\.state\\.)/', $key) === 1,
+            ARRAY_FILTER_USE_KEY,
+        );
+        self::assertGreaterThan(60, \count($public));
+
+        foreach (array_keys(PublicLanguages::NAMES) as $locale) {
+            $catalog = $loader->load($locale);
+            foreach ($public as $key => $text) {
+                self::assertArrayHasKey($key, $catalog, "{$locale}: {$key}");
+                preg_match_all('/\\{[a-z_]+\\}/', $text, $expected);
+                preg_match_all('/\\{[a-z_]+\\}/', $catalog[$key], $found);
+                $expectedNames = array_unique($expected[0]);
+                $foundNames = array_unique($found[0]);
+                sort($expectedNames);
+                sort($foundNames);
+                self::assertSame($expectedNames, $foundNames, "{$locale}: placeholders of {$key}");
+            }
+        }
+    }
+
+    public function testPicksTheBrowserLanguageWhenOffered(): void
+    {
+        self::assertSame('de', PublicLanguages::fromAcceptLanguage('de-CH,de;q=0.9,en;q=0.8'));
+        self::assertSame('uk', PublicLanguages::fromAcceptLanguage('ru;q=0.9, uk'));
+        self::assertNull(PublicLanguages::fromAcceptLanguage('ja,ko'));
+        self::assertSame('rtl', PublicLanguages::direction('ar'));
+        self::assertSame('ltr', PublicLanguages::direction('zh'));
+    }
+
+    public function testTextsOfAnotherLanguageAreLoadedOnDemand(): void
+    {
+        $translator = (new CatalogLoader([self::GENERIC]))->translator('fr');
+        self::assertSame('Ein Kind anmelden', $translator->transIn('de', 'signup.title'));
+        self::assertSame('Inscrire un enfant', $translator->trans('signup.title'), 'Current language unchanged');
+        $translator->useLocale('it');
+        self::assertSame('Iscrivere un bambino', $translator->trans('signup.title'));
+        self::assertSame('Log out', $translator->trans('nav.logout'), 'Missing texts fall back to English');
     }
 
     public function testReplacesPlaceholdersAndFallsBack(): void

@@ -26,6 +26,8 @@ final class RequestContext
     public AuthState $state = AuthState::Anonymous;
     public Phase $phase = Phase::Preparation;
     public ?string $ip = null;
+    /** Scheme and host of the current request, for links in emails when APP_URL is not set. */
+    public string $baseUrl = '';
     public string $deviceId = '';
 
     public function setSession(Session $session): void

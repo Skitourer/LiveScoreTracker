@@ -160,27 +160,27 @@ form.inline {
 .notice,
 .flash {
   padding: var(--space-3);
-  border-left: var(--accent-bar-width) solid var(--color-accent);
+  border-inline-start: var(--accent-bar-width) solid var(--color-accent);
   border-radius: var(--radius-md);
   background: var(--color-surface);
 }
 
 .notice.error,
 .flash.error {
-  border-left-color: var(--color-error);
+  border-inline-start-color: var(--color-error);
 }
 
 .flash.success {
-  border-left-color: var(--color-ok);
+  border-inline-start-color: var(--color-ok);
 }
 
 .notice.warning,
 .flash.warning {
-  border-left-color: var(--color-warning);
+  border-inline-start-color: var(--color-warning);
 }
 
 .form-errors {
-  padding-left: var(--space-5);
+  padding-inline-start: var(--space-5);
   color: var(--color-error);
   font-weight: var(--font-weight-strong);
 }
@@ -228,7 +228,7 @@ form.inline {
 /* ---------- Badges and chips ---------- */
 .badge {
   display: inline-block;
-  margin-left: var(--space-1);
+  margin-inline-start: var(--space-1);
   padding: 0 var(--space-2);
   border-radius: var(--radius-sm);
   background: var(--color-surface);
@@ -293,7 +293,7 @@ th,
 td {
   padding: var(--space-2) var(--space-1);
   border-bottom: var(--border-width) solid var(--color-border);
-  text-align: left;
+  text-align: start;
   vertical-align: top;
 }
 
@@ -303,7 +303,7 @@ th {
 }
 
 .num {
-  text-align: right;
+  text-align: end;
   white-space: nowrap;
 }
 
@@ -356,6 +356,7 @@ tr.podium {
 }
 
 .form fieldset {
+  min-inline-size: 0;
   padding: var(--space-2) var(--space-3);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-md);
@@ -363,7 +364,7 @@ tr.podium {
 
 .form-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(14rem, 100%), 1fr));
   gap: var(--space-3);
   max-width: var(--content-width);
 }
@@ -1216,4 +1217,41 @@ pre.details {
 
 .ceremony-order .current span {
   font-weight: var(--font-weight-strong);
+}
+
+/* ---------- Public registration form (step 11) ---------- */
+.language-menu {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-3);
+  margin: 0 0 var(--space-3);
+  padding: 0;
+  list-style: none;
+}
+
+.language-menu a[aria-current='true'] {
+  font-weight: var(--font-weight-strong);
+  text-decoration: none;
+}
+
+.signup-trap {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.signup-privacy {
+  color: var(--color-muted);
+  font-size: var(--font-size-sm);
+  white-space: pre-line;
+}
+
+.registration-window {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: var(--space-2);
 }

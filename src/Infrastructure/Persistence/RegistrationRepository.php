@@ -60,6 +60,59 @@ final class RegistrationRepository
         return $id;
     }
 
+    /**
+     * Stores a registration made on the public form: waiting for the family to
+     * click the verification link (spec § 5.3).
+     */
+    public function createPending(ChildData $child, string $locale, string $tokenHash, string $expiresAt): int
+    {
+        $id = $this->create($child, RegistrationStatus::PendingVerification, RegistrationSource::Online, null, 0);
+        $this->pdo->prepare('UPDATE registrations SET locale = :locale, verify_token = :token, verify_expires_at = :expires WHERE id = :id')
+            ->execute(['locale' => $locale, 'token' => $tokenHash, 'expires' => $expiresAt, 'id' => $id]);
+
+        return $id;
+    }
+
+    public function findByVerifyToken(string $tokenHash): ?Registration
+    {
+        return $this->findBy('verify_token', $tokenHash);
+    }
+
+    public function findByWithdrawToken(string $tokenHash): ?Registration
+    {
+        return $this->findBy('withdraw_token', $tokenHash);
+    }
+
+    /**
+     * Replaces the withdrawal link of a registration (null: no valid link left).
+     */
+    public function setWithdrawToken(int $id, ?string $tokenHash): void
+    {
+        $this->pdo->prepare('UPDATE registrations SET withdraw_token = :token WHERE id = :id')->execute(['token' => $tokenHash, 'id' => $id]);
+    }
+
+    /**
+     * Registrations still waiting for verification whose link has expired.
+     *
+     * @return list<int>
+     */
+    public function stalePendingIds(string $now): array
+    {
+        $statement = $this->pdo->prepare('SELECT id FROM registrations WHERE status = :status AND verify_expires_at IS NOT NULL AND verify_expires_at < :now');
+        $statement->execute(['status' => RegistrationStatus::PendingVerification->value, 'now' => $now]);
+
+        return array_map(static fn(array $row): int => Row::int($row, 'id'), Row::all($statement));
+    }
+
+    private function findBy(string $column, string $value): ?Registration
+    {
+        $statement = $this->pdo->prepare("SELECT * FROM registrations WHERE {$column} = :value");
+        $statement->execute(['value' => $value]);
+        $rows = Row::all($statement);
+
+        return $rows === [] ? null : self::hydrate($rows[0]);
+    }
+
     public function find(int $id): ?Registration
     {
         $statement = $this->pdo->prepare('SELECT * FROM registrations WHERE id = :id');
@@ -452,6 +505,8 @@ final class RegistrationRepository
             checkedInAt: Row::nullableString($row, 'checked_in_at'),
             bibReturnedAt: Row::nullableString($row, 'bib_returned_at'),
             giftGivenAt: Row::nullableString($row, 'gift_given_at'),
+            locale: Row::nullableString($row, 'locale'),
+            verifyExpiresAt: Row::nullableString($row, 'verify_expires_at'),
         );
     }
 }
