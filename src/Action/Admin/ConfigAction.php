@@ -235,7 +235,7 @@ final class ConfigAction
         }
 
         $after = $before;
-        $after['workshops'] = array_values($list);
+        $after['workshops'] = $list;
         try {
             $this->save($before, $after, 'workshops');
         } catch (InvalidConfig $exception) {
