@@ -31,7 +31,8 @@ Le logiciel est **open source** (licence MIT). Tout ce qui est propre à l'organ
 | **Niveau** | Niveau scolaire : CP, CE1, CE2, CM1, CM2. |
 | **Groupe de niveaux** | Ensemble de niveaux qui font les mêmes épreuves (ex. « CP-CE1 », « CE2-CM2 »). |
 | **Genre** | Fille ou Garçon. |
-| **Catégorie** | Combinaison niveau + genre (ex. « Filles CM1 »). 10 catégories par défaut. C'est l'unité de calcul des scores et des classements. |
+| **Catégorie** | Fille ou garçon (le « genre » des données). |
+| **Série** | Combinaison classe + catégorie (ex. « CM1 filles »). 10 séries par défaut. C'est l'unité de calcul des scores et des classements (dans le code : `category`). |
 | **Atelier** | Un poste physique de la compétition (ex. « Sprint »). Un atelier peut servir plusieurs groupes de niveaux. |
 | **Variante** | La déclinaison d'un atelier pour un groupe de niveaux (ex. « Sprint 30 m » pour CP-CE1, « Sprint 40 m » pour CE2-CM2). C'est l'**épreuve** au sens du classement. |
 | **Essai** | Une tentative d'un enfant sur une épreuve. Une épreuve peut autoriser plusieurs essais. |
@@ -80,7 +81,7 @@ Il est recommandé d'avoir **au moins 2 admins**, pour permettre la réinitialis
 | Suivi de l'atelier (dossards restants, passés) | ✅ | ✅ | ✅ | |
 | Page d'aide de l'atelier | ✅ | ✅ | ✅ | |
 | Écrans de suivi (avancement, épreuves manquantes, contrôles) | ✅ | ✅ | | |
-| Résultats et scores par épreuve/catégorie, classements | ✅ | ✅ | | |
+| Résultats et scores par épreuve/série, classements | ✅ | ✅ | | |
 | Impression (listes, feuilles papier, podiums) | ✅ | ✅ | | |
 | Pilotage de l'écran de cérémonie | ✅ | ✅ | | |
 | Validation des actions proposées par Claude | ✅ | ✅ | | |
@@ -104,7 +105,7 @@ Le compte **arbitre de table** est actif pendant la phase « compétition en cou
 |---|---|---|---|
 | **Préparation** | Fermée (sauf tests) | Libre | Liste des épreuves à faire |
 | **Compétition en cours** | Ouverte | Modifiable avec garde-fous (§ 10.4) | Résultats bruts + épreuves faites/à faire |
-| **Compétition terminée** | **Bloquée** | Bloquée | Résultats, scores, rangs, classement de sa catégorie |
+| **Compétition terminée** | **Bloquée** | Bloquée | Résultats, scores, rangs, classement de sa série |
 
 - Le passage à « terminée » est une **validation explicite d'un admin**. Il est précédé d'une **alerte bloquante** qui liste les enfants présents ayant des épreuves manquantes et les égalités non départagées. L'admin confirme en connaissance de cause.
 - La **réouverture** (retour à « en cours ») est possible en cas d'oubli. Elle est tracée dans le journal.
@@ -192,7 +193,7 @@ Dans les deux cas, l'admin est notifié, pour éventuellement valider un enfant 
 
 Pour les cas où les inscriptions ont été recueillies ailleurs (formulaire externe, HelloAsso…) :
 - Formats acceptés : **.xlsx** et **.csv**.
-- **Correspondance des colonnes configurable** dans la configuration (ex. « la colonne genre s'appelle *Catégorie* »).
+- **Correspondance des colonnes configurable** dans la configuration (ex. « la colonne des filles/garçons s'appelle *Sexe* »).
 - **Nettoyage** : suppression des espaces superflus, normalisation de la casse des noms, reconnaissance des variantes de valeurs (« Garçon », « garcon », « G »).
 - **Import incrémental** : seuls les **nouveaux** enfants sont ajoutés (identifiés par nom + prénom + classe, et date de naissance si présente). Les dossards existants ne bougent pas.
 - **Aperçu avant validation** : lignes nouvelles, lignes déjà connues, lignes en erreur (champ manquant, classe inconnue…), doublons probables.
@@ -437,7 +438,7 @@ Trois niveaux de secours en cas de problème :
 
 ### 9.1 Population de calcul
 
-Pour chaque **variante** et chaque **catégorie**, le barème est calculé sur les **meilleures performances valides** des enfants **présents** de la catégorie. Les absents, les essais nuls et les DNF ne servent **jamais** de borne.
+Pour chaque **variante** et chaque **série**, le barème est calculé sur les **meilleures performances valides** des enfants **présents** de la série. Les absents, les essais nuls et les DNF ne servent **jamais** de borne.
 
 ### 9.2 Calcul du score d'une épreuve
 
@@ -447,7 +448,7 @@ Paramètres (configurables, globalement ou par variante) :
 - `foul_score` = score d'un enfant dont tous les essais sont nuls (**défaut : 1**)
 - `dnf_score` = score d'une épreuve non réalisée (**0**)
 
-Avec `best` et `worst` la meilleure et la moins bonne performance valide de la catégorie, et `v` la performance de l'enfant :
+Avec `best` et `worst` la meilleure et la moins bonne performance valide de la série, et `v` la performance de l'enfant :
 
 ```
 progression = (v − worst) / (best − worst)        # entre 0 et 1, quel que soit le sens
@@ -458,7 +459,7 @@ Le score est **arrondi à l'entier le plus proche**. Pour une épreuve « plus p
 
 **Cas limites**
 - Un seul enfant avec une performance valide, ou toutes les performances identiques : **1000 points** pour tous.
-- Aucun enfant avec une performance valide dans la catégorie : pas de barème. Les nuls reçoivent `foul_score`.
+- Aucun enfant avec une performance valide dans la série : pas de barème. Les nuls reçoivent `foul_score`.
 
 **Remarque** : avec `floor = 1`, on retrouve le barème historique (1 à 1000). Il faut alors fixer `foul_score = 0` pour distinguer le nul de la moins bonne performance. La configuration est **refusée** si `foul_score` n'est pas strictement inférieur à `floor`, ou si `dnf_score` dépasse `foul_score`.
 
@@ -476,12 +477,12 @@ Le score est **arrondi à l'entier le plus proche**. Pour une épreuve « plus p
 
 ### 9.4 Rang par épreuve
 
-Dans chaque catégorie, les enfants sont classés par score décroissant sur chaque épreuve. En cas d'égalité de score sur une épreuve, les enfants partagent le même rang.
+Dans chaque série, les enfants sont classés par score décroissant sur chaque épreuve. En cas d'égalité de score sur une épreuve, les enfants partagent le même rang.
 
 ### 9.5 Classement général
 
 - **Total** = somme des scores de toutes les épreuves du groupe de niveaux.
-- **10 classements**, un par catégorie.
+- **10 classements**, un par série.
 - Pas de classement par école.
 
 ### 9.6 Départage des égalités au total
@@ -519,7 +520,7 @@ Les vérifications sont des **avertissements non bloquants**, sauf mention contr
 | Enfant non pointé à l'accueil | Avertissement + proposition de le marquer présent |
 | Nombre d'essais déjà atteint | Avertissement (saisie possible, signalée) |
 | Valeur hors de la plage plausible de la variante | Avertissement |
-| Valeur très éloignée de la médiane de la catégorie (une fois quelques résultats disponibles) | Avertissement |
+| Valeur très éloignée de la médiane de la série (une fois quelques résultats disponibles) | Avertissement |
 | **Mauvaise distance probable** : temps plus proche de la distribution de l'autre variante (ex. temps d'un CE1 typique du 40 m) | Avertissement « Distance correcte ? » |
 | Doublon probable (même dossard, même épreuve, même valeur à quelques secondes d'intervalle) | Avertissement ; dédoublonnage à la synchronisation |
 | Mode compteur : plus de tirs que le nombre autorisé | Avertissement |
@@ -538,7 +539,7 @@ Précisions (étape 8b) :
   - **Égalités à trancher** (§ 9.6) : pendant la compétition, une égalité n'est listée qu'une fois que les enfants concernés ont fait toutes leurs épreuves (avant, elle peut encore changer) ; après la clôture, toutes. L'admin choisit l'ordre (une place par enfant) ; le classement affiche « départagé : décision de l'arbitre principal ». La décision vaut pour ces enfants-là tant qu'ils restent à égalité : si les résultats changent, elle est ignorée. Elle peut être annulée. Décision et annulation sont tracées dans le journal d'audit.
   - **Saisies après la clôture** (§ 8.8) : résultat, heure sur le téléphone, heure de réception, arbitre ; boutons « Accepter » (le résultat est enregistré comme une saisie normale, avec les contrôles habituels, et marqué « reçu après la clôture, accepté ») et « Refuser » (gardée sur le serveur). Possible en compétition ou terminée, sans rouvrir ; les classements sont recalculés. Tracé dans le journal d'audit.
 - **Contrôles par rapport aux autres résultats** (§ 10.1), faits sur le tableau des contrôles et non au moment de la saisie, uniquement pour les temps et les distances, et seulement quand au moins 5 autres résultats sont connus. Seul le résultat retenu de chaque enfant est comparé :
-  - **loin de la médiane** : plus du double, ou moins de la moitié, de la médiane des autres enfants de la catégorie ;
+  - **loin de la médiane** : plus du double, ou moins de la moitié, de la médiane des autres enfants de la série ;
   - **distance correcte ?** (épreuves chronométrées avec une variante par groupe de niveaux, ex. sprint 30 m / 40 m) : temps au moins aussi lent que le temps médian de l'autre distance (plus longue), ou au moins aussi rapide que celui de l'autre distance (plus courte), pour les enfants du même genre.
 - **Clôture** (admin, page « Phase de la compétition ») : le bouton « Clôturer la compétition » ouvre d'abord une page de rappel : enfants présents avec des épreuves manquantes (liste), égalités à trancher, résultats à vérifier, saisies tardives en attente. L'admin peut clôturer quand même (« Clôturer quand même »). Le nombre d'éléments en suspens est inscrit au journal d'audit avec le changement de phase. Après la clôture : saisie fermée, une épreuve non faite compte « non faite », compte des arbitres inactif (sauf l'envoi des saisies en attente, § 8.8).
 - **Réouverture** (admin) : retour à « en cours », après confirmation ; inscrite au journal d'audit.
@@ -563,7 +564,7 @@ L'application affiche les enfants concernés avant validation (ex. « 12 enfants
 - **Mode nul strict → bienveillant** : les nuls ne comptent plus, des essais redeviennent disponibles.
 - **Mode nul bienveillant → strict** : les nuls comptent, d'où un éventuel dépassement (même règle des N premiers).
 - **Ajout d'une épreuve** : tous les enfants concernés l'ont à faire.
-- **Changement de classe ou de genre d'un enfant** : ses résultats le suivent, et les catégories concernées sont recalculées.
+- **Changement de classe ou de catégorie d'un enfant** : ses résultats le suivent, et les séries concernées sont recalculées.
 
 **Interdit dès qu'il existe des résultats**
 - Changement du type de mesure ou de l'unité d'une variante.
@@ -581,32 +582,32 @@ Toute modification est inscrite au **journal d'audit** (qui, quoi, quand, ancien
 - Compteurs : inscrits, présents, sortis, résultats saisis, résultats à vérifier, saisies en attente de synchronisation.
 - Accès rapide à toutes les fonctions.
 
-### 11.2 Résultats par épreuve et catégorie
+### 11.2 Résultats par épreuve et série
 
-Pour chaque variante × catégorie : liste des enfants avec **tous les essais**, modificateurs, **résultat retenu**, **score**, **rang**, statut (valide, nul, DNF, à vérifier). Correction possible depuis cet écran.
+Pour chaque variante × série : liste des enfants avec **tous les essais**, modificateurs, **résultat retenu**, **score**, **rang**, statut (valide, nul, DNF, à vérifier). Correction possible depuis cet écran.
 
 ### 11.3 Épreuves manquantes
 
-- Pour chaque atelier : la liste des **enfants présents qui ne l'ont pas faite** (dossard, prénom, nom, catégorie), en gros caractères, lisible pour un **appel à la sono**.
+- Pour chaque atelier : la liste des **enfants présents qui ne l'ont pas faite** (dossard, prénom, nom, série), en gros caractères, lisible pour un **appel à la sono**.
 - Vue inverse : pour chaque enfant, les épreuves qui lui manquent.
-- Filtres par atelier et par catégorie.
+- Filtres par atelier et par série.
 
 ### 11.4 Classements
 
-Classement général de chaque catégorie : rang, prénom, nom, total, score par épreuve, critère de départage éventuel.
+Classement général de chaque série : rang, prénom, nom, total, score par épreuve, critère de départage éventuel.
 
 - **Essais épuisés** : quand un enfant a fait tous ses essais, on ne peut plus en ajouter (écran de l'enfant, course, téléphone hors ligne) ; un résultat se change seulement par « Corriger ». Seule exception : une saisie faite hors ligne par un autre téléphone est acceptée et marquée « à vérifier » (§ 8.8).
 
 Précisions (étape 8a) :
-- **Résultats et classements** (`/results`) : une page par catégorie (choix par pastilles) avec le classement général (rang, dossard, prénom, nom, total, score de chaque épreuve, critère de départage, badge « épreuves en attente »), puis le détail de chaque épreuve (bornes du barème, tous les essais, résultat retenu, score, rang, statut, badge « à vérifier »). Chaque ligne mène à l'écran de correction de l'enfant. Tout est recalculé à chaque affichage (§ 9.7) ; avant la clôture, une épreuve pas encore faite est « à faire ».
-- **Épreuves manquantes** (`/missing`) : vue « par atelier » en gros caractères (dossard, prénom, nom, classe) et vue « par enfant », avec filtres par atelier et par catégorie ; seuls les enfants présents sont listés.
+- **Résultats et classements** (`/results`) : une page par série (choix par pastilles) avec le classement général (rang, dossard, prénom, nom, total, score de chaque épreuve, critère de départage, badge « épreuves en attente »), puis le détail de chaque épreuve (bornes du barème, tous les essais, résultat retenu, score, rang, statut, badge « à vérifier »). Chaque ligne mène à l'écran de correction de l'enfant. Tout est recalculé à chaque affichage (§ 9.7) ; avant la clôture, une épreuve pas encore faite est « à faire ».
+- **Épreuves manquantes** (`/missing`) : vue « par atelier » en gros caractères (dossard, prénom, nom, classe) et vue « par enfant », avec filtres par atelier et par série ; seuls les enfants présents sont listés.
 - **Effacer les résultats d'un dossard à une épreuve** (admin, organisateur, phase « en cours ») : un bouton sur l'écran de saisie de l'enfant supprime tous ses essais de l'épreuve (ils restent visibles dans l'historique, l'action est inscrite au journal d'audit) ; l'enfant peut refaire l'épreuve.
 
 ### 11.5 Avancement
 
-Version détaillée de l'écran public (§ 13.1) : par atelier et par catégorie.
+Version détaillée de l'écran public (§ 13.1) : par atelier et par série.
 
-Précisions (étape 9b) : adresse `/progress` (admin, organisateur ; tuile « Suivi de la compétition » du tableau de bord) ; tableau atelier × catégorie « passés / attendus », lien vers le suivi de chaque atelier et vers l'écran public ; actualisation automatique.
+Précisions (étape 9b) : adresse `/progress` (admin, organisateur ; tuile « Suivi de la compétition » du tableau de bord) ; tableau atelier × série « passés / attendus », lien vers le suivi de chaque atelier et vers l'écran public ; actualisation automatique.
 
 ### 11.6 Journal d'audit (admin)
 
@@ -640,7 +641,7 @@ config.example/                      data/
 
 Les **clés** sont en anglais (comme le code) ; les **libellés** affichés passent par les traductions. Contenu principal :
 - informations de l'édition : nom, date, lieu, horaires, organisateur, contact ;
-- niveaux, genres, **groupes de niveaux**, ordre d'affichage des catégories ;
+- niveaux, genres, **groupes de niveaux**, ordre d'affichage des séries ;
 - liste des **écoles** proposées ;
 - inscriptions : dates d'ouverture et de fermeture, quota, numéro du premier dossard ;
 - barème : score maximal, plancher, score du nul, score DNF, critères de départage ;
@@ -706,13 +707,13 @@ Sujets et corps de tous les emails dans les fichiers de traduction, avec des var
 ### 13.2 Écran de cérémonie
 
 - Disponible **uniquement après la clôture**.
-- Affiché sur un grand écran, **piloté depuis le téléphone** d'un admin ou d'un organisateur : « catégorie suivante », « révéler la place suivante ».
-- Pour chaque catégorie : révélation du **3e, puis du 2e, puis du 1er**, en **prénom et nom complets** (les enfants sont appelés au micro ; demande de Boris, étape 9c) avec le total de points, sur l'écran comme sur la page de pilotage.
-- Ordre des catégories configurable.
+- Affiché sur un grand écran, **piloté depuis le téléphone** d'un admin ou d'un organisateur : « série suivante », « révéler la place suivante ».
+- Pour chaque série : révélation du **3e, puis du 2e, puis du 1er**, en **prénom et nom complets** (les enfants sont appelés au micro ; demande de Boris, étape 9c) avec le total de points, sur l'écran comme sur la page de pilotage.
+- Ordre des séries configurable.
 - Précisions (étape 9c) :
   - **Écran** `/ceremony` : sur l'ordinateur relié au vidéoprojecteur, **connecté en admin ou organisateur** (pas de lien public). Il suit l'état toutes les 2 secondes ; ni menu ni messages ; bouton « Plein écran ». Podium en marches (2e à gauche, 1er au centre, 3e à droite), place non révélée affichée « ? », dernière place révélée animée (sauf si l'appareil demande moins d'animations).
-  - **Pilotage** `/ceremony/control` (admin, organisateur ; tuile « Cérémonie » du tableau de bord, lien depuis la page de phase une fois la compétition terminée) : gros bouton « Révéler la 3e / 2e / 1re place », puis « Catégorie suivante » ; « Masquer la dernière place », « Catégorie précédente » ; ordre des catégories réglable (monter, descendre, aller à une catégorie), par défaut celui de la configuration.
-  - Podium : enfants **présents** classés 1 à 3 au classement final (égalités tranchées comprises) ; une égalité non tranchée partage la même place et se révèle d'un coup. L'état (ordre, catégorie, places révélées) est gardé dans la base, partagé entre l'écran et le téléphone.
+  - **Pilotage** `/ceremony/control` (admin, organisateur ; tuile « Cérémonie » du tableau de bord, lien depuis la page de phase une fois la compétition terminée) : gros bouton « Révéler la 3e / 2e / 1re place », puis « Série suivante » ; « Masquer la dernière place », « Série précédente » ; ordre des séries réglable (monter, descendre, aller à une série), par défaut celui de la configuration.
+  - Podium : enfants **présents** classés 1 à 3 au classement final (égalités tranchées comprises) ; une égalité non tranchée partage la même place et se révèle d'un coup. L'état (ordre, série, places révélées) est gardé dans la base, partagé entre l'écran et le téléphone.
   - Disponible seulement en phase « terminée » ; avant, les deux pages l'indiquent.
 
 ### 13.3 Page participant
@@ -723,11 +724,11 @@ Connexion par **dossard + date de naissance**, avec blocage temporaire après pl
 |---|---|
 | Préparation | Liste des épreuves de son groupe |
 | En cours | Épreuves faites avec **résultats bruts** (essais), épreuves **restant à faire**. Pas de scores ni de rangs. |
-| Terminée | Résultats bruts, **scores**, **rang par épreuve**, **rang au total**, et **classement de sa catégorie** sous forme de liste (prénom + initiale, scores, rangs). |
+| Terminée | Résultats bruts, **scores**, **rang par épreuve**, **rang au total**, et **classement de sa série** sous forme de liste (prénom + initiale, scores, rangs). |
 
 Les autres enfants sont toujours affichés en **prénom + initiale du nom**.
 
-Précisions (étape 9b) : adresse `/participant`, liée depuis l'accueil. Seuls les enfants inscrits avec un dossard peuvent se connecter ; blocage temporaire après 5 échecs pour un dossard ou 20 pour une adresse IP (§ 15). Cette connexion est indépendante des comptes bénévoles et se ferme après 30 minutes sans visite (bouton « Quitter »). L'enfant connecté voit son nom complet. Pendant la compétition, les résultats bruts s'affichent au fil de l'eau, y compris ceux « à vérifier », sans mention particulière. Après la clôture : total et rang dans la catégorie, tableau des épreuves (résultats, points, rang par épreuve ; « non faite » si besoin), puis classement de la catégorie (enfants présents, prénom + initiale, points) avec sa propre ligne mise en valeur.
+Précisions (étape 9b) : adresse `/participant`, liée depuis l'accueil. Seuls les enfants inscrits avec un dossard peuvent se connecter ; blocage temporaire après 5 échecs pour un dossard ou 20 pour une adresse IP (§ 15). Cette connexion est indépendante des comptes bénévoles et se ferme après 30 minutes sans visite (bouton « Quitter »). L'enfant connecté voit son nom complet. Pendant la compétition, les résultats bruts s'affichent au fil de l'eau, y compris ceux « à vérifier », sans mention particulière. Après la clôture : total et rang dans la série, tableau des épreuves (résultats, points, rang par épreuve ; « non faite » si besoin), puis classement de la série (enfants présents, prénom + initiale, points) avec sa propre ligne mise en valeur.
 
 ---
 
@@ -738,8 +739,8 @@ Précisions (étape 9b) : adresse `/participant`, liée depuis l'accueil. Seuls 
 | Liste d'accueil | PDF | Prénom, nom complet, dossard, classe — **triée par prénom** |
 | Feuilles de secours | PDF | Par épreuve et groupe de classes, triées par dossard (détail § 8.9) |
 | Modèle de saisie de secours | Excel | Une feuille par variante |
-| Podiums | PDF | Les **3 premiers de chaque catégorie** (prénom, nom, école, dossard, total) |
-| Classements complets | PDF / Excel | Par catégorie : rang, dossard, nom, école, points par épreuve, total (Excel : aussi les critères de départage) |
+| Podiums | PDF | Les **3 premiers de chaque série** (prénom, nom, école, dossard, total) |
+| Classements complets | PDF / Excel | Par série : rang, dossard, nom, école, points par épreuve, total (Excel : aussi les critères de départage) |
 | Résultats détaillés | Excel | Tous les essais retenus : enfant, épreuve, mesure, modificateurs, résultat, auteur et heure de saisie, « à vérifier » |
 | Liste des inscrits | Excel | Toutes les informations d'inscription |
 | Fiches des épreuves | PDF | Contenu des pages d'aide (impression pour les ateliers) |
@@ -784,9 +785,9 @@ Tous les documents sont regroupés sur une page **Documents** (admins et organis
 
 - **J+23** : email d'avertissement aux admins.
 - **J+30** : avant la suppression, archivage des **statistiques anonymes** :
-  - nombre de participants par catégorie et par école ;
+  - nombre de participants par série et par école ;
   - résultats par épreuve **sans nom** (distributions, meilleures performances, moyennes) ;
-  - records par épreuve et catégorie.
+  - records par épreuve et série.
 - Puis **suppression** de toutes les données nominatives : enfants, adultes, emails, journaux nominatifs, sauvegardes locales et copies sur Drive.
 - Déclenchement par tâche planifiée OVH, ou à la première visite après l'échéance.
 
@@ -806,7 +807,7 @@ L'**historique anonyme** des éditions précédentes reste consultable (comparai
 
 - **API REST en JSON**, protégée par une **clé** générée par l'admin (révocable).
 - **Données exposées uniquement par numéro de dossard** (aucun nom).
-- **Lecture** : phase, avancement par atelier et catégorie, résultats bruts et scores, résultats « à vérifier », épreuves manquantes, anomalies, état de synchronisation.
+- **Lecture** : phase, avancement par atelier et série, résultats bruts et scores, résultats « à vérifier », épreuves manquantes, anomalies, état de synchronisation.
 - **Propositions d'action** : l'API permet de **proposer** une action (ex. marquer un résultat « à vérifier », signaler une anomalie). Les propositions arrivent dans une **file d'attente** que l'admin ou un organisateur **valide ou refuse** d'un clic. Rien n'est appliqué sans validation humaine.
 - Toutes les propositions et décisions sont tracées dans le journal.
 - Phase 1 : l'API est conçue et documentée, et sert déjà en interne (écrans à rafraîchissement automatique). Phase 2 : branchement de Claude pour la surveillance en temps réel.
@@ -1278,7 +1279,7 @@ Les libellés affichés (noms des ateliers, des actions, des modificateurs, des 
 ## Annexe B — Exemples de calcul
 
 **Épreuve « plus grand = meilleur »** (lancer, `floor` = 100)
-Meilleure performance de la catégorie 68,00 m, moins bonne 8,00 m.
+Meilleure performance de la série 68,00 m, moins bonne 8,00 m.
 
 | Enfant | Résultat | Calcul | Score |
 |---|---|---|---|

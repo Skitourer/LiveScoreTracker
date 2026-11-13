@@ -37,7 +37,7 @@ final class HttpTest extends TestCase
         $body = (string) $this->request('GET', '/status')->getBody();
         self::assertStringContainsString('LiveScoreTracker', $body);
         self::assertStringContainsString('migration(s) en attente', $body);
-        self::assertStringContainsString('12 épreuves, 10 catégories', $body);
+        self::assertStringContainsString('12 épreuves, 10 séries', $body);
         self::assertStringContainsString('/demo/report', $body);
 
         $this->request('POST', '/internal/migrate', ['X-Deploy-Token' => 'test-token']);

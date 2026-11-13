@@ -2,7 +2,7 @@
 
 *[English version](README.md)*
 
-LiveScoreTracker gère une compétition multisports d'une journée pour les enfants : inscriptions, accueil, saisie des résultats à chaque atelier depuis le téléphone des arbitres (même sans réseau), calcul automatique des points et des classements par catégorie, contrôles, écrans d'avancement et remise des prix.
+LiveScoreTracker gère une compétition multisports d'une journée pour les enfants : inscriptions, accueil, saisie des résultats à chaque atelier depuis le téléphone des arbitres (même sans réseau), calcul automatique des points et des classements par série (classe + fille/garçon), contrôles, écrans d'avancement et remise des prix.
 
 C'est une application web pensée d'abord pour le téléphone, en PHP (Slim 4) avec MySQL, prévue pour un hébergement mutualisé bon marché et des bénévoles équipés de téléphones ordinaires.
 

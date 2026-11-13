@@ -31,7 +31,7 @@ The software is **open source** (MIT license). Everything specific to an organiz
 | **Level** | School grade: CP, CE1, CE2, CM1, CM2 (French primary school, roughly ages 6 to 11). |
 | **Level group** | Set of levels doing the same events (e.g. "CP-CE1", "CE2-CM2"). |
 | **Gender** | Girl or Boy. |
-| **Category** | Level + gender combination (e.g. "CM1 Girls"). 10 categories by default. It is the unit for computing scores and rankings. |
+| **Division** | Level + gender combination (e.g. "CM1 Girls"). 10 divisions by default. It is the unit for computing scores and rankings (in the code: `category`). |
 | **Workshop** | A physical station of the competition (e.g. "Sprint"). A workshop can serve several level groups. |
 | **Variant** | The version of a workshop for a level group (e.g. "Sprint 30 m" for CP-CE1, "Sprint 40 m" for CE2-CM2). It is the **event** for ranking purposes. |
 | **Attempt** | One try by a child at an event. An event may allow several attempts. |
@@ -80,7 +80,7 @@ Having **at least 2 admins** is recommended, so that they can reset each other's
 | Workshop follow-up (remaining and done bibs) | ✅ | ✅ | ✅ | |
 | Workshop help page | ✅ | ✅ | ✅ | |
 | Monitoring screens (progress, missing events, checks) | ✅ | ✅ | | |
-| Results and scores per event/category, rankings | ✅ | ✅ | | |
+| Results and scores per event/division, rankings | ✅ | ✅ | | |
 | Printing (lists, paper sheets, podiums) | ✅ | ✅ | | |
 | Driving the ceremony screen | ✅ | ✅ | | |
 | Approving actions proposed by Claude | ✅ | ✅ | | |
@@ -104,7 +104,7 @@ The **table referee** account is active during the "competition in progress" pha
 |---|---|---|---|
 | **Preparation** | Closed (except tests) | Free | List of events to do |
 | **In progress** | Open | Editable with safeguards (§ 10.4) | Raw results + events done/to do |
-| **Closed** | **Locked** | Locked | Results, scores, ranks, own category ranking |
+| **Closed** | **Locked** | Locked | Results, scores, ranks, own division ranking |
 
 - Switching to "closed" requires **explicit admin approval**. It is preceded by a **blocking alert** listing present children with missing events and unresolved ties. The admin confirms knowingly.
 - **Reopening** (back to "in progress") is possible if something was forgotten. It is recorded in the log.
@@ -437,7 +437,7 @@ Three fallback levels in case of trouble:
 
 ### 9.1 Computation population
 
-For each **variant** and each **category**, the scale is computed over the **best valid performances** of the **present** children in the category. Absentees, fouls and DNFs **never** serve as bounds.
+For each **variant** and each **division**, the scale is computed over the **best valid performances** of the **present** children in the division. Absentees, fouls and DNFs **never** serve as bounds.
 
 ### 9.2 Event score computation
 
@@ -447,7 +447,7 @@ Parameters (configurable globally or per variant):
 - `foul_score` = score of a child whose attempts are all fouls (**default: 1**)
 - `dnf_score` = score for an event not done (**0**)
 
-With `best` and `worst` the best and worst valid performances in the category, and `v` the child's performance:
+With `best` and `worst` the best and worst valid performances in the division, and `v` the child's performance:
 
 ```
 progression = (v − worst) / (best − worst)        # between 0 and 1, whatever the direction
@@ -458,7 +458,7 @@ The score is **rounded to the nearest integer**. For a "lower is better" event t
 
 **Edge cases**
 - Only one child with a valid performance, or all performances identical: **1000 points** for everyone.
-- No child with a valid performance in the category: no scale. Fouls get `foul_score`.
+- No child with a valid performance in the division: no scale. Fouls get `foul_score`.
 
 **Note**: with `floor = 1`, you get the historical scale (1 to 1000). Then set `foul_score = 0` to distinguish a foul from the worst performance. The configuration is **rejected** if `foul_score` is not strictly lower than `floor`, or if `dnf_score` is higher than `foul_score`.
 
@@ -476,12 +476,12 @@ The score is **rounded to the nearest integer**. For a "lower is better" event t
 
 ### 9.4 Per-event rank
 
-Within each category, children are ranked by decreasing score for each event. Children with the same score on an event share the same rank.
+Within each division, children are ranked by decreasing score for each event. Children with the same score on an event share the same rank.
 
 ### 9.5 Overall ranking
 
 - **Total** = sum of the scores of all events of the level group.
-- **10 rankings**, one per category.
+- **10 rankings**, one per division.
 - No ranking by school.
 
 ### 9.6 Tie-breaking on the total
@@ -519,7 +519,7 @@ Checks are **non-blocking warnings** unless stated otherwise. The affected resul
 | Child not checked in | Warning + offer to mark as present |
 | Number of attempts already reached | Warning (entry allowed, flagged) |
 | Value outside the variant's plausible range | Warning |
-| Value far from the category median (once some results exist) | Warning |
+| Value far from the division median (once some results exist) | Warning |
 | **Probable wrong distance**: time closer to the other variant's distribution (e.g. a CE1 time typical of the 40 m) | Warning "Correct distance?" |
 | Probable duplicate (same bib, same event, same value within a few seconds) | Warning; deduplication during sync |
 | Counter mode: more shots than allowed | Warning |
@@ -538,7 +538,7 @@ Details (step 8b):
   - **Ties to break** (§ 9.6): during the competition, a tie is only listed once the tied children have done all their events (before, it may still change); after closing, all of them. The admin chooses the order (one place per child); the ranking shows "decided by the head referee". The decision applies to these children as long as they stay tied: if results change, it is ignored. It can be cancelled. Decision and cancellation are recorded in the audit log.
   - **Entries after closing** (§ 8.8): result, time on the phone, time received, referee; "Accept" (the result is recorded as a normal entry, with the usual checks, and marked "received after the closing, accepted") and "Refuse" (kept on the server). Possible while running or closed, without reopening; rankings are recomputed. Recorded in the audit log.
 - **Checks against the other results** (§ 10.1), made on the checks dashboard rather than on entry, only for times and distances, and only once at least 5 other results are known. Only each child's retained result is compared:
-  - **far from the median**: more than twice, or less than half, the median of the other children of the category;
+  - **far from the median**: more than twice, or less than half, the median of the other children of the division;
   - **right distance?** (timed events with one variant per level group, e.g. sprint 30 m / 40 m): a time at least as slow as the median time of the other (longer) distance, or at least as fast as that of the other (shorter) distance, among children of the same gender.
 - **Closing** (admin, "Competition phase" page): the "Close the competition" button first opens a recap page: present children with missing events (list), ties to break, results to check, late entries waiting. The admin can close anyway ("Close anyway"). The number of pending items is written to the audit log with the phase change. After closing: entry closed, an event not done counts as "not done", referee account inactive (except for sending waiting entries, § 8.8).
 - **Reopening** (admin): back to "in progress", after confirmation; recorded in the audit log.
@@ -563,7 +563,7 @@ The application shows the affected children before approval (e.g. "12 children w
 - **Foul mode strict → lenient**: fouls no longer count, attempts become available again.
 - **Foul mode lenient → strict**: fouls count, possibly exceeding the limit (same first-N rule).
 - **New event**: all the relevant children have to do it.
-- **Change of a child's grade or gender**: their results follow them, and the affected categories are recomputed.
+- **Change of a child's grade or gender**: their results follow them, and the affected divisions are recomputed.
 
 **Forbidden once results exist**
 - Changing a variant's measure type or unit.
@@ -581,32 +581,32 @@ Every change is written to the **audit log** (who, what, when, old and new value
 - Counters: registered, present, checked out, results entered, results to review, entries waiting for sync.
 - Quick access to all features.
 
-### 11.2 Results per event and category
+### 11.2 Results per event and division
 
-For each variant × category: list of children with **all attempts**, modifiers, **retained result**, **score**, **rank**, status (valid, foul, DNF, to review). Corrections possible from this screen.
+For each variant × division: list of children with **all attempts**, modifiers, **retained result**, **score**, **rank**, status (valid, foul, DNF, to review). Corrections possible from this screen.
 
 ### 11.3 Missing events
 
-- For each workshop: the list of **present children who have not done it** (bib, first name, last name, category), in large type, readable for a **PA announcement**.
+- For each workshop: the list of **present children who have not done it** (bib, first name, last name, division), in large type, readable for a **PA announcement**.
 - Reverse view: for each child, their missing events.
-- Filters by workshop and category.
+- Filters by workshop and division.
 
 ### 11.4 Rankings
 
-Overall ranking of each category: rank, first name, last name, total, score per event, tie-break criterion if any.
+Overall ranking of each division: rank, first name, last name, total, score per event, tie-break criterion if any.
 
 - **Attempts used up**: once a child has done every attempt, no attempt can be added (child screen, race, offline phone); a result can only be changed with "Correct". Only exception: an entry made offline by another phone is accepted and marked "to check" (§ 8.8).
 
 Details (step 8a):
-- **Results and rankings** (`/results`): one page per category (chosen with chips) with the overall ranking (rank, bib, first name, last name, total, score of each event, tie-break criterion, "events pending" badge), then the detail of each event (scale bounds, every attempt, retained result, score, rank, status, "to check" badge). Each line leads to the child's correction screen. Everything is recomputed on every display (§ 9.7); before closing, an event not done yet is "to do".
-- **Missing events** (`/missing`): "by workshop" view in large print (bib, first name, last name, grade) and "by child" view, with filters by workshop and by category; only present children are listed.
+- **Results and rankings** (`/results`): one page per division (chosen with chips) with the overall ranking (rank, bib, first name, last name, total, score of each event, tie-break criterion, "events pending" badge), then the detail of each event (scale bounds, every attempt, retained result, score, rank, status, "to check" badge). Each line leads to the child's correction screen. Everything is recomputed on every display (§ 9.7); before closing, an event not done yet is "to do".
+- **Missing events** (`/missing`): "by workshop" view in large print (bib, first name, last name, grade) and "by child" view, with filters by workshop and by division; only present children are listed.
 - **Clear a bib's results at an event** (admin, organizer, "running" phase): a button on the child's entry screen deletes all their attempts at the event (they stay visible in the history, the action is written to the audit log); the child can do the event again.
 
 ### 11.5 Progress
 
-Detailed version of the public screen (§ 13.1): per workshop and per category.
+Detailed version of the public screen (§ 13.1): per workshop and per division.
 
-Details (step 9b): address `/progress` (admin, organizer; "Competition monitoring" tile of the dashboard); workshop × category table "done / expected", links to each workshop's follow-up and to the public screen; automatic refresh.
+Details (step 9b): address `/progress` (admin, organizer; "Competition monitoring" tile of the dashboard); workshop × division table "done / expected", links to each workshop's follow-up and to the public screen; automatic refresh.
 
 ### 11.6 Audit log (admin)
 
@@ -640,7 +640,7 @@ config.example/                      data/
 
 **Keys** are in English (like the code); displayed **labels** go through translations. Main content:
 - edition information: name, date, venue, times, organizer, contact;
-- levels, genders, **level groups**, category display order;
+- levels, genders, **level groups**, division display order;
 - list of offered **schools**;
 - registration: opening and closing dates, quota, first bib number;
 - scoring: maximum score, floor, foul score, DNF score, tie-break criteria;
@@ -706,13 +706,13 @@ At the site's address (`/`), **without login**, readable on a phone, **with no p
 ### 13.2 Ceremony screen
 
 - Available **only after closing**.
-- Shown on a big screen, **driven from the phone** of an admin or organizer: "next category", "reveal next place".
-- For each category: reveal **3rd, then 2nd, then 1st**, with **full first and last names** (the children are called over the microphone; requested in step 9c) and total points, on the screen and on the control page.
-- Configurable category order.
+- Shown on a big screen, **driven from the phone** of an admin or organizer: "next division", "reveal next place".
+- For each division: reveal **3rd, then 2nd, then 1st**, with **full first and last names** (the children are called over the microphone; requested in step 9c) and total points, on the screen and on the control page.
+- Configurable division order.
 - Details (step 9c):
   - **Screen** `/ceremony`: on the computer connected to the projector, **logged in as admin or organizer** (no public link). It follows the state every 2 seconds; no menu nor messages; "Full screen" button. Stepped podium (2nd on the left, 1st in the middle, 3rd on the right), a place not revealed shows "?", the last place revealed is animated (unless the device asks for less motion).
-  - **Control** `/ceremony/control` (admin, organizer; "Ceremony" tile of the dashboard, link from the phase page once the competition is closed): big "Reveal the 3rd / 2nd / 1st place" button, then "Next category"; "Hide the last place", "Previous category"; category order adjustable (up, down, go to a category), by default the configuration's.
-  - Podium: **present** children ranked 1 to 3 in the final ranking (ties broken by hand included); an unbroken tie shares the same place and is revealed at once. The state (order, category, places revealed) is kept in the database, shared by the screen and the phone.
+  - **Control** `/ceremony/control` (admin, organizer; "Ceremony" tile of the dashboard, link from the phase page once the competition is closed): big "Reveal the 3rd / 2nd / 1st place" button, then "Next division"; "Hide the last place", "Previous division"; division order adjustable (up, down, go to a division), by default the configuration's.
+  - Podium: **present** children ranked 1 to 3 in the final ranking (ties broken by hand included); an unbroken tie shares the same place and is revealed at once. The state (order, division, places revealed) is kept in the database, shared by the screen and the phone.
   - Only available in the "closed" phase; before, both pages say so.
 
 ### 13.3 Participant page
@@ -723,11 +723,11 @@ Login with **bib + date of birth**, with temporary lockout after several failure
 |---|---|
 | Preparation | List of their group's events |
 | In progress | Events done with **raw results** (attempts), events **still to do**. No scores or ranks. |
-| Closed | Raw results, **scores**, **per-event rank**, **overall rank**, and their **category ranking** as a list (first name + initial, scores, ranks). |
+| Closed | Raw results, **scores**, **per-event rank**, **overall rank**, and their **division ranking** as a list (first name + initial, scores, ranks). |
 
 Other children are always shown as **first name + last-name initial**.
 
-Details (step 9b): address `/participant`, linked from the home page. Only registered children with a bib can log in; temporary block after 5 failures for a bib or 20 for an IP address (§ 15). This login is independent of the volunteers' accounts and ends after 30 minutes without a visit ("Leave" button). The logged-in child sees their full name. During the competition, raw results show as they come, including those "to check", without any particular mention. After closing: total and rank in the category, table of events (results, points, rank per event; "not done" if needed), then the category ranking (present children, first name + initial, points) with their own line highlighted.
+Details (step 9b): address `/participant`, linked from the home page. Only registered children with a bib can log in; temporary block after 5 failures for a bib or 20 for an IP address (§ 15). This login is independent of the volunteers' accounts and ends after 30 minutes without a visit ("Leave" button). The logged-in child sees their full name. During the competition, raw results show as they come, including those "to check", without any particular mention. After closing: total and rank in the division, table of events (results, points, rank per event; "not done" if needed), then the division ranking (present children, first name + initial, points) with their own line highlighted.
 
 ---
 
@@ -738,8 +738,8 @@ Details (step 9b): address `/participant`, linked from the home page. Only regis
 | Check-in list | PDF | First name, full last name, bib, grade — **sorted by first name** |
 | Backup sheets | PDF | Per event and level group, sorted by bib (details in § 8.9) |
 | Backup entry template | Spreadsheet | One sheet per variant |
-| Podiums | PDF | **Top 3 of each category** (first name, last name, school, bib, total) |
-| Full rankings | PDF / spreadsheet | Per category: rank, bib, name, school, points per event, total (spreadsheet: also the tie-break criteria) |
+| Podiums | PDF | **Top 3 of each division** (first name, last name, school, bib, total) |
+| Full rankings | PDF / spreadsheet | Per division: rank, bib, name, school, points per event, total (spreadsheet: also the tie-break criteria) |
 | Detailed results | Spreadsheet | Every retained attempt: child, event, measure, modifiers, result, who entered it and when, "to check" |
 | Registrations list | Spreadsheet | All registration information |
 | Event sheets | PDF | Content of the help pages (printed for workshops) |
@@ -784,9 +784,9 @@ All documents are gathered on a **Documents** page (admins and organizers). They
 
 - **D+23**: warning email to admins.
 - **D+30**: before deletion, archiving of **anonymous statistics**:
-  - number of participants per category and per school;
+  - number of participants per division and per school;
   - results per event **without names** (distributions, best performances, averages);
-  - records per event and category.
+  - records per event and division.
 - Then **deletion** of all personal data: children, adults, emails, personal logs, local backups and Drive copies.
 - Triggered by an OVH scheduled task, or on the first visit after the deadline.
 
@@ -806,7 +806,7 @@ The **anonymous history** of previous editions remains available (year-over-year
 
 - **JSON REST API**, protected by a **key** generated by the admin (revocable).
 - **Data exposed by bib number only** (no names).
-- **Read**: phase, progress per workshop and category, raw results and scores, results "to review", missing events, anomalies, sync status.
+- **Read**: phase, progress per workshop and division, raw results and scores, results "to review", missing events, anomalies, sync status.
 - **Action proposals**: the API lets a client **propose** an action (e.g. flag a result "to review", report an anomaly). Proposals go into a **queue** that an admin or organizer **approves or rejects** in one click. Nothing is applied without human approval.
 - All proposals and decisions are recorded in the log.
 - Phase 1: the API is designed and documented, and already used internally (auto-refreshing screens). Phase 2: connecting Claude for real-time monitoring.
@@ -1278,7 +1278,7 @@ Displayed labels (workshop, action, modifier and contact role names) are in the 
 ## Appendix B — Computation examples
 
 **"Higher is better" event** (throw, `floor` = 100)
-Best performance in the category 68.00 m, worst 8.00 m.
+Best performance in the division 68.00 m, worst 8.00 m.
 
 | Child | Result | Computation | Score |
 |---|---|---|---|
