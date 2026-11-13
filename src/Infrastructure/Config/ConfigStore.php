@@ -6,6 +6,7 @@ namespace LiveScoreTracker\Infrastructure\Config;
 
 use DateTimeImmutable;
 use Internal\Toml\Toml;
+use LiveScoreTracker\Domain\Config\ConfigError;
 use LiveScoreTracker\Domain\Config\ConfigParser;
 use LiveScoreTracker\Domain\Config\InvalidConfig;
 use RuntimeException;
@@ -62,16 +63,16 @@ final class ConfigStore
     /**
      * Errors of a TOML text, empty when it is a valid configuration.
      *
-     * @return list<string>
+     * @return list<ConfigError>
      */
     public static function check(string $toml): array
     {
         try {
             ConfigParser::parse(Toml::parseToArray($toml));
         } catch (InvalidConfig $exception) {
-            return $exception->errors;
+            return $exception->issues;
         } catch (Throwable $exception) {
-            return ['TOML: ' . $exception->getMessage()];
+            return [new ConfigError('', 'toml_syntax', ['detail' => $exception->getMessage()])];
         }
 
         return [];

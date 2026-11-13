@@ -55,7 +55,7 @@ final class ConfigScreenTest extends TestCase
             'max_score' => '1000', 'floor' => '2000', 'foul_score' => '1', 'dnf_score' => '0', 'tie_breakers' => ['youngest'],
         ]);
         self::assertSame(422, $response->getStatusCode());
-        self::assertStringContainsString('must be lower than max_score', $this->admin->lastBody);
+        self::assertStringContainsString('doit être inférieur au score maximal', $this->admin->lastBody);
         self::assertFileDoesNotExist($this->dataDir . '/competition.toml');
     }
 

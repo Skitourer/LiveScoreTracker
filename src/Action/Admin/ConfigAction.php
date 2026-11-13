@@ -8,8 +8,10 @@ use Internal\Toml\Toml;
 use LiveScoreTracker\Action\Support\Responder;
 use LiveScoreTracker\Application\ConfigForms;
 use LiveScoreTracker\Domain\Config\ConfigDiff;
+use LiveScoreTracker\Domain\Config\ConfigError;
 use LiveScoreTracker\Domain\Config\InvalidConfig;
 use LiveScoreTracker\Infrastructure\Config\ConfigStore;
+use LiveScoreTracker\Infrastructure\I18n\Translator;
 use LiveScoreTracker\Infrastructure\Persistence\AttemptRepository;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -31,6 +33,7 @@ final class ConfigAction
         private readonly Responder $responder,
         private readonly ConfigStore $store,
         private readonly AttemptRepository $attempts,
+        private readonly Translator $translator,
     ) {}
 
     /**
@@ -86,7 +89,7 @@ final class ConfigAction
         try {
             $this->save($before, $after, $tab);
         } catch (InvalidConfig $exception) {
-            return $this->renderTab($response, $tab, ConfigForms::values($tab, $after), $exception->errors, 422);
+            return $this->renderTab($response, $tab, ConfigForms::values($tab, $after), $exception->issues, 422);
         }
 
         return $this->responder->redirect($response, '/admin/config/' . $tab);
@@ -94,7 +97,7 @@ final class ConfigAction
 
     /**
      * @param array<mixed>         $values
-     * @param list<string>         $errors
+     * @param list<ConfigError>    $errors
      */
     private function renderTab(ResponseInterface $response, string $tab, array $values, array $errors, int $status = 200): ResponseInterface
     {
@@ -109,8 +112,8 @@ final class ConfigAction
             'tab' => $tab,
             'tabs' => ConfigForms::TABS,
             'values' => $values,
-            'errors' => self::errorMap($errors),
-            'error_list' => $errors,
+            'errors' => $this->errorMap($errors),
+            'error_list' => $this->errorList($errors),
             'editable' => ConfigForms::editable($tab, $this->responder->context->phase),
             'uses_example' => $this->store->usesExample(),
             'phase' => $this->responder->context->phase->value,
@@ -145,7 +148,7 @@ final class ConfigAction
         } catch (InvalidConfig $exception) {
             $values = ConfigForms::workshopValues($updated);
 
-            return $this->renderWorkshop($response, $index, $values, $exception->errors, 422);
+            return $this->renderWorkshop($response, $index, $values, $exception->issues, 422);
         }
 
         return $this->responder->redirect($response, '/admin/config/workshops');
@@ -153,7 +156,7 @@ final class ConfigAction
 
     /**
      * @param array<mixed>         $values
-     * @param list<string>         $errors
+     * @param list<ConfigError>    $errors
      */
     private function renderWorkshop(ResponseInterface $response, ?int $index, array $values, array $errors, int $status = 200): ResponseInterface
     {
@@ -176,8 +179,8 @@ final class ConfigAction
             'tabs' => ConfigForms::TABS,
             'index' => $index,
             'values' => $values,
-            'errors' => self::errorMap($errors, $prefix),
-            'error_list' => $errors,
+            'errors' => $this->errorMap($errors, $prefix),
+            'error_list' => $this->errorList($errors),
             'editable' => ConfigForms::editable('workshops', $this->responder->context->phase),
             'groups' => array_keys(\is_array($data['level_groups'] ?? null) ? $data['level_groups'] : []),
             'measures' => ConfigForms::MEASURES,
@@ -239,7 +242,7 @@ final class ConfigAction
         try {
             $this->save($before, $after, 'workshops');
         } catch (InvalidConfig $exception) {
-            return $this->renderTab($response, 'workshops', [], $exception->errors, 422);
+            return $this->renderTab($response, 'workshops', [], $exception->issues, 422);
         }
 
         return $this->responder->redirect($response, $op === 'duplicate' ? '/admin/config/workshops/' . ($index + 1) : '/admin/config/workshops');
@@ -307,7 +310,7 @@ final class ConfigAction
                 'op' => $op,
                 'toml' => $toml,
                 'changes' => $changes,
-                'error_list' => $errors,
+                'error_list' => $this->errorList($errors),
                 'uses_example' => $this->store->usesExample(),
                 'phase' => $this->responder->context->phase->value,
             ]);
@@ -317,7 +320,7 @@ final class ConfigAction
         try {
             $this->store->saveToml($toml);
         } catch (InvalidConfig $exception) {
-            return $this->renderTab($response, 'file', ['toml' => $toml], $exception->errors, 422);
+            return $this->renderTab($response, 'file', ['toml' => $toml], $exception->issues, 422);
         }
         $this->audited($before, $this->store->data(), 'file', \is_string($form['source'] ?? null) ? $form['source'] : $op);
 
@@ -383,23 +386,42 @@ final class ConfigAction
     }
 
     /**
-     * Errors by location ("edition.date: must be…" → ["edition.date" => […]]).
+     * Translated errors by location, shown next to the fields.
      *
-     * @param list<string> $errors
+     * @param list<ConfigError> $errors
      *
      * @return array<string, list<string>>
      */
-    private static function errorMap(array $errors, string $prefix = ''): array
+    private function errorMap(array $errors, string $prefix = ''): array
     {
         $map = [];
         foreach ($errors as $error) {
-            $parts = explode(': ', $error, 2);
-            if (\count($parts) === 2) {
-                $path = str_starts_with($parts[0], $prefix) ? substr($parts[0], \strlen($prefix)) : $parts[0];
-                $map[$path][] = $parts[1];
-            }
+            $path = str_starts_with($error->path, $prefix) ? substr($error->path, \strlen($prefix)) : $error->path;
+            $map[$path][] = $this->message($error);
         }
 
         return $map;
+    }
+
+    /**
+     * Translated errors with their location, listed at the top of the page.
+     *
+     * @param list<ConfigError> $errors
+     *
+     * @return list<string>
+     */
+    private function errorList(array $errors): array
+    {
+        return array_map(
+            fn(ConfigError $error): string => ($error->path === '' ? '' : $error->path . ' : ') . $this->message($error),
+            $errors,
+        );
+    }
+
+    private function message(ConfigError $error): string
+    {
+        $key = 'config.error.' . $error->key;
+
+        return $this->translator->has($key) ? $this->translator->trans($key, $error->params) : $error->english();
     }
 }

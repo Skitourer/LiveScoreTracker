@@ -6,6 +6,7 @@ namespace LiveScoreTracker\Infrastructure\Config;
 
 use Internal\Toml\Toml;
 use LiveScoreTracker\Domain\Config\CompetitionConfig;
+use LiveScoreTracker\Domain\Config\ConfigError;
 use LiveScoreTracker\Domain\Config\ConfigParser;
 use LiveScoreTracker\Domain\Config\InvalidConfig;
 use Throwable;
@@ -58,13 +59,13 @@ final class ConfigRepository
     {
         $content = @file_get_contents($path);
         if ($content === false) {
-            throw new InvalidConfig([\sprintf('%s: file not found or not readable', basename($path))]);
+            throw new InvalidConfig([new ConfigError(basename($path), 'file_unreadable')]);
         }
 
         try {
             $data = Toml::parseToArray($content);
         } catch (Throwable $exception) {
-            throw new InvalidConfig([\sprintf('%s: TOML syntax error: %s', basename($path), $exception->getMessage())]);
+            throw new InvalidConfig([new ConfigError(basename($path), 'toml_syntax', ['detail' => $exception->getMessage()])]);
         }
 
         return ConfigParser::parse($data);
