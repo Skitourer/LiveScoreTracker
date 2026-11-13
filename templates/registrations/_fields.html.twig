@@ -59,6 +59,6 @@
 {% if warnings is defined and warnings is not empty %}
     <div class="notice warning" role="alert">
         <ul>{% for key, params in warnings %}<li>{{ t(key, params) }}</li>{% endfor %}</ul>
-        <label class="choice"><input type="checkbox" name="confirm_warnings" value="1" required> {{ t('registration.confirm_warnings') }}</label>
+        <label class="choice"><input type="checkbox" name="confirm_warnings" value="1"> {{ t('registration.confirm_warnings') }}</label>
     </div>
 {% endif %}

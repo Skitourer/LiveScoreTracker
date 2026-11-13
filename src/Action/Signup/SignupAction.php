@@ -115,7 +115,8 @@ final class SignupAction
             'warnings' => $errors === [] ? $warnings : [],
             'config' => $this->config,
             'edition' => $this->config->edition,
-            'has_rules' => $this->pages->page('rules', $locale, $this->config->edition->defaultLocale) !== null,
+            // Shown in the page itself: reading them must not lose what was typed.
+            'rules_html' => $this->pages->page('rules', $locale, $this->config->edition->defaultLocale),
             'responsibility' => Responder::field($request, 'responsibility') === '1',
             'rules' => Responder::field($request, 'rules') === '1',
             'page' => '/inscription',

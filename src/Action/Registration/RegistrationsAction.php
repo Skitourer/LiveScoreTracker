@@ -51,6 +51,8 @@ final class RegistrationsAction
             'statuses' => RegistrationStatus::cases(),
             'config' => $this->config,
             'window' => $this->window->status($this->config),
+            // "Refresh" keeps the search and filters.
+            'refresh' => $request->getUri()->getPath() . ($request->getUri()->getQuery() === '' ? '' : '?' . $request->getUri()->getQuery()),
         ]);
     }
 }

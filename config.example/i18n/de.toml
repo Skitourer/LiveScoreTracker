@@ -14,7 +14,7 @@ one = "Junge"
 many = "Jungen"
 
 [registration]
-guardian = "Verantwortliche erwachsene Person, die am Veranstaltungstag anwesend ist"
+guardian = "Erziehungsberechtigte Person des Kindes"
 optional = "freiwillig"
 volunteer_label = "Bereit, bei der Betreuung eines Standes zu helfen"
 confirm_warnings = "Ich habe es geprüft: trotzdem speichern"
@@ -35,7 +35,7 @@ birth_date = "Geburtsdatum"
 gender = "Geschlecht"
 level = "Klasse"
 school = "Schule"
-guardian_name = "Vor- und Nachname der erwachsenen Person"
+guardian_name = "Vor- und Nachname der erziehungsberechtigten Person"
 guardian_phone = "Telefon"
 guardian_email = "E-Mail"
 
@@ -46,7 +46,7 @@ birth_date = "Das Geburtsdatum ist erforderlich."
 gender = "Das Geschlecht ist erforderlich."
 school = "Die Schule ist erforderlich."
 level = "Die Klasse ist erforderlich."
-guardian_name = "Der Name der erwachsenen Person ist erforderlich."
+guardian_name = "Der Name der erziehungsberechtigten Person ist erforderlich."
 guardian_phone = "Die Telefonnummer ist erforderlich."
 guardian_email = "Die E-Mail-Adresse ist erforderlich."
 
@@ -67,7 +67,7 @@ rules_accept = "Ich habe die Teilnahmebedingungen gelesen und akzeptiere sie."
 rules_link = "Teilnahmebedingungen lesen"
 submit = "Anmeldung absenden"
 privacy_title = "Ihre personenbezogenen Daten"
-privacy = "Die Angaben in diesem Formular werden von {organizer} erhoben, um die Veranstaltung zu organisieren: Anmeldung, Empfang, Ergebnisse und Kontakt zur verantwortlichen erwachsenen Person. Sie werden an niemanden weitergegeben und in Frankreich gespeichert. Die Ergebnisse werden mit dem Vornamen und dem Anfangsbuchstaben des Nachnamens des Kindes angezeigt. Alle Daten werden einen Monat nach der Veranstaltung gelöscht. Um sie einzusehen, zu berichtigen oder löschen zu lassen, schreiben Sie an {contact}."
+privacy = "Die Angaben in diesem Formular werden von {organizer} erhoben, um die Veranstaltung zu organisieren: Anmeldung, Empfang, Ergebnisse und Kontakt zur erziehungsberechtigten Person. Sie werden an niemanden weitergegeben und in Frankreich gespeichert. Die Ergebnisse werden mit dem Vornamen und dem Anfangsbuchstaben des Nachnamens des Kindes angezeigt. Alle Daten werden einen Monat nach der Veranstaltung gelöscht. Um sie einzusehen, zu berichtigen oder löschen zu lassen, schreiben Sie an {contact}."
 required_responsibility = "Bitte kreuzen Sie das Kästchen zur Verantwortung der erwachsenen Person an."
 required_rules = "Bitte akzeptieren Sie die Teilnahmebedingungen."
 duplicate = "Dieses Kind ist bereits angemeldet oder wird gerade angemeldet. Bei Fragen: {contact}."
@@ -177,3 +177,14 @@ Bei Fragen: {contact}
 
 {organizer}
 """
+
+[level]
+CP = "CP"
+CE1 = "CE1"
+CE2 = "CE2"
+CM1 = "CM1"
+CM2 = "CM2"
+
+[public]
+rules = "Teilnahmebedingungen"
+back_home = "Startseite"

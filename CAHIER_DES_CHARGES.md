@@ -127,8 +127,8 @@ Accessible sans compte, sur le site de l'application. Champs :
 - École *(obligatoire, liste configurable)*
 - Classe *(obligatoire, liste : CP, CE1, CE2, CM1, CM2)*
 
-**Adulte responsable présent le jour J**
-- Prénom et nom *(obligatoire)*
+**Responsable légal de l'enfant**
+- Nom et prénom du responsable légal *(obligatoire)*
 - Téléphone *(obligatoire)*
 - Email *(obligatoire)*
 
@@ -139,13 +139,13 @@ Accessible sans compte, sur le site de l'application. Champs :
 
 **Notice d'information RGPD** affichée sous le formulaire (cf. § 15).
 
-Contrôles : champs obligatoires, format de l'email (adresse complète avec domaine) et du téléphone (10 chiffres commençant par 0, ou format international « +33 6… » ; un zéro initial perdu par un tableur est rétabli), vérifiés dans le navigateur et sur le serveur, cohérence date de naissance / classe (avertissement), doublon probable (même nom + prénom + date de naissance : refus avec message).
+Contrôles : champs obligatoires, format de l'email (adresse complète avec domaine) et du téléphone (10 chiffres commençant par 0, ou format international « +33 6… » ; un zéro initial perdu par un tableur est rétabli), vérifiés dans le navigateur et sur le serveur, cohérence date de naissance / classe (avertissement : la case « j'ai vérifié » n'est pas obligatoire ; si la classe ou la date corrigée fait disparaître l'avertissement, l'inscription est enregistrée sans la cocher), doublon probable (même nom + prénom + date de naissance : refus avec message).
 
 Protection anti-robots **sans service tiers** : champ piège invisible (rempli : la page fait comme si tout allait bien, rien n'est enregistré), délai minimal de remplissage de **5 s**, au plus **10 inscriptions par heure** depuis une même adresse IP.
 
 Un parent peut inscrire **plusieurs enfants** (fratrie) : après une inscription, proposer « inscrire un autre enfant » en conservant les informations de l'adulte (ainsi que l'école et le volontariat). **Un email de vérification par enfant.**
 
-**Langues** (étape 11) : le formulaire public (`/inscription`), la page « vérifiez votre messagerie », les pages de confirmation et de désistement existent en **français, anglais, italien, allemand, néerlandais, espagnol, portugais, ukrainien, chinois simplifié et arabe** (de droite à gauche). Un menu, sans drapeaux, présente chaque langue dans sa propre langue (中文, العربية…). Langue choisie : menu (gardée pour la session), sinon langue du navigateur si elle est proposée, sinon langue de l'installation. La langue est enregistrée avec l'inscription : **les emails à la famille sont écrits dans cette langue, suivis de la version française**. Les inscriptions faites par l'organisation reçoivent les emails dans la langue de l'installation. Le règlement et la présentation de l'accueil restent dans les langues fournies (§ 12.4). Une ligne d'aide rappelle l'âge habituel de chaque classe pour les familles qui ne connaissent pas l'école française.
+**Langues** (étape 11) : le formulaire public (`/inscription`), la page « vérifiez votre messagerie », les pages de confirmation et de désistement existent en **français, anglais, italien, allemand, néerlandais, espagnol, portugais, ukrainien, chinois simplifié et arabe** (de droite à gauche). Un menu, sans drapeaux, présente chaque langue dans sa propre langue (中文, العربية…). Langue choisie : menu (gardée pour la session), sinon langue du navigateur si elle est proposée, sinon langue de l'installation. La langue est enregistrée avec l'inscription : **les emails à la famille sont écrits dans cette langue, suivis de la version française**. Les inscriptions faites par l'organisation reçoivent les emails dans la langue de l'installation. Le **règlement** existe dans chaque langue fournie (`pages/<langue>/rules.md`, sinon langue de l'installation) ; il s'affiche **dans la page d'inscription** (bloc dépliable, sans quitter le formulaire) et la page `/reglement` suit la langue choisie, avec le même menu. La présentation de l'accueil reste dans les langues fournies (§ 12.4). Les noms des classes (CP, CE1, CE2, CM1, CM2) **ne sont jamais traduits**. Une ligne d'aide rappelle l'âge habituel de chaque classe pour les familles qui ne connaissent pas l'école française.
 
 ### 5.2 Ouverture, fermeture, quota
 
@@ -209,6 +209,7 @@ Le règlement interdit officiellement les inscriptions sur place, mais l'applica
 - Fiche enfant : consultation, correction, historique des modifications.
 - Compteurs : inscrits / quota, liste d'attente, en attente de vérification.
 - Export Excel de la liste.
+- Bouton « Actualiser » (garde la recherche et les filtres).
 
 ---
 

@@ -127,8 +127,8 @@ Accessible without an account, on the application website. Fields:
 - School *(required, configurable list)*
 - Grade *(required, list: CP, CE1, CE2, CM1, CM2)*
 
-**Responsible adult present on competition day**
-- First and last name *(required)*
+**Child's legal guardian**
+- Legal guardian's full name *(required)*
 - Phone *(required)*
 - Email *(required)*
 
@@ -139,13 +139,13 @@ Accessible without an account, on the application website. Fields:
 
 **GDPR information notice** displayed below the form (see § 15).
 
-Checks: required fields, format of the email (full address with a domain) and of the phone (10 digits starting with 0, or international format "+33 6…"; a leading zero lost by a spreadsheet is restored), checked in the browser and on the server, date of birth / grade consistency (warning), probable duplicate (same last name + first name + date of birth: rejected with a message).
+Checks: required fields, format of the email (full address with a domain) and of the phone (10 digits starting with 0, or international format "+33 6…"; a leading zero lost by a spreadsheet is restored), checked in the browser and on the server, date of birth / grade consistency (warning: the "I have checked" box is not required; when the corrected grade or date makes the warning disappear, the registration is saved without ticking it), probable duplicate (same last name + first name + date of birth: rejected with a message).
 
 Anti-bot protection **without any third-party service**: invisible honeypot field (when filled, the page pretends all went well and stores nothing), minimum fill-in time of **5 s**, at most **10 registrations per hour** from one IP address.
 
 A parent can register **several children** (siblings): after one registration, offer "register another child" while keeping the adult's details (and the school and volunteering). **One verification email per child.**
 
-**Languages** (step 11): the public form (`/inscription`), the "check your mailbox" page, the confirmation and withdrawal pages exist in **French, English, Italian, German, Dutch, Spanish, Portuguese, Ukrainian, Simplified Chinese and Arabic** (right to left). A menu, without flags, shows each language in its own language (中文, العربية…). Chosen language: menu (kept for the session), else the browser's language when offered, else the installation's language. The language is stored with the registration: **emails to the family are written in that language, followed by the French version**. Registrations made by the organization get emails in the installation's language. The rules and the home presentation stay in the languages provided (§ 12.4). A help line gives the usual age of each grade for families who do not know the French school system.
+**Languages** (step 11): the public form (`/inscription`), the "check your mailbox" page, the confirmation and withdrawal pages exist in **French, English, Italian, German, Dutch, Spanish, Portuguese, Ukrainian, Simplified Chinese and Arabic** (right to left). A menu, without flags, shows each language in its own language (中文, العربية…). Chosen language: menu (kept for the session), else the browser's language when offered, else the installation's language. The language is stored with the registration: **emails to the family are written in that language, followed by the French version**. Registrations made by the organization get emails in the installation's language. The **rules** exist in each language provided (`pages/<lang>/rules.md`, else the installation's language); they are shown **inside the registration page** (collapsible block, without leaving the form) and the `/reglement` page follows the chosen language, with the same menu. The home presentation stays in the languages provided (§ 12.4). Grade names (CP, CE1, CE2, CM1, CM2) are **never translated**. A help line gives the usual age of each grade for families who do not know the French school system.
 
 ### 5.2 Opening, closing, quota
 
@@ -209,6 +209,7 @@ The rules officially forbid on-site registration, but the application lets an **
 - Child record: view, edit, change history.
 - Counters: registered / quota, waiting list, pending verification.
 - Spreadsheet export of the list.
+- "Refresh" button (keeps the search and filters).
 
 ---
 

@@ -28,8 +28,14 @@
             {% include 'registrations/_fields.html.twig' with {birthOptional: false, levelHint: t('signup.level_hint')} %}
             <label class="choice"><input type="checkbox" name="responsibility" value="1" required {% if responsibility %}checked{% endif %}> {{ t('signup.responsibility') }}</label>
             <label class="choice"><input type="checkbox" name="rules" value="1" required {% if rules %}checked{% endif %}>
-                <span>{{ t('signup.rules_accept') }}{% if has_rules %} <a href="{{ url_for('rules') }}" target="_blank" rel="noopener">{{ t('signup.rules_link') }}</a>{% endif %}</span>
+                <span>{{ t('signup.rules_accept') }}</span>
             </label>
+            {% if rules_html %}
+                <details class="signup-rules">
+                    <summary>{{ t('signup.rules_link') }}</summary>
+                    <article class="help-page">{{ rules_html|raw }}</article>
+                </details>
+            {% endif %}
             <div class="toolbar">
                 <button type="submit" class="button">{{ t('signup.submit') }}</button>
             </div>

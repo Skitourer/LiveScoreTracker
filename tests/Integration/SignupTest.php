@@ -44,6 +44,13 @@ final class SignupTest extends TestCase
 
         $this->family->get('/inscription?lang=de');
         self::assertStringContainsString('<html lang="de" dir="ltr"', $this->family->lastBody);
+        self::assertStringContainsString('<summary>Teilnahmebedingungen lesen</summary>', $this->family->lastBody, 'Rules shown inside the form');
+        self::assertStringContainsString('Artikel 1', $this->family->lastBody);
+        self::assertStringContainsString('>CE2</option>', $this->family->lastBody, 'Grade names are not translated');
+        self::assertStringContainsString('Erziehungsberechtigte Person des Kindes', $this->family->lastBody);
+        $this->family->get('/reglement');
+        self::assertStringContainsString('Artikel 1', $this->family->lastBody, 'Rules page follows the chosen language');
+        $this->family->get('/inscription');
         self::assertStringContainsString('Ein Kind anmelden', $this->family->lastBody);
         self::assertStringContainsString('lang="zh" hreflang="zh">中文</a>', $this->family->lastBody);
 
@@ -147,11 +154,17 @@ final class SignupTest extends TestCase
 
         $this->family->get('/inscription');
         $this->family->clock->advance(10);
-        $this->family->post('/inscription', [...self::CHILD, 'responsibility' => '']);
+        // A grade typed by mistake gives a warning; once corrected, no box to tick.
+        $this->family->post('/inscription', [...self::CHILD, 'level' => 'CM2']);
+        self::assertStringContainsString('name="confirm_warnings" value="1">', $this->family->lastBody);
+        $this->family->clock->advance(10);
+        self::assertSame('/inscription/envoye', $this->family->post('/inscription', self::CHILD)->getHeaderLine('Location'));
+
+        $this->family->get('/inscription?another=1');
+        $this->family->clock->advance(10);
+        $this->family->post('/inscription', [...self::CHILD, 'first_name' => 'Léa', 'responsibility' => '']);
         self::assertStringContainsString('responsabilité de l&#039;adulte', $this->family->lastBody);
 
-        $this->family->clock->advance(10);
-        $this->family->post('/inscription', self::CHILD);
         $this->family->get('/inscription?another=1');
         self::assertStringContainsString('value="anne@example.org"', $this->family->lastBody, 'Adult kept for brothers and sisters');
         $this->family->clock->advance(10);
@@ -165,6 +178,7 @@ final class SignupTest extends TestCase
         $this->admin->post('/registrations/window', ['state' => 'open']);
         $this->admin->get('/registrations');
         self::assertMatchesRegularExpression('#Inscriptions en ligne : (ouvertes|complètes)#', $this->admin->lastBody);
+        self::assertStringContainsString('href="/registrations">⟳ Actualiser</a>', $this->admin->lastBody);
     }
 
     /**

@@ -14,7 +14,7 @@ one = "Niño"
 many = "Niños"
 
 [registration]
-guardian = "Adulto responsable presente el día del evento"
+guardian = "Representante legal del niño"
 optional = "opcional"
 volunteer_label = "Voluntario para ayudar a atender un puesto"
 confirm_warnings = "Lo he comprobado: guardar de todos modos"
@@ -35,7 +35,7 @@ birth_date = "Fecha de nacimiento"
 gender = "Sexo"
 level = "Curso"
 school = "Escuela"
-guardian_name = "Nombre y apellidos del adulto"
+guardian_name = "Nombre y apellidos del representante legal"
 guardian_phone = "Teléfono"
 guardian_email = "Correo electrónico"
 
@@ -46,7 +46,7 @@ birth_date = "La fecha de nacimiento es obligatoria."
 gender = "El sexo es obligatorio."
 school = "La escuela es obligatoria."
 level = "El curso es obligatorio."
-guardian_name = "El nombre del adulto es obligatorio."
+guardian_name = "El nombre del representante legal es obligatorio."
 guardian_phone = "El teléfono es obligatorio."
 guardian_email = "El correo electrónico es obligatorio."
 
@@ -67,7 +67,7 @@ rules_accept = "He leído y acepto el reglamento."
 rules_link = "Leer el reglamento"
 submit = "Enviar la inscripción"
 privacy_title = "Sus datos personales"
-privacy = "Los datos de este formulario los recoge {organizer} para organizar el evento: inscripción, recepción, resultados y contacto con el adulto responsable. No se comunican a nadie más y se alojan en Francia. Los resultados se muestran con el nombre y la inicial del apellido del niño. Todos los datos se borran un mes después del evento. Para consultarlos, corregirlos o pedir que se borren, escriba a {contact}."
+privacy = "Los datos de este formulario los recoge {organizer} para organizar el evento: inscripción, recepción, resultados y contacto con el representante legal. No se comunican a nadie más y se alojan en Francia. Los resultados se muestran con el nombre y la inicial del apellido del niño. Todos los datos se borran un mes después del evento. Para consultarlos, corregirlos o pedir que se borren, escriba a {contact}."
 required_responsibility = "Marque la casilla sobre la responsabilidad del adulto."
 required_rules = "Acepte el reglamento."
 duplicate = "Este niño ya está inscrito o en proceso de inscripción. Para cualquier pregunta: {contact}."
@@ -177,3 +177,14 @@ Para cualquier pregunta: {contact}
 
 {organizer}
 """
+
+[level]
+CP = "CP"
+CE1 = "CE1"
+CE2 = "CE2"
+CM1 = "CM1"
+CM2 = "CM2"
+
+[public]
+rules = "Reglamento"
+back_home = "Inicio"

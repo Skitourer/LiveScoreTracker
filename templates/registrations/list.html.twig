@@ -25,6 +25,7 @@
         </form>
     {% endif %}
     <div class="toolbar">
+        <a class="button secondary" href="{{ refresh }}">⟳ {{ t('registration.refresh') }}</a>
         {% if can('add_on_site') %}<a class="button" href="{{ url_for('registration-new') }}">{{ t('registration.add') }}</a>{% endif %}
         {% if can('import_spreadsheets') %}<a class="button secondary" href="{{ url_for('registration-import') }}">{{ t('import.title') }}</a>{% endif %}
         <a class="button secondary" href="{{ url_for('registration-export') }}">{{ t('registration.export') }}</a>

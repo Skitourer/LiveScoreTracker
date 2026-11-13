@@ -14,7 +14,7 @@ one = "男孩"
 many = "男孩"
 
 [registration]
-guardian = "活动当天在场的负责成人"
+guardian = "孩子的法定监护人"
 optional = "选填"
 volunteer_label = "愿意协助负责一个摊位"
 confirm_warnings = "我已核实，仍然保存"
@@ -35,7 +35,7 @@ birth_date = "出生日期"
 gender = "性别"
 level = "年级"
 school = "学校"
-guardian_name = "成人姓名"
+guardian_name = "法定监护人姓名"
 guardian_phone = "电话"
 guardian_email = "电子邮箱"
 
@@ -46,7 +46,7 @@ birth_date = "请填写出生日期。"
 gender = "请选择性别。"
 school = "请选择学校。"
 level = "请选择年级。"
-guardian_name = "请填写成人姓名。"
+guardian_name = "请填写法定监护人姓名。"
 guardian_phone = "请填写电话。"
 guardian_email = "请填写电子邮箱。"
 
@@ -67,7 +67,7 @@ rules_accept = "我已阅读并接受活动规则。"
 rules_link = "阅读活动规则"
 submit = "提交报名"
 privacy_title = "您的个人信息"
-privacy = "本表格中的信息由 {organizer} 收集，用于组织本次活动：报名、接待、成绩以及与负责成人的联系。这些信息不会提供给任何第三方，并存储在法国。成绩只显示孩子的名字和姓氏首字母。所有数据将在活动结束一个月后删除。如需查看、更正或删除您的数据，请写信至 {contact}。"
+privacy = "本表格中的信息由 {organizer} 收集，用于组织本次活动：报名、接待、成绩以及与法定监护人的联系。这些信息不会提供给任何第三方，并存储在法国。成绩只显示孩子的名字和姓氏首字母。所有数据将在活动结束一个月后删除。如需查看、更正或删除您的数据，请写信至 {contact}。"
 required_responsibility = "请勾选关于成人责任的选项。"
 required_rules = "请接受活动规则。"
 duplicate = "该孩子已报名或正在报名中。如有疑问：{contact}。"
@@ -177,3 +177,14 @@ body = """
 
 {organizer}
 """
+
+[level]
+CP = "CP"
+CE1 = "CE1"
+CE2 = "CE2"
+CM1 = "CM1"
+CM2 = "CM2"
+
+[public]
+rules = "活动规则"
+back_home = "首页"

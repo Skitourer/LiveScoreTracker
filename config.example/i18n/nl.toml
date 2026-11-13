@@ -14,7 +14,7 @@ one = "Jongen"
 many = "Jongens"
 
 [registration]
-guardian = "Verantwoordelijke volwassene die op de dag zelf aanwezig is"
+guardian = "Wettelijke vertegenwoordiger van het kind"
 optional = "optioneel"
 volunteer_label = "Wil helpen bij het bemannen van een kraam"
 confirm_warnings = "Ik heb het gecontroleerd: toch opslaan"
@@ -35,7 +35,7 @@ birth_date = "Geboortedatum"
 gender = "Geslacht"
 level = "Klas"
 school = "School"
-guardian_name = "Voor- en achternaam van de volwassene"
+guardian_name = "Voor- en achternaam van de wettelijke vertegenwoordiger"
 guardian_phone = "Telefoon"
 guardian_email = "E-mail"
 
@@ -46,7 +46,7 @@ birth_date = "De geboortedatum is verplicht."
 gender = "Het geslacht is verplicht."
 school = "De school is verplicht."
 level = "De klas is verplicht."
-guardian_name = "De naam van de volwassene is verplicht."
+guardian_name = "De naam van de wettelijke vertegenwoordiger is verplicht."
 guardian_phone = "Het telefoonnummer is verplicht."
 guardian_email = "Het e-mailadres is verplicht."
 
@@ -67,7 +67,7 @@ rules_accept = "Ik heb het reglement gelezen en ga ermee akkoord."
 rules_link = "Het reglement lezen"
 submit = "Inschrijving versturen"
 privacy_title = "Uw persoonsgegevens"
-privacy = "De gegevens in dit formulier worden verzameld door {organizer} om het evenement te organiseren: inschrijving, ontvangst, uitslagen en contact met de verantwoordelijke volwassene. Ze worden aan niemand anders doorgegeven en in Frankrijk opgeslagen. De uitslagen worden getoond met de voornaam en de eerste letter van de achternaam van het kind. Alle gegevens worden een maand na het evenement verwijderd. Om ze in te zien, te verbeteren of te laten verwijderen, schrijft u naar {contact}."
+privacy = "De gegevens in dit formulier worden verzameld door {organizer} om het evenement te organiseren: inschrijving, ontvangst, uitslagen en contact met de wettelijke vertegenwoordiger. Ze worden aan niemand anders doorgegeven en in Frankrijk opgeslagen. De uitslagen worden getoond met de voornaam en de eerste letter van de achternaam van het kind. Alle gegevens worden een maand na het evenement verwijderd. Om ze in te zien, te verbeteren of te laten verwijderen, schrijft u naar {contact}."
 required_responsibility = "Vink het vakje over de verantwoordelijkheid van de volwassene aan."
 required_rules = "Ga akkoord met het reglement."
 duplicate = "Dit kind is al ingeschreven of wordt al ingeschreven. Voor vragen: {contact}."
@@ -177,3 +177,14 @@ Voor vragen: {contact}
 
 {organizer}
 """
+
+[level]
+CP = "CP"
+CE1 = "CE1"
+CE2 = "CE2"
+CM1 = "CM1"
+CM2 = "CM2"
+
+[public]
+rules = "Reglement"
+back_home = "Startpagina"
