@@ -21,6 +21,9 @@ final class ConfigParser
     /** @var list<string> */
     private array $errors = [];
 
+    /** @var array<string, string> translation key => text */
+    private array $labels = [];
+
     /**
      * @param array<mixed> $data
      *
@@ -68,6 +71,7 @@ final class ConfigParser
             $workshops,
             $importColumns,
             $contacts,
+            $this->labels,
         );
     }
 
@@ -249,8 +253,9 @@ final class ConfigParser
                 $this->error($path, 'must be a table');
                 continue;
             }
-            $this->allowKeys($w, $path, ['id', 'help', 'variants']);
+            $this->allowKeys($w, $path, ['id', 'name', 'help', 'variants']);
             $id = $this->identifier($w, 'id', $path);
+            $this->label($w, 'name', $path, "workshop.{$id}.name", $id);
             if ($id !== null && isset($ids[$id])) {
                 $this->error("{$path}.id", \sprintf('"%s" is used twice', $id));
             }
@@ -408,8 +413,9 @@ final class ConfigParser
         $ids = [];
         foreach ($this->tableList($v, 'modifiers', $path) as $i => $m) {
             $mPath = "{$path}.modifiers[{$i}]";
-            $this->allowKeys($m, $mPath, ['id', 'value', 'repeatable']);
+            $this->allowKeys($m, $mPath, ['id', 'name', 'value', 'repeatable']);
             $id = $this->identifier($m, 'id', $mPath);
+            $this->label($m, 'name', $mPath, "modifier.{$id}", $id);
             $value = $m['value'] ?? null;
             if (!self::isNumber($value) || $value === 0) {
                 $this->error("{$mPath}.value", 'must be a non-zero number (negative for a bonus on a time)');
@@ -439,8 +445,9 @@ final class ConfigParser
         $ids = [];
         foreach ($this->tableList($v, 'actions', $path) as $i => $a) {
             $aPath = "{$path}.actions[{$i}]";
-            $this->allowKeys($a, $aPath, ['id', 'points']);
+            $this->allowKeys($a, $aPath, ['id', 'name', 'points']);
             $id = $this->identifier($a, 'id', $aPath);
+            $this->label($a, 'name', $aPath, "action.{$id}", $id);
             $points = $this->int($a, 'points', $aPath, 0, 1);
             if ($id === null) {
                 continue;
@@ -554,8 +561,9 @@ final class ConfigParser
                 $this->error($path, 'must be a table');
                 continue;
             }
-            $this->allowKeys($c, $path, ['role', 'name', 'phone']);
+            $this->allowKeys($c, $path, ['role', 'label', 'name', 'phone']);
             $role = $this->identifier($c, 'role', $path);
+            $this->label($c, 'label', $path, "contact.{$role}", $role);
             $name = $this->string($c, 'name', $path, true);
             $phone = $this->string($c, 'phone', $path, true);
             if ($role !== null && $name !== null && $phone !== null) {
@@ -567,6 +575,19 @@ final class ConfigParser
     }
 
     // ------------------------------------------------------------ value readers
+
+    /**
+     * Optional display name given in the file; it overrides the translations.
+     *
+     * @param array<mixed> $t
+     */
+    private function label(array $t, string $key, string $path, string $translationKey, ?string $id): void
+    {
+        $text = $this->string($t, $key, $path, false);
+        if ($text !== null && $id !== null && trim($text) !== '') {
+            $this->labels[$translationKey] = trim($text);
+        }
+    }
 
     private function error(string $path, string $message): void
     {

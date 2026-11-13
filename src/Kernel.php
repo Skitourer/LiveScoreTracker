@@ -281,7 +281,14 @@ final class Kernel
                     $settings->dataDir . '/i18n',
                 ]);
 
-                return $loader->translator($locale);
+                $translator = $loader->translator($locale);
+                try {
+                    $translator->override(self::service($c, ConfigRepository::class)->get()->labels);
+                } catch (InvalidConfig) {
+                    // The status page reports the configuration errors.
+                }
+
+                return $translator;
             },
             CompetitionConfig::class => static fn(ContainerInterface $c): CompetitionConfig => self::service($c, ConfigRepository::class)->get(),
             ValueMatcher::class => static function (ContainerInterface $c): ValueMatcher {

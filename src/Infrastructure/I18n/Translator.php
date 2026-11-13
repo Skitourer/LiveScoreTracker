@@ -17,6 +17,9 @@ namespace LiveScoreTracker\Infrastructure\I18n;
  */
 final class Translator
 {
+    /** @var array<string, string> */
+    private array $overrides = [];
+
     /** @var (\Closure(string): array<string, string>)|null */
     private readonly ?\Closure $loader;
 
@@ -114,8 +117,19 @@ final class Translator
         }
     }
 
+    /**
+     * Texts that override every catalog, whatever the language (names given
+     * in the configuration, e.g. a workshop added from the admin screen).
+     *
+     * @param array<string, string> $texts key => text
+     */
+    public function override(array $texts): void
+    {
+        $this->overrides = $texts + $this->overrides;
+    }
+
     private function find(string $key): ?string
     {
-        return $this->catalogs[$this->locale][$key] ?? $this->catalogs[$this->fallbackLocale][$key] ?? null;
+        return $this->overrides[$key] ?? $this->catalogs[$this->locale][$key] ?? $this->catalogs[$this->fallbackLocale][$key] ?? null;
     }
 }
