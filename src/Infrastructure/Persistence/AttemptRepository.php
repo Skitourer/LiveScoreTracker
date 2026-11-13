@@ -125,9 +125,6 @@ final class AttemptRepository
     }
 
     /**
-     * Whether an entry with this id (made on the form or the phone) was already stored.
-     */
-    /**
      * Whether a workshop has results (current or not), so that it cannot be deleted.
      */
     public function hasWorkshopResults(string $workshopId): bool
@@ -139,6 +136,9 @@ final class AttemptRepository
         return $statement->fetchColumn() !== false;
     }
 
+    /**
+     * Whether an entry with this id (made on the form or the phone) was already stored.
+     */
     public function hasClient(string $clientId): bool
     {
         return $this->idForClient($clientId) !== null;
