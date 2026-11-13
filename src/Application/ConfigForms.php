@@ -40,7 +40,7 @@ final class ConfigForms
     /**
      * @param array<mixed> $data
      *
-     * @return array<string, mixed>
+     * @return array<mixed>
      */
     public static function values(string $tab, array $data): array
     {
@@ -217,7 +217,8 @@ final class ConfigForms
                 continue;
             }
             $old = \is_array($oldVariants[$i] ?? null) ? $oldVariants[$i] : [];
-            $variants[] = self::variant($old, $row, \is_array($form['variants'][$i] ?? null) ? $form['variants'][$i] : []);
+            $rawVariants = \is_array($form['variants'] ?? null) ? $form['variants'] : [];
+            $variants[] = self::variant($old, $row, \is_array($rawVariants[$i] ?? null) ? $rawVariants[$i] : []);
         }
         $workshop['variants'] = $variants;
 

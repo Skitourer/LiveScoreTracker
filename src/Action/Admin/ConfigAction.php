@@ -93,7 +93,7 @@ final class ConfigAction
     }
 
     /**
-     * @param array<string, mixed> $values
+     * @param array<mixed>         $values
      * @param list<string>         $errors
      */
     private function renderTab(ResponseInterface $response, string $tab, array $values, array $errors, int $status = 200): ResponseInterface
@@ -138,7 +138,7 @@ final class ConfigAction
         } else {
             $list[] = $updated;
         }
-        $after['workshops'] = array_values($list);
+        $after['workshops'] = $list;
 
         try {
             $this->save($before, $after, 'workshops');
@@ -152,7 +152,7 @@ final class ConfigAction
     }
 
     /**
-     * @param array<string, mixed> $values
+     * @param array<mixed>         $values
      * @param list<string>         $errors
      */
     private function renderWorkshop(ResponseInterface $response, ?int $index, array $values, array $errors, int $status = 200): ResponseInterface
@@ -161,12 +161,14 @@ final class ConfigAction
         // One empty variant, modifier and action row to add new ones without script.
         $variants = \is_array($values['variants'] ?? null) ? $values['variants'] : [];
         $variants[] = ['group' => '', 'measure' => 'time', 'better' => 'lower', 'attempts' => '1', 'foul_mode' => 'strict', 'time_format' => 'ss.cc', 'bibs_per_timer' => '1', 'modifiers' => [], 'actions' => [], 'new' => true];
-        foreach ($variants as &$variant) {
+        $rows = [];
+        foreach ($variants as $variant) {
+            $variant = \is_array($variant) ? $variant : [];
             $variant['modifiers'] = [...(\is_array($variant['modifiers'] ?? null) ? $variant['modifiers'] : []), ['id' => '', 'name' => '', 'value' => '', 'repeatable' => false]];
             $variant['actions'] = [...(\is_array($variant['actions'] ?? null) ? $variant['actions'] : []), ['id' => '', 'name' => '', 'points' => '']];
+            $rows[] = $variant;
         }
-        unset($variant);
-        $values['variants'] = $variants;
+        $values['variants'] = $rows;
         $prefix = $index === null ? 'workshops[' . \count($this->workshops($data)) . '].' : "workshops[{$index}].";
 
         return $this->responder->render($response, 'admin/config-workshop.html.twig', [
@@ -250,7 +252,7 @@ final class ConfigAction
      */
     private function workshops(array $data): array
     {
-        $list = \is_array($data['workshops'] ?? null) ? array_values($data['workshops']) : [];
+        $list = \is_array($data['workshops'] ?? null) ? $data['workshops'] : [];
 
         return array_values(array_filter($list, \is_array(...)));
     }
@@ -307,7 +309,7 @@ final class ConfigAction
                 'changes' => $changes,
                 'error_list' => $errors,
                 'uses_example' => $this->store->usesExample(),
-            'phase' => $this->responder->context->phase->value,
+                'phase' => $this->responder->context->phase->value,
             ]);
         }
 
@@ -372,7 +374,10 @@ final class ConfigAction
             'tab' => $tab,
             'source' => $source,
             'count' => \count($changes),
-            'changes' => \array_slice($changes, 0, self::AUDIT_CHANGES),
+            'changes' => implode("\n", array_map(
+                static fn(array $c): string => \sprintf('%s: %s → %s', $c['path'], $c['before'] ?? '—', $c['after'] ?? '—'),
+                \array_slice($changes, 0, self::AUDIT_CHANGES),
+            )),
         ]);
         $this->responder->flash('success', 'config.saved');
     }
