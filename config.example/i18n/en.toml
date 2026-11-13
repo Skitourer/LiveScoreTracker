@@ -389,6 +389,8 @@ older = "Older"
 "referee.password_changed" = "Referee password changed"
 "referee.disconnected_all" = "Referee phones disconnected"
 "phase.changed" = "Phase change"
+"config.changed" = "Configuration changed"
+"config.exported" = "Configuration exported"
 "setup.first_admin" = "First admin created"
 "documents.downloaded" = "Document downloaded"
 "reception.list_printed" = "Reception list printed"
@@ -1277,3 +1279,175 @@ Children on the waiting list: {waitlist}.
 
 Record: {link}
 """
+
+[config]
+title = "Configuration"
+uses_example = "The configuration in use is the fictitious example. The first save copies it into this server's data folder."
+read_only_running = "Competition running: levels, groups, workshops and the whole file cannot be changed."
+read_only_finished = "Competition finished: the configuration is read-only."
+read_only = "This part of the configuration cannot be changed in the current phase."
+invalid = "The configuration was not saved: {count} error(s) to fix."
+workshops_hint = "Click a workshop to edit it. A workshop with results cannot be deleted."
+one_per_line = "one per line"
+save = "Save"
+saved = "Configuration saved."
+unchanged = "No change."
+workshop_has_results = "This workshop has results: it cannot be deleted."
+file_empty = "Empty or unreadable file."
+
+[config.tab]
+edition = "Edition"
+participants = "Participants"
+registration = "Registration"
+scoring = "Scoring"
+workshops = "Workshops"
+import = "Excel import"
+contacts = "Contacts"
+file = "File"
+
+[config.edition]
+name = "Edition name"
+organizer = "Organizer"
+date = "Date"
+start = "Start"
+end = "End"
+venue = "Venue"
+contact_email = "Contact email"
+default_locale = "Default language"
+
+[config.locale]
+fr = "French"
+en = "English"
+
+[config.participants]
+levels = "Levels"
+genders = "Genders (girl, boy)"
+schools = "Schools"
+level_groups = "Level groups"
+level_groups_hint = "one group per line, e.g. \"junior: CP, CE1\""
+hint = "Every level must belong to a group, and every group needs at least one event."
+
+[config.registration]
+opens_at = "Registration opens"
+closes_at = "Registration closes"
+quota = "Number of places"
+first_bib = "First bib"
+
+[config.scoring]
+max_score = "Maximum score"
+floor = "Floor"
+foul_score = "Foul score"
+dnf_score = "\"Not done\" score"
+tie_breakers = "Tie-breaking"
+tie_breaker_n = "Criterion {n}"
+
+[config.tie_breaker]
+first_places = "Number of first places"
+top3_places = "Number of top-3 places"
+youngest = "Youngest"
+
+[config.import]
+hint = "Column header of the Excel file for each piece of information (leave empty if absent)."
+last_name = "Last name"
+first_name = "First name"
+gender = "Gender"
+level = "Level"
+birth_date = "Birth date"
+school = "School"
+guardian_name = "Legal guardian"
+guardian_phone = "Phone"
+guardian_email = "Email"
+volunteer = "Volunteer"
+
+[config.contacts]
+hint = "Contacts shown on the workshop help pages. To remove one, empty its fields."
+n = "Contact {n}"
+role = "Role (identifier)"
+label = "Displayed label"
+name = "Name"
+phone = "Phone"
+
+[config.workshop]
+name = "Displayed name"
+id = "Identifier"
+variants = "Variants"
+add = "Add a workshop"
+id_hint = "lowercase letters, digits and \"_\"; cannot change afterwards"
+name_hint = "optional when the name is in the translations"
+help = "Help page"
+help_hint = "Markdown file name, e.g. sprint.md"
+delete_confirm = "Delete this workshop?"
+up = "Move up"
+down = "Move down"
+duplicate = "Duplicate"
+delete = "Delete"
+up_short = "↑"
+down_short = "↓"
+duplicate_short = "Duplicate"
+delete_short = "Delete"
+
+[config.variant]
+new = "New variant"
+new_hint = "Choose a group to add it; otherwise it is ignored."
+title = "Variant \"{group}\""
+group = "Level group"
+label = "Label (e.g. 30 m)"
+measure = "Measure"
+better = "Best result"
+attempts = "Attempts"
+foul_mode = "Fouls"
+range_min = "Lowest plausible value"
+range_max = "Highest plausible value"
+time_format = "Display format"
+bibs_per_timer = "Bibs per race"
+modifiers = "Bonuses and penalties"
+modifiers_hint = "Value in seconds, metres or points (negative for a bonus on a time). Rows without an identifier are ignored."
+item_id = "Identifier"
+modifier_value = "Value"
+repeatable = "Several times"
+limit_type = "Limit"
+limit_value = "Limit value"
+limit_hint = "duration \"1:30\" or number of shots"
+max_value = "Maximum value"
+points = "Points"
+delete = "Delete this variant"
+
+[config.measure]
+time = "Time"
+distance = "Distance"
+score = "Points"
+counter = "Counter"
+
+[config.better]
+lower = "Lowest"
+higher = "Highest"
+
+[config.foul_mode]
+strict = "Count as an attempt"
+lenient = "Do not count"
+
+[config.limit]
+duration = "Duration"
+shots = "Number of shots"
+
+[config.file]
+export = "Export"
+download = "Download competition.toml"
+import = "Import a file"
+import_label = "competition.toml file"
+preview = "See the changes"
+history = "Previous versions"
+no_history = "No previous version."
+restore = "Go back to this version"
+advanced = "Edit the file"
+advanced_hint = "For settings that are not in the forms. The text is checked before saving."
+
+[config.preview]
+title_import = "Import: changes"
+title_restore = "Back to a previous version: changes"
+none = "No change compared with the current configuration."
+count = "{count} setting(s) changed."
+setting = "Setting"
+before = "Before"
+after = "After"
+apply = "Apply"

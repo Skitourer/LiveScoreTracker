@@ -389,6 +389,8 @@ older = "Plus anciennes"
 "referee.password_changed" = "Mot de passe des arbitres changé"
 "referee.disconnected_all" = "Téléphones des arbitres déconnectés"
 "phase.changed" = "Changement de phase"
+"config.changed" = "Configuration modifiée"
+"config.exported" = "Configuration exportée"
 "setup.first_admin" = "Premier admin créé"
 "documents.downloaded" = "Document téléchargé"
 "reception.list_printed" = "Liste d'accueil imprimée"
@@ -1277,3 +1279,175 @@ Enfants en liste d'attente : {waitlist}.
 
 Fiche : {link}
 """
+
+[config]
+title = "Configuration"
+uses_example = "La configuration en service est l'exemple fictif. Le premier enregistrement le copie dans le dossier de données de ce serveur."
+read_only_running = "Compétition en cours : les classes, les groupes, les ateliers et le fichier complet ne sont pas modifiables."
+read_only_finished = "Compétition terminée : la configuration est en lecture seule."
+read_only = "Cette partie de la configuration n'est pas modifiable dans la phase actuelle."
+invalid = "La configuration n'a pas été enregistrée : {count} erreur(s) à corriger."
+workshops_hint = "Cliquez sur un atelier pour le modifier. Un atelier qui a des résultats ne peut pas être supprimé."
+one_per_line = "une par ligne"
+save = "Enregistrer"
+saved = "Configuration enregistrée."
+unchanged = "Aucun changement."
+workshop_has_results = "Cet atelier a des résultats : il ne peut pas être supprimé."
+file_empty = "Fichier vide ou illisible."
+
+[config.tab]
+edition = "Édition"
+participants = "Participants"
+registration = "Inscriptions"
+scoring = "Barème"
+workshops = "Ateliers"
+import = "Import Excel"
+contacts = "Contacts"
+file = "Fichier"
+
+[config.edition]
+name = "Nom de l'édition"
+organizer = "Organisateur"
+date = "Date"
+start = "Début"
+end = "Fin"
+venue = "Lieu"
+contact_email = "Email de contact"
+default_locale = "Langue par défaut"
+
+[config.locale]
+fr = "Français"
+en = "Anglais"
+
+[config.participants]
+levels = "Classes"
+genders = "Genres (girl, boy)"
+schools = "Écoles"
+level_groups = "Groupes de classes"
+level_groups_hint = "un groupe par ligne, ex. « junior: CP, CE1 »"
+hint = "Chaque classe doit appartenir à un groupe, et chaque groupe doit avoir au moins une épreuve."
+
+[config.registration]
+opens_at = "Ouverture des inscriptions"
+closes_at = "Fermeture des inscriptions"
+quota = "Nombre de places"
+first_bib = "Premier dossard"
+
+[config.scoring]
+max_score = "Score maximal"
+floor = "Plancher"
+foul_score = "Score du nul"
+dnf_score = "Score « non fait »"
+tie_breakers = "Départage des égalités"
+tie_breaker_n = "Critère {n}"
+
+[config.tie_breaker]
+first_places = "Nombre de premières places"
+top3_places = "Nombre de places dans les 3 premiers"
+youngest = "Le plus jeune"
+
+[config.import]
+hint = "Intitulé de la colonne du fichier Excel pour chaque information (laisser vide si absente)."
+last_name = "Nom"
+first_name = "Prénom"
+gender = "Genre"
+level = "Classe"
+birth_date = "Date de naissance"
+school = "École"
+guardian_name = "Responsable légal"
+guardian_phone = "Téléphone"
+guardian_email = "Email"
+volunteer = "Bénévole"
+
+[config.contacts]
+hint = "Contacts affichés dans les pages d'aide des ateliers. Pour en retirer un, videz ses champs."
+n = "Contact {n}"
+role = "Rôle (identifiant)"
+label = "Libellé affiché"
+name = "Nom"
+phone = "Téléphone"
+
+[config.workshop]
+name = "Nom affiché"
+id = "Identifiant"
+variants = "Variantes"
+add = "Ajouter un atelier"
+id_hint = "minuscules, chiffres et « _ » ; non modifiable ensuite"
+name_hint = "facultatif si le nom est dans les traductions"
+help = "Page d'aide"
+help_hint = "nom du fichier Markdown, ex. sprint.md"
+delete_confirm = "Supprimer cet atelier ?"
+up = "Monter"
+down = "Descendre"
+duplicate = "Dupliquer"
+delete = "Supprimer"
+up_short = "↑"
+down_short = "↓"
+duplicate_short = "Dupliquer"
+delete_short = "Supprimer"
+
+[config.variant]
+new = "Nouvelle variante"
+new_hint = "Choisissez un groupe pour l'ajouter ; sinon elle est ignorée."
+title = "Variante « {group} »"
+group = "Groupe de classes"
+label = "Libellé (ex. 30 m)"
+measure = "Type de mesure"
+better = "Meilleur résultat"
+attempts = "Nombre d'essais"
+foul_mode = "Essais nuls"
+range_min = "Valeur plausible minimale"
+range_max = "Valeur plausible maximale"
+time_format = "Format d'affichage"
+bibs_per_timer = "Dossards par course"
+modifiers = "Bonus et pénalités"
+modifiers_hint = "Valeur en secondes, mètres ou points (négative pour un bonus sur un temps). Ligne sans identifiant ignorée."
+item_id = "Identifiant"
+modifier_value = "Valeur"
+repeatable = "Plusieurs fois"
+limit_type = "Limite"
+limit_value = "Valeur de la limite"
+limit_hint = "durée « 1:30 » ou nombre de tirs"
+max_value = "Valeur maximale"
+points = "Points"
+delete = "Supprimer cette variante"
+
+[config.measure]
+time = "Temps"
+distance = "Distance"
+score = "Points"
+counter = "Compteur"
+
+[config.better]
+lower = "Le plus petit"
+higher = "Le plus grand"
+
+[config.foul_mode]
+strict = "Comptent comme un essai"
+lenient = "Ne comptent pas"
+
+[config.limit]
+duration = "Durée"
+shots = "Nombre de tirs"
+
+[config.file]
+export = "Exporter"
+download = "Télécharger competition.toml"
+import = "Importer un fichier"
+import_label = "Fichier competition.toml"
+preview = "Voir les changements"
+history = "Versions précédentes"
+no_history = "Aucune version précédente."
+restore = "Revenir à cette version"
+advanced = "Modifier le fichier"
+advanced_hint = "Pour les réglages absents des formulaires. Le texte est vérifié avant l'enregistrement."
+
+[config.preview]
+title_import = "Import : changements"
+title_restore = "Retour à une version précédente : changements"
+none = "Aucun changement par rapport à la configuration actuelle."
+count = "{count} réglage(s) modifié(s)."
+setting = "Réglage"
+before = "Avant"
+after = "Après"
+apply = "Appliquer"
