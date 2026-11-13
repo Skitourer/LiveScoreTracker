@@ -26,10 +26,13 @@ final class ConfigFormsTest extends TestCase
 
     public function testEveryWorkshopRoundTrips(): void
     {
-        foreach (self::example()['workshops'] as $workshop) {
+        $workshops = self::example()['workshops'] ?? [];
+        self::assertIsArray($workshops);
+        foreach ($workshops as $workshop) {
+            self::assertIsArray($workshop);
             $values = ConfigForms::workshopValues($workshop);
             $after = ConfigForms::workshop($workshop, $values);
-            self::assertSame([], ConfigDiff::compare($workshop, $after), (string) $workshop['id']);
+            self::assertSame([], ConfigDiff::compare($workshop, $after));
         }
     }
 

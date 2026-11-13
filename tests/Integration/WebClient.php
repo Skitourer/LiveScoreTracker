@@ -80,7 +80,7 @@ final class WebClient
     }
 
     /**
-     * @param array<string, string|array<array-key, string>> $form fields; a list field (name[key]) as an array
+     * @param array<string, mixed> $form fields; a list field (name[key]) as an array, nested if needed
      */
     public function post(string $path, array $form = [], bool $withCsrf = true): ResponseInterface
     {
@@ -130,7 +130,7 @@ final class WebClient
     }
 
     /**
-     * @param array<string, string|array<array-key, string>> $form
+     * @param array<string, mixed>                   $form
      * @param array<string, UploadedFileInterface>          $files
      * @param array<string, mixed>|null            $json
      * @param array<string, string>                $headers
