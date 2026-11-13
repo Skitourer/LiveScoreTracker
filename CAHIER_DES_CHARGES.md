@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.26 — 13 novembre 2026
+> Version 1.27 — 13 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -653,10 +653,15 @@ Un exemple complet, **avec des données fictives**, figure en **annexe A**.
 
 ### 12.3 Écran de configuration (admin)
 
-- Formulaires pour modifier tous les réglages sans éditer le fichier à la main. L'écran **lit et écrit** `competition.toml`.
-- Validation de la configuration avant enregistrement (erreurs explicites).
-- Garde-fous de la § 10.4 en phase « en cours ».
-- Export et import du fichier de configuration (pour repartir d'une édition précédente ou partager avec un autre organisateur).
+- Page `/admin/config`, réservée aux **admins**, avec un onglet par partie : Édition, Participants (classes, genres, écoles, groupes de classes), Inscriptions, Barème (dont l'ordre des critères de départage), Ateliers, Import Excel (intitulés des colonnes), Contacts, Fichier.
+- Formulaires pour modifier tous les réglages sans éditer le fichier à la main. L'écran **lit et écrit** `competition.toml` ; une réécriture par les formulaires perd les commentaires du fichier.
+- **Ateliers** : ajouter, modifier, dupliquer, monter/descendre, supprimer (refusé si l'atelier a des résultats). Pour chaque variante : groupe, libellé, type de mesure, meilleur résultat, essais, nuls, plage plausible, format du temps, dossards par course, bonus/pénalités, limite et actions du mode compteur. L'identifiant d'un atelier n'est plus modifiable une fois créé.
+- **Noms affichés** facultatifs dans le fichier : `name` d'un atelier, d'un bonus/pénalité ou d'une action du compteur, `label` d'un contact. Ils remplacent les traductions dans toutes les langues (utile pour un atelier ajouté depuis l'écran).
+- Validation de la configuration avant enregistrement : les erreurs sont listées et affichées à côté des champs concernés ; rien n'est enregistré tant qu'il en reste.
+- **Historique** : chaque enregistrement garde la version précédente (20 dernières, dossier `config-history/` du dossier de données) ; bouton « Revenir à cette version » avec aperçu des changements.
+- Export du fichier ; **import** avec aperçu des changements réglage par réglage avant d'appliquer (pour repartir d'une édition précédente ou partager avec un autre organisateur) ; édition directe du texte du fichier pour les réglages absents des formulaires (vérifiée avant l'enregistrement).
+- Chaque modification est inscrite au journal d'audit (onglet, ancienne et nouvelle valeur de chaque réglage).
+- **Selon la phase** : tout est modifiable en « préparation » ; en « en cours », les participants, les ateliers et le fichier complet (édition, import, retour à une version) sont en lecture seule — les garde-fous de la § 10.4 viendront à l'étape 12b ; en « terminée », toute la configuration est en lecture seule.
 
 ### 12.4 Traductions (i18n)
 

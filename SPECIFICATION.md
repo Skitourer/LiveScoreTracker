@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.26 — 13 November 2026
+> Version 1.27 — 13 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -653,10 +653,15 @@ A complete example **with fictitious data** is given in **appendix A**.
 
 ### 12.3 Configuration screen (admin)
 
-- Forms to change every setting without editing the file by hand. The screen **reads and writes** `competition.toml`.
-- Configuration validation before saving (explicit errors).
-- Safeguards from § 10.4 during the "in progress" phase.
-- Export and import of the configuration file (to start from a previous edition or share with another organizer).
+- Page `/admin/config`, **admins only**, with one tab per part: Edition, Participants (levels, genders, schools, level groups), Registration, Scoring (including the order of the tie-breaking criteria), Workshops, Excel import (column headers), Contacts, File.
+- Forms to change every setting without editing the file by hand. The screen **reads and writes** `competition.toml`; a rewrite by the forms loses the comments of the file.
+- **Workshops**: add, edit, duplicate, move up/down, delete (refused when the workshop has results). For each variant: group, label, measure, best result, attempts, fouls, plausible range, time format, bibs per race, bonuses/penalties, counter limit and actions. A workshop's identifier cannot change once created.
+- Optional **display names** in the file: `name` of a workshop, a bonus/penalty or a counter action, `label` of a contact. They override the translations in every language (useful for a workshop added from the screen).
+- Configuration validation before saving: errors are listed and shown next to the fields concerned; nothing is saved while any remains.
+- **History**: every save keeps the previous version (last 20, `config-history/` in the data folder); "Go back to this version" button with a preview of the changes.
+- Export of the file; **import** with a setting-by-setting preview of the changes before applying (to start from a previous edition or share with another organizer); direct edit of the file's text for settings that are not in the forms (checked before saving).
+- Every change is written to the audit log (tab, old and new value of each setting).
+- **By phase**: everything can be changed in "preparation"; in "in progress", participants, workshops and the whole file (edit, import, going back to a version) are read-only — the § 10.4 safeguards come with step 12b; in "finished", the whole configuration is read-only.
 
 ### 12.4 Translations (i18n)
 
