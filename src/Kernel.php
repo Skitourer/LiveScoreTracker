@@ -8,6 +8,7 @@ use DI\ContainerBuilder;
 use Dotenv\Dotenv;
 use LiveScoreTracker\Action\AccountAction;
 use LiveScoreTracker\Action\Admin\AuditAction;
+use LiveScoreTracker\Action\Admin\ConfigAction;
 use LiveScoreTracker\Action\Admin\PhaseAction;
 use LiveScoreTracker\Action\Admin\RefereeAccountAction;
 use LiveScoreTracker\Action\Admin\TestDataAction;
@@ -77,6 +78,7 @@ use LiveScoreTracker\Http\RequestContext;
 use LiveScoreTracker\Infrastructure\BuildInfo;
 use LiveScoreTracker\Infrastructure\Clock;
 use LiveScoreTracker\Infrastructure\Config\ConfigRepository;
+use LiveScoreTracker\Infrastructure\Config\ConfigStore;
 use LiveScoreTracker\Infrastructure\Database\ConnectionFactory;
 use LiveScoreTracker\Infrastructure\Database\Migrator;
 use LiveScoreTracker\Infrastructure\Help\HelpPages;
@@ -236,6 +238,8 @@ final class Kernel
             $admin->map(['GET', 'POST'], '/referee', RefereeAccountAction::class)->setName('admin-referee')->add($guard(Permission::ManageAccounts));
             $admin->map(['GET', 'POST'], '/test-data', TestDataAction::class)->setName('admin-test-data')->add($guard(Permission::RestoreAndPurge));
             $admin->map(['GET', 'POST'], '/phase', PhaseAction::class)->setName('admin-phase')->add($guard(Permission::ChangePhase));
+            $admin->map(['GET', 'POST'], '/config[/{tab:[a-z]+}]', ConfigAction::class)->setName('admin-config')->add($guard(Permission::ManageConfiguration));
+            $admin->map(['GET', 'POST'], '/config/{tab:workshops}/{workshop:[0-9]+|new}', ConfigAction::class)->setName('admin-config-workshop')->add($guard(Permission::ManageConfiguration));
             $admin->get('/audit', AuditAction::class)->setName('admin-audit')->add($guard(Permission::ViewAuditLog));
         });
     }
@@ -269,6 +273,10 @@ final class Kernel
             ConfigRepository::class => static fn(): ConfigRepository => new ConfigRepository(
                 $settings->dataDir,
                 $settings->rootDir . '/config.example',
+            ),
+            ConfigStore::class => static fn(ContainerInterface $c): ConfigStore => new ConfigStore(
+                self::service($c, ConfigRepository::class),
+                $settings->dataDir,
             ),
             Translator::class => static function (ContainerInterface $c) use ($settings): Translator {
                 try {
