@@ -2,7 +2,7 @@
 
 *[English version](README.md)*
 
-LiveScoreTracker gère une compétition multisports d'une journée pour les enfants : inscriptions, accueil, saisie des résultats à chaque atelier depuis le téléphone des arbitres (même sans réseau), calcul automatique des points et des classements par catégorie, contrôles, écrans d'avancement et remise des prix.
+LiveScoreTracker gère une compétition multisports d'une journée pour les enfants : inscriptions, accueil, saisie des résultats à chaque atelier depuis le téléphone des arbitres (même sans réseau), calcul automatique des points et des classements par série (classe + fille/garçon), contrôles, écrans d'avancement et remise des prix.
 
 C'est une application web pensée d'abord pour le téléphone, en PHP (Slim 4) avec MySQL, prévue pour un hébergement mutualisé bon marché et des bénévoles équipés de téléphones ordinaires.
 
@@ -19,7 +19,7 @@ C'est une application web pensée d'abord pour le téléphone, en PHP (Slim 4) a
 - **Documents** : feuilles de secours pour la saisie papier (par épreuve, triées par dossard), fiches des épreuves, podiums et classements complets (PDF), classements et résultats détaillés (Excel).
 - **Affichages** : page d'accueil publique, espace participant (dossard + date de naissance), écran d'avancement pour un vidéoprojecteur, écran de cérémonie piloté depuis un téléphone.
 - **Sécurité et vie privée** : rôles et permissions, double authentification des admins, limitation des tentatives de connexion, protection CSRF, politique de sécurité du contenu stricte, journal d'audit, prénom + initiale affichés partout où c'est possible.
-- Interface en **français et en anglais** ; tout ce qui est propre à une édition (ateliers, barèmes, écoles, textes) est dans des fichiers de configuration.
+- Interface en **français et en anglais** ; tout ce qui est propre à une édition (ateliers, barèmes, écoles, textes) est dans des fichiers de configuration, modifiables depuis un écran d'administration (avec historique, import et export).
 
 ## Démarrage rapide
 

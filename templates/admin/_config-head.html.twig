@@ -1,0 +1,13 @@
+{% macro err(errors, path) %}{% for message in errors[path] ?? [] %}<small class="error">{{ message }}</small>{% endfor %}{% endmacro %}
+<h1>{{ t('config.title') }}</h1>
+{% if uses_example %}<p class="notice">{{ t('config.uses_example') }}</p>{% endif %}
+{% if editable is defined and not editable %}<p class="notice">{{ t('config.read_only_' ~ phase) }}</p>{% endif %}
+<nav class="chips" aria-label="{{ t('config.title') }}">
+    {% for item in tabs %}<a href="{{ url_for('admin-config', {tab: item}) }}" {% if item == tab %}aria-current="page"{% endif %}>{{ t('config.tab.' ~ item) }}</a>{% endfor %}
+</nav>
+{% if error_list is not empty %}
+    <div role="alert">
+        <p class="error"><strong>{{ t('config.invalid', {count: error_list|length}) }}</strong></p>
+        <ul class="form-errors">{% for message in error_list %}<li>{{ message }}</li>{% endfor %}</ul>
+    </div>
+{% endif %}

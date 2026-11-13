@@ -32,12 +32,12 @@ final class HttpTest extends TestCase
     public function testStatusPageShowsPendingMigrationsThenUpToDate(): void
     {
         $home = (string) $this->request('GET', '/')->getBody();
-        self::assertStringContainsString('Multisport Games 2027', $home, 'The public home page works before the first migration.');
+        self::assertStringContainsString('Olympiades fictives 2027', $home, 'The public home page works before the first migration.');
 
         $body = (string) $this->request('GET', '/status')->getBody();
         self::assertStringContainsString('LiveScoreTracker', $body);
         self::assertStringContainsString('migration(s) en attente', $body);
-        self::assertStringContainsString('12 épreuves, 10 catégories', $body);
+        self::assertStringContainsString('12 épreuves, 10 séries', $body);
         self::assertStringContainsString('/demo/report', $body);
 
         $this->request('POST', '/internal/migrate', ['X-Deploy-Token' => 'test-token']);

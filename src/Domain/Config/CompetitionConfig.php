@@ -19,6 +19,7 @@ final class CompetitionConfig
      * @param list<Workshop>              $workshops
      * @param array<string, string>       $importColumns internal field => source column header
      * @param list<Contact>               $contacts
+     * @param array<string, string>       $labels       translation key => text given in the file (`name`, `label`)
      */
     public function __construct(
         public readonly Edition $edition,
@@ -31,6 +32,7 @@ final class CompetitionConfig
         public readonly array $workshops,
         public readonly array $importColumns = [],
         public readonly array $contacts = [],
+        public readonly array $labels = [],
     ) {}
 
     /**

@@ -2,7 +2,7 @@
 
 *[Version française](README.fr.md)*
 
-LiveScoreTracker runs a one-day, multi-sport competition for children: registrations, check-in, result entry at each workshop from the referees' phones (even without network), automatic scoring and rankings by category, checks, progress screens and the award ceremony.
+LiveScoreTracker runs a one-day, multi-sport competition for children: registrations, check-in, result entry at each workshop from the referees' phones (even without network), automatic scoring and rankings by division (level + girl/boy), checks, progress screens and the award ceremony.
 
 It is a mobile-first web application in PHP (Slim 4) with MySQL, designed for cheap shared hosting and volunteers with ordinary phones.
 
@@ -19,7 +19,7 @@ It is a mobile-first web application in PHP (Slim 4) with MySQL, designed for ch
 - **Documents**: rescue sheets for paper entry (per event, sorted by bib), event sheets, podiums and full rankings (PDF), rankings and detailed results (spreadsheets).
 - **Displays**: public home page, participant space (bib + birth date), progress screen for a projector, award ceremony screen driven from a phone.
 - **Security and privacy**: roles and permissions, two-factor authentication for admins, throttled logins, CSRF protection, strict content security policy, audit log, only first name + initial shown where possible.
-- Interface in **French and English**; everything specific to an edition (workshops, scoring, schools, texts) lives in configuration files.
+- Interface in **French and English**; everything specific to an edition (workshops, scoring, schools, texts) lives in configuration files, editable from an admin screen (with history, import and export).
 
 ## Quick start
 

@@ -125,6 +125,18 @@ final class AttemptRepository
     }
 
     /**
+     * Whether a workshop has results (current or not), so that it cannot be deleted.
+     */
+    public function hasWorkshopResults(string $workshopId): bool
+    {
+        $prefix = $workshopId . '.';
+        $statement = $this->pdo->prepare('SELECT 1 FROM attempts WHERE SUBSTR(variant_id, 1, :length) = :prefix LIMIT 1');
+        $statement->execute(['length' => \strlen($prefix), 'prefix' => $prefix]);
+
+        return $statement->fetchColumn() !== false;
+    }
+
+    /**
      * Whether an entry with this id (made on the form or the phone) was already stored.
      */
     public function hasClient(string $clientId): bool

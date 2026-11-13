@@ -1,7 +1,7 @@
 *Fiktive Beispiel-Teilnahmebedingungen: durch die Ihrer Veranstaltung ersetzen.*
 
 ## Artikel 1 — Organisation
-Der Wettbewerb wird vom Springfield School Sports Club am auf der Startseite angegebenen Sonntagvormittag organisiert.
+Der Wettbewerb wird vom Association sportive fictive am auf der Startseite angegebenen Sonntagvormittag organisiert.
 
 ## Artikel 2 — Teilnehmende
 Teilnehmen können Kinder der Klassen CP bis CM2 einer teilnehmenden Schule, solange Plätze frei sind. Darüber hinaus kommen Anmeldungen auf die Warteliste.

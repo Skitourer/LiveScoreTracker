@@ -18,8 +18,11 @@ final class ConfigParser
 {
     private const ID_PATTERN = '/^[a-z0-9_]+$/';
 
-    /** @var list<string> */
+    /** @var list<ConfigError> */
     private array $errors = [];
+
+    /** @var array<string, string> translation key => text */
+    private array $labels = [];
 
     /**
      * @param array<mixed> $data
@@ -49,12 +52,12 @@ final class ConfigParser
 
         foreach (array_keys($levelGroups) as $group) {
             if (!$this->groupHasVariant($workshops, $group)) {
-                $this->error("level_groups.{$group}", 'no event is defined for this level group');
+                $this->error("level_groups.{$group}", 'no_event_for_group');
             }
         }
 
         if ($this->errors !== [] || $edition === null) {
-            throw new InvalidConfig($this->errors === [] ? ['edition: missing'] : $this->errors);
+            throw new InvalidConfig($this->errors === [] ? [new ConfigError('edition', 'missing_section')] : $this->errors);
         }
 
         return new CompetitionConfig(
@@ -68,6 +71,7 @@ final class ConfigParser
             $workshops,
             $importColumns,
             $contacts,
+            $this->labels,
         );
     }
 
@@ -84,7 +88,7 @@ final class ConfigParser
         $date = $this->date($t, 'date', 'edition', true);
         $locale = $this->string($t, 'default_locale', 'edition', false) ?? 'fr';
         if (preg_match('/^[a-z]{2}(_[A-Z]{2})?$/', $locale) !== 1) {
-            $this->error('edition.default_locale', 'must be a language code such as "fr" or "en"');
+            $this->error('edition.default_locale', 'locale_code');
         }
 
         if ($name === null || $organizer === null || $date === null) {
@@ -132,15 +136,15 @@ final class ConfigParser
         foreach ($t as $group => $members) {
             $path = "level_groups.{$group}";
             if (!\is_string($group) || preg_match(self::ID_PATTERN, $group) !== 1) {
-                $this->error($path, 'group names may only contain lowercase letters, digits and "_"');
+                $this->error($path, 'group_name');
                 continue;
             }
             $list = $this->stringList($t, $group, 'level_groups', true);
             foreach ($list as $level) {
                 if (!\in_array($level, $levels, true)) {
-                    $this->error($path, \sprintf('unknown level "%s" (not in participants.levels)', $level));
+                    $this->error($path, 'unknown_level', ['level' => $level]);
                 } elseif (isset($owner[$level])) {
-                    $this->error($path, \sprintf('level "%s" is already in group "%s"', $level, $owner[$level]));
+                    $this->error($path, 'level_twice', ['level' => $level, 'group' => $owner[$level]]);
                 } else {
                     $owner[$level] = $group;
                 }
@@ -151,7 +155,7 @@ final class ConfigParser
         if ($t !== []) {
             foreach ($levels as $level) {
                 if (!isset($owner[$level])) {
-                    $this->error('level_groups', \sprintf('level "%s" belongs to no group', $level));
+                    $this->error('level_groups', 'level_no_group', ['level' => $level]);
                 }
             }
         }
@@ -168,7 +172,7 @@ final class ConfigParser
         $opensAt = $this->date($t, 'opens_at', 'registration', false);
         $closesAt = $this->date($t, 'closes_at', 'registration', false);
         if ($opensAt !== null && $closesAt !== null && $opensAt >= $closesAt) {
-            $this->error('registration.closes_at', 'must be after opens_at');
+            $this->error('registration.closes_at', 'closes_before_opens');
         }
 
         return new Registration(
@@ -193,9 +197,9 @@ final class ConfigParser
             foreach ($this->stringList($t, 'tie_breakers', $path, false) as $i => $value) {
                 $criterion = TieBreaker::tryFrom($value);
                 if ($criterion === null) {
-                    $this->error("{$path}.tie_breakers[{$i}]", 'must be one of ' . self::enumValues(TieBreaker::class));
+                    $this->error("{$path}.tie_breakers[{$i}]", 'one_of', ['values' => self::enumValues(TieBreaker::class)]);
                 } elseif (\in_array($criterion, $tieBreakers, true)) {
-                    $this->error("{$path}.tie_breakers[{$i}]", 'is listed twice');
+                    $this->error("{$path}.tie_breakers[{$i}]", 'listed_twice');
                 } else {
                     $tieBreakers[] = $criterion;
                 }
@@ -217,14 +221,14 @@ final class ConfigParser
     private function checkPoints(ScoringRules $rules, string $path): void
     {
         if ($rules->floor >= $rules->maxScore) {
-            $this->error("{$path}.floor", 'must be lower than max_score');
+            $this->error("{$path}.floor", 'floor_max');
         }
         // Spec § 9.2: a foul must score less than the worst valid performance.
         if ($rules->foulScore >= $rules->floor) {
-            $this->error("{$path}.foul_score", 'must be lower than floor, otherwise a foul scores like the worst valid result');
+            $this->error("{$path}.foul_score", 'foul_floor');
         }
         if ($rules->dnfScore > $rules->foulScore) {
-            $this->error("{$path}.dnf_score", 'must not be higher than foul_score');
+            $this->error("{$path}.dnf_score", 'dnf_foul');
         }
     }
 
@@ -236,7 +240,7 @@ final class ConfigParser
     private function workshops(mixed $list, array $groups, ScoringRules $scoring): array
     {
         if (!\is_array($list) || $list === [] || !array_is_list($list)) {
-            $this->error('workshops', 'at least one [[workshops]] entry is required');
+            $this->error('workshops', 'workshops_required');
 
             return [];
         }
@@ -246,26 +250,27 @@ final class ConfigParser
         foreach ($list as $i => $w) {
             $path = "workshops[{$i}]";
             if (!\is_array($w)) {
-                $this->error($path, 'must be a table');
+                $this->error($path, 'table');
                 continue;
             }
-            $this->allowKeys($w, $path, ['id', 'help', 'variants']);
+            $this->allowKeys($w, $path, ['id', 'name', 'help', 'variants']);
             $id = $this->identifier($w, 'id', $path);
+            $this->label($w, 'name', $path, "workshop.{$id}.name", $id);
             if ($id !== null && isset($ids[$id])) {
-                $this->error("{$path}.id", \sprintf('"%s" is used twice', $id));
+                $this->error("{$path}.id", 'used_twice', ['id' => $id]);
             }
             $ids[(string) $id] = true;
 
             $variants = [];
             $rawVariants = $w['variants'] ?? null;
             if (!\is_array($rawVariants) || $rawVariants === [] || !array_is_list($rawVariants)) {
-                $this->error("{$path}.variants", 'at least one [[workshops.variants]] entry is required');
+                $this->error("{$path}.variants", 'variants_required');
             } else {
                 $seenGroups = [];
                 foreach ($rawVariants as $j => $v) {
                     $vPath = "{$path}.variants[{$j}]";
                     if (!\is_array($v)) {
-                        $this->error($vPath, 'must be a table');
+                        $this->error($vPath, 'table');
                         continue;
                     }
                     $variant = $this->variant($v, $vPath, (string) $id, $groups, $scoring);
@@ -273,7 +278,7 @@ final class ConfigParser
                         continue;
                     }
                     if (isset($seenGroups[$variant->group])) {
-                        $this->error("{$vPath}.group", \sprintf('this workshop already has a variant for "%s"', $variant->group));
+                        $this->error("{$vPath}.group", 'variant_group_twice', ['group' => $variant->group]);
                     }
                     $seenGroups[$variant->group] = true;
                     $variants[] = $variant;
@@ -304,7 +309,7 @@ final class ConfigParser
 
         $group = $this->string($v, 'group', $path, true);
         if ($group !== null && !\in_array($group, $groups, true)) {
-            $this->error("{$path}.group", \sprintf('unknown level group "%s"', $group));
+            $this->error("{$path}.group", 'unknown_group', ['group' => $group]);
         }
         $measure = $this->enum($v, 'measure', $path, Measure::class, null);
         $better = $this->enum($v, 'better', $path, Better::class, null);
@@ -317,13 +322,13 @@ final class ConfigParser
         if ($measure === Measure::Time) {
             $timeFormat = $this->enum($v, 'time_format', $path, TimeFormat::class, TimeFormat::Seconds);
         } elseif (\array_key_exists('time_format', $v)) {
-            $this->error("{$path}.time_format", 'only applies to time events');
+            $this->error("{$path}.time_format", 'time_only');
         }
 
         $attempts = $this->int($v, 'attempts', $path, 1, 1);
         $isCounter = $measure === Measure::Counter;
         if ($isCounter && $attempts !== 1) {
-            $this->error("{$path}.attempts", 'counter events allow a single attempt');
+            $this->error("{$path}.attempts", 'counter_single_attempt');
         }
 
         $maxValue = null;
@@ -331,13 +336,13 @@ final class ConfigParser
             if (\in_array($measure, [Measure::Score, Measure::Counter], true)) {
                 $maxValue = $this->int($v, 'max_value', $path, 0, 1);
             } else {
-                $this->error("{$path}.max_value", 'only applies to score and counter events');
+                $this->error("{$path}.max_value", 'max_value_only');
             }
         }
 
         $bibsPerTimer = $this->int($v, 'bibs_per_timer', $path, 1, 1);
         if ($bibsPerTimer > 2) {
-            $this->error("{$path}.bibs_per_timer", 'must be 1 or 2');
+            $this->error("{$path}.bibs_per_timer", 'bibs_per_timer');
         }
 
         $scoring = $globalScoring->with(
@@ -382,14 +387,14 @@ final class ConfigParser
         }
         $range = $v['plausible_range'];
         if (!\is_array($range) || \count($range) !== 2 || !self::isNumber($range[0] ?? null) || !self::isNumber($range[1] ?? null)) {
-            $this->error("{$path}.plausible_range", 'must be [minimum, maximum]');
+            $this->error("{$path}.plausible_range", 'range_format');
 
             return null;
         }
         $min = self::toStorage($range[0], $measure);
         $max = self::toStorage($range[1], $measure);
         if ($min >= $max) {
-            $this->error("{$path}.plausible_range", 'minimum must be lower than maximum');
+            $this->error("{$path}.plausible_range", 'range_order');
 
             return null;
         }
@@ -408,18 +413,19 @@ final class ConfigParser
         $ids = [];
         foreach ($this->tableList($v, 'modifiers', $path) as $i => $m) {
             $mPath = "{$path}.modifiers[{$i}]";
-            $this->allowKeys($m, $mPath, ['id', 'value', 'repeatable']);
+            $this->allowKeys($m, $mPath, ['id', 'name', 'value', 'repeatable']);
             $id = $this->identifier($m, 'id', $mPath);
+            $this->label($m, 'name', $mPath, "modifier.{$id}", $id);
             $value = $m['value'] ?? null;
             if (!self::isNumber($value) || $value === 0) {
-                $this->error("{$mPath}.value", 'must be a non-zero number (negative for a bonus on a time)');
+                $this->error("{$mPath}.value", 'modifier_value');
                 continue;
             }
             if ($id === null) {
                 continue;
             }
             if (isset($ids[$id])) {
-                $this->error("{$mPath}.id", \sprintf('"%s" is used twice', $id));
+                $this->error("{$mPath}.id", 'used_twice', ['id' => $id]);
             }
             $ids[$id] = true;
             $modifiers[] = new Modifier($id, self::toStorage($value, $measure), $this->bool($m, 'repeatable', $mPath, false));
@@ -439,20 +445,21 @@ final class ConfigParser
         $ids = [];
         foreach ($this->tableList($v, 'actions', $path) as $i => $a) {
             $aPath = "{$path}.actions[{$i}]";
-            $this->allowKeys($a, $aPath, ['id', 'points']);
+            $this->allowKeys($a, $aPath, ['id', 'name', 'points']);
             $id = $this->identifier($a, 'id', $aPath);
+            $this->label($a, 'name', $aPath, "action.{$id}", $id);
             $points = $this->int($a, 'points', $aPath, 0, 1);
             if ($id === null) {
                 continue;
             }
             if (isset($ids[$id])) {
-                $this->error("{$aPath}.id", \sprintf('"%s" is used twice', $id));
+                $this->error("{$aPath}.id", 'used_twice', ['id' => $id]);
             }
             $ids[$id] = true;
             $actions[] = new CounterAction($id, $points);
         }
         if ($actions === []) {
-            $this->error("{$path}.actions", 'a counter event needs at least one action');
+            $this->error("{$path}.actions", 'counter_action_required');
         }
 
         return $actions;
@@ -465,7 +472,7 @@ final class ConfigParser
     {
         $limit = $v['limit'] ?? null;
         if (!\is_array($limit)) {
-            $this->error("{$path}.limit", 'a counter event needs a limit, e.g. { type = "duration", value = "1:30" }');
+            $this->error("{$path}.limit", 'counter_limit_required');
 
             return null;
         }
@@ -482,8 +489,8 @@ final class ConfigParser
         };
         if ($value === null || $value < 1) {
             $this->error("{$lPath}.value", $type === CounterLimitType::Duration
-                ? 'must be a duration such as "1:30" or a number of seconds'
-                : 'must be a positive number of shots');
+                ? 'limit_duration'
+                : 'limit_shots');
 
             return null;
         }
@@ -497,7 +504,7 @@ final class ConfigParser
     private function noLimit(array $v, string $path): null
     {
         if (\array_key_exists('limit', $v)) {
-            $this->error("{$path}.limit", 'only applies to counter events');
+            $this->error("{$path}.limit", 'counter_only');
         }
 
         return null;
@@ -511,7 +518,7 @@ final class ConfigParser
     private function noneAllowed(array $v, string $key, string $path): array
     {
         if (\array_key_exists($key, $v)) {
-            $this->error("{$path}.{$key}", $key === 'actions' ? 'only applies to counter events' : 'does not apply to counter events');
+            $this->error("{$path}.{$key}", $key === 'actions' ? 'counter_only' : 'not_counter');
         }
 
         return [];
@@ -528,7 +535,7 @@ final class ConfigParser
         $columns = [];
         foreach ($this->table($t, 'columns', 'import.columns', false) as $field => $header) {
             if (!\is_string($field) || !\is_string($header) || $header === '') {
-                $this->error("import.columns.{$field}", 'must be a column header (text)');
+                $this->error("import.columns.{$field}", 'column_header');
                 continue;
             }
             $columns[$field] = $header;
@@ -543,7 +550,7 @@ final class ConfigParser
     private function contacts(mixed $list): array
     {
         if (!\is_array($list) || !array_is_list($list)) {
-            $this->error('contacts', 'must be a list of [[contacts]] entries');
+            $this->error('contacts', 'contacts_list');
 
             return [];
         }
@@ -551,11 +558,12 @@ final class ConfigParser
         foreach ($list as $i => $c) {
             $path = "contacts[{$i}]";
             if (!\is_array($c)) {
-                $this->error($path, 'must be a table');
+                $this->error($path, 'table');
                 continue;
             }
-            $this->allowKeys($c, $path, ['role', 'name', 'phone']);
+            $this->allowKeys($c, $path, ['role', 'label', 'name', 'phone']);
             $role = $this->identifier($c, 'role', $path);
+            $this->label($c, 'label', $path, "contact.{$role}", $role);
             $name = $this->string($c, 'name', $path, true);
             $phone = $this->string($c, 'phone', $path, true);
             if ($role !== null && $name !== null && $phone !== null) {
@@ -568,9 +576,25 @@ final class ConfigParser
 
     // ------------------------------------------------------------ value readers
 
-    private function error(string $path, string $message): void
+    /**
+     * Optional display name given in the file; it overrides the translations.
+     *
+     * @param array<mixed> $t
+     */
+    private function label(array $t, string $key, string $path, string $translationKey, ?string $id): void
     {
-        $this->errors[] = ($path === '' ? '' : $path . ': ') . $message;
+        $text = $this->string($t, $key, $path, false);
+        if ($text !== null && $id !== null && trim($text) !== '') {
+            $this->labels[$translationKey] = trim($text);
+        }
+    }
+
+    /**
+     * @param array<string, string|int> $params
+     */
+    private function error(string $path, string $key, array $params = []): void
+    {
+        $this->errors[] = new ConfigError($path, $key, $params);
     }
 
     /**
@@ -581,7 +605,7 @@ final class ConfigParser
     {
         foreach (array_keys($t) as $key) {
             if (!\in_array($key, $allowed, true)) {
-                $this->error(ltrim("{$path}.{$key}", '.'), 'unknown setting (allowed: ' . implode(', ', $allowed) . ')');
+                $this->error(ltrim("{$path}.{$key}", '.'), 'unknown_setting', ['allowed' => implode(', ', $allowed)]);
             }
         }
     }
@@ -595,13 +619,13 @@ final class ConfigParser
     {
         if (!\array_key_exists($key, $t)) {
             if ($required) {
-                $this->error($path, 'missing section');
+                $this->error($path, 'missing_section');
             }
 
             return [];
         }
         if (!\is_array($t[$key]) || (array_is_list($t[$key]) && $t[$key] !== [])) {
-            $this->error($path, 'must be a table');
+            $this->error($path, 'table');
 
             return [];
         }
@@ -618,7 +642,7 @@ final class ConfigParser
     {
         $list = $t[$key] ?? [];
         if (!\is_array($list) || !array_is_list($list)) {
-            $this->error("{$path}.{$key}", 'must be a list of tables');
+            $this->error("{$path}.{$key}", 'table_list');
 
             return [];
         }
@@ -627,7 +651,7 @@ final class ConfigParser
             if (\is_array($item)) {
                 $tables[] = $item;
             } else {
-                $this->error("{$path}.{$key}[{$i}]", 'must be a table');
+                $this->error("{$path}.{$key}[{$i}]", 'table');
             }
         }
 
@@ -642,13 +666,13 @@ final class ConfigParser
         $value = $t[$key] ?? null;
         if ($value === null) {
             if ($required) {
-                $this->error("{$path}.{$key}", 'is required');
+                $this->error("{$path}.{$key}", 'required');
             }
 
             return null;
         }
         if (!\is_string($value) || trim($value) === '') {
-            $this->error("{$path}.{$key}", 'must be a non-empty text');
+            $this->error("{$path}.{$key}", 'text');
 
             return null;
         }
@@ -663,7 +687,7 @@ final class ConfigParser
     {
         $value = $this->string($t, $key, $path, true);
         if ($value !== null && preg_match(self::ID_PATTERN, $value) !== 1) {
-            $this->error("{$path}.{$key}", 'may only contain lowercase letters, digits and "_"');
+            $this->error("{$path}.{$key}", 'identifier');
 
             return null;
         }
@@ -681,28 +705,28 @@ final class ConfigParser
         $value = $t[$key] ?? null;
         if ($value === null) {
             if ($required) {
-                $this->error("{$path}.{$key}", 'is required');
+                $this->error("{$path}.{$key}", 'required');
             }
 
             return [];
         }
         if (!\is_array($value) || !array_is_list($value)) {
-            $this->error("{$path}.{$key}", 'must be a list of texts');
+            $this->error("{$path}.{$key}", 'text_list');
 
             return [];
         }
         $list = [];
         foreach ($value as $i => $item) {
             if (!\is_string($item) || trim($item) === '') {
-                $this->error("{$path}.{$key}[{$i}]", 'must be a non-empty text');
+                $this->error("{$path}.{$key}[{$i}]", 'text');
             } elseif (\in_array(trim($item), $list, true)) {
-                $this->error("{$path}.{$key}[{$i}]", \sprintf('"%s" is listed twice', $item));
+                $this->error("{$path}.{$key}[{$i}]", 'item_listed_twice', ['item' => $item]);
             } else {
                 $list[] = trim($item);
             }
         }
         if ($required && $list === [] && $value === []) {
-            $this->error("{$path}.{$key}", 'must not be empty');
+            $this->error("{$path}.{$key}", 'not_empty');
         }
 
         return $list;
@@ -726,7 +750,7 @@ final class ConfigParser
         }
         $value = $t[$key];
         if (!\is_int($value) || $value < $min) {
-            $this->error("{$path}.{$key}", \sprintf('must be a whole number ≥ %d', $min));
+            $this->error("{$path}.{$key}", 'whole_number', ['min' => $min]);
 
             return null;
         }
@@ -741,7 +765,7 @@ final class ConfigParser
     {
         $value = $t[$key] ?? $default;
         if (!\is_bool($value)) {
-            $this->error("{$path}.{$key}", 'must be true or false');
+            $this->error("{$path}.{$key}", 'boolean');
 
             return $default;
         }
@@ -757,13 +781,13 @@ final class ConfigParser
         $value = $t[$key] ?? null;
         if ($value === null) {
             if ($required) {
-                $this->error("{$path}.{$key}", 'is required');
+                $this->error("{$path}.{$key}", 'required');
             }
 
             return null;
         }
         if (!$value instanceof DateTimeImmutable) {
-            $this->error("{$path}.{$key}", 'must be a date such as 2027-06-06 (or 2027-06-06T08:00:00)');
+            $this->error("{$path}.{$key}", 'date');
 
             return null;
         }
@@ -782,7 +806,7 @@ final class ConfigParser
             return null;
         }
         if (!\is_string($value) || preg_match('/^([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?$/', $value) !== 1) {
-            $this->error("{$path}.{$key}", 'must be a time such as 09:00:00');
+            $this->error("{$path}.{$key}", 'time');
 
             return null;
         }
@@ -803,7 +827,7 @@ final class ConfigParser
     {
         if (!\array_key_exists($key, $t)) {
             if ($default === null) {
-                $this->error("{$path}.{$key}", 'is required (' . self::enumValues($enum) . ')');
+                $this->error("{$path}.{$key}", 'required_one_of', ['values' => self::enumValues($enum)]);
             }
 
             return $default;
@@ -811,7 +835,7 @@ final class ConfigParser
         $value = $t[$key];
         $case = \is_string($value) ? $enum::tryFrom($value) : null;
         if ($case === null) {
-            $this->error("{$path}.{$key}", 'must be one of ' . self::enumValues($enum));
+            $this->error("{$path}.{$key}", 'one_of', ['values' => self::enumValues($enum)]);
         }
 
         return $case;

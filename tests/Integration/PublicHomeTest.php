@@ -29,11 +29,11 @@ final class PublicHomeTest extends TestCase
     {
         self::assertSame(200, $this->visitor->get('/')->getStatusCode());
         $body = $this->visitor->lastBody;
-        self::assertStringContainsString('<h1>Multisport Games 2027</h1>', $body);
+        self::assertStringContainsString('<h1>Olympiades fictives 2027</h1>', $body);
         self::assertStringContainsString('Dimanche 6 juin 2027', $body);
         self::assertStringContainsString('de 09:00 à 12:00', $body);
-        self::assertStringContainsString('Springfield Municipal Stadium', $body);
-        self::assertStringContainsString('Organisé par Springfield School Sports Club', $body);
+        self::assertStringContainsString('Stade municipal fictif', $body);
+        self::assertStringContainsString('Organisé par Association sportive fictive', $body);
         self::assertStringContainsString('Une matinée de sport en plein air', $body, 'Presentation text from pages/fr/home.md.');
         self::assertStringContainsString('Sprint 30 m', $body);
         self::assertStringContainsString('Sprint 40 m', $body);

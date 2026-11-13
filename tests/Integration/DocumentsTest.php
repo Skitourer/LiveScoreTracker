@@ -165,7 +165,7 @@ final class DocumentsTest extends TestCase
     {
         return [
             'last_name' => $lastName, 'first_name' => $firstName, 'birth_date' => $birthDate, 'gender' => 'girl',
-            'school' => 'Springfield Elementary', 'level' => 'CM1', 'guardian_name' => 'Anne ' . $lastName,
+            'school' => 'École des Tilleuls', 'level' => 'CM1', 'guardian_name' => 'Anne ' . $lastName,
             'guardian_phone' => '0611223344', 'guardian_email' => 'parent@example.org', 'volunteer' => '0',
         ];
     }

@@ -14,7 +14,7 @@ final class SignupTest extends TestCase
 {
     private const CHILD = [
         'last_name' => 'Fictif', 'first_name' => 'Zoé', 'birth_date' => '2018-04-12', 'gender' => 'girl',
-        'school' => 'Springfield Elementary', 'level' => 'CE2', 'guardian_name' => 'Anne Fictif',
+        'school' => 'École des Tilleuls', 'level' => 'CE2', 'guardian_name' => 'Anne Fictif',
         'guardian_phone' => '06 12 34 56 78', 'guardian_email' => 'anne@example.org',
         'responsibility' => '1', 'rules' => '1', 'website' => '',
     ];

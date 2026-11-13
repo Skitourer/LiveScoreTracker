@@ -34,7 +34,7 @@ final class DashboardAction
         ['dashboard.accounts', '/admin/users', Permission::ManageAccounts],
         ['dashboard.referee_account', '/admin/referee', Permission::ManageAccounts],
         ['dashboard.audit_log', '/admin/audit', Permission::ViewAuditLog],
-        ['dashboard.configuration', null, Permission::ManageConfiguration],
+        ['dashboard.configuration', '/admin/config', Permission::ManageConfiguration],
         ['dashboard.system_status', '/status', Permission::ManageConfiguration],
     ];
 
