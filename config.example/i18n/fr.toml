@@ -1321,7 +1321,7 @@ en = "Anglais"
 
 [config.participants]
 levels = "Classes"
-genders = "Catégories (girl, boy)"
+genders = "Catégories (identifiants : girl = fille, boy = garçon)"
 schools = "Écoles"
 level_groups = "Groupes de classes"
 level_groups_hint = "un groupe par ligne, ex. « junior: CP, CE1 »"

@@ -1321,7 +1321,7 @@ en = "English"
 
 [config.participants]
 levels = "Levels"
-genders = "Genders (girl, boy)"
+genders = "Genders (identifiers: girl, boy)"
 schools = "Schools"
 level_groups = "Level groups"
 level_groups_hint = "one group per line, e.g. \"junior: CP, CE1\""
