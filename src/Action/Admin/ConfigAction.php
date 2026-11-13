@@ -113,6 +113,7 @@ final class ConfigAction
             'error_list' => $errors,
             'editable' => ConfigForms::editable($tab, $this->responder->context->phase),
             'uses_example' => $this->store->usesExample(),
+            'phase' => $this->responder->context->phase->value,
             'tie_breakers' => ConfigForms::TIE_BREAKERS,
             'import_fields' => ConfigForms::IMPORT_FIELDS,
         ] + $extra, $status);
@@ -179,6 +180,7 @@ final class ConfigAction
             'groups' => array_keys(\is_array($data['level_groups'] ?? null) ? $data['level_groups'] : []),
             'measures' => ConfigForms::MEASURES,
             'uses_example' => $this->store->usesExample(),
+            'phase' => $this->responder->context->phase->value,
         ], $status);
     }
 
@@ -305,6 +307,7 @@ final class ConfigAction
                 'changes' => $changes,
                 'error_list' => $errors,
                 'uses_example' => $this->store->usesExample(),
+            'phase' => $this->responder->context->phase->value,
             ]);
         }
 

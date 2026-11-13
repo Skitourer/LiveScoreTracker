@@ -1,0 +1,30 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('config.title') }} · {{ t('config.file.preview') }}{% endblock %}
+
+{% block content %}
+    {% include 'admin/_config-head.html.twig' %}
+    <h2>{{ t('config.preview.title_' ~ op) }}</h2>
+    {% if error_list is empty %}
+        {% if changes is empty %}<p>{{ t('config.preview.none') }}</p>{% else %}
+            <p>{{ t('config.preview.count', {count: changes|length}) }}</p>
+            <div class="table-scroll">
+                <table>
+                    <thead><tr><th>{{ t('config.preview.setting') }}</th><th>{{ t('config.preview.before') }}</th><th>{{ t('config.preview.after') }}</th></tr></thead>
+                    <tbody>{% for c in changes %}<tr><td><code>{{ c.path }}</code></td><td>{{ c.before ?? '—' }}</td><td>{{ c.after ?? '—' }}</td></tr>{% endfor %}</tbody>
+                </table>
+            </div>
+        {% endif %}
+        <form method="post" action="{{ url_for('admin-config', {tab: 'file'}) }}" class="form">
+            {{ csrf_field() }}
+            <input type="hidden" name="op" value="confirm"><input type="hidden" name="source" value="{{ op }}">
+            <textarea name="toml" hidden>{{ toml }}</textarea>
+            <div class="toolbar">
+                <button type="submit" class="button">{{ t('config.preview.apply') }}</button>
+                <a class="button secondary" href="{{ url_for('admin-config', {tab: 'file'}) }}">{{ t('phase.cancel') }}</a>
+            </div>
+        </form>
+    {% else %}
+        <p><a class="button secondary" href="{{ url_for('admin-config', {tab: 'file'}) }}">{{ t('phase.cancel') }}</a></p>
+    {% endif %}
+{% endblock %}

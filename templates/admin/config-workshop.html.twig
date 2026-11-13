@@ -1,0 +1,80 @@
+{% extends 'layout.html.twig' %}
+{% from 'admin/_config-head.html.twig' import err %}
+
+{% block title %}{{ t('config.title') }} · {{ index is null ? t('config.workshop.add') : t('workshop.' ~ values.id ~ '.name') }}{% endblock %}
+
+{% block content %}
+    {% include 'admin/_config-head.html.twig' %}
+    <p><a href="{{ url_for('admin-config', {tab: 'workshops'}) }}">← {{ t('config.tab.workshops') }}</a></p>
+    <h2>{{ index is null ? t('config.workshop.add') : t('workshop.' ~ values.id ~ '.name') }}</h2>
+    <form method="post" class="form wide-form">
+        {{ csrf_field() }}
+        <fieldset {{ editable ? '' : 'disabled' }}>
+        <div class="form-grid">
+            <label>{{ t('config.workshop.id') }} <small>{{ t('config.workshop.id_hint') }}</small>
+                <input type="text" name="id" value="{{ values.id }}" pattern="[a-z0-9_]+" {% if index is not null %}readonly{% endif %} required>{{ err(errors, 'id') }}</label>
+            <label>{{ t('config.workshop.name') }} <small>{{ t('config.workshop.name_hint') }}</small>
+                <input type="text" name="name" value="{{ values.name }}">{{ err(errors, 'name') }}</label>
+            <label>{{ t('config.workshop.help') }} <small>{{ t('config.workshop.help_hint') }}</small>
+                <input type="text" name="help" value="{{ values.help }}">{{ err(errors, 'help') }}</label>
+        </div>
+        {{ err(errors, 'variants') }}
+
+        {% for j, v in values.variants %}
+            {% set p = 'variants[' ~ j ~ ']' %}
+            <fieldset>
+                <legend>{{ v.new ?? false ? t('config.variant.new') : t('config.variant.title', {group: v.group}) }}</legend>
+                {% if v.new ?? false %}<p class="meta">{{ t('config.variant.new_hint') }}</p>{% endif %}
+                <div class="form-grid">
+                    <label>{{ t('config.variant.group') }}
+                        <select name="{{ p }}[group]"><option value="">—</option>{% for g in groups %}<option value="{{ g }}" {% if v.group == g %}selected{% endif %}>{{ g }}</option>{% endfor %}</select>{{ err(errors, p ~ '.group') }}</label>
+                    <label>{{ t('config.variant.label') }} <input type="text" name="{{ p }}[label]" value="{{ v.label ?? '' }}"></label>
+                    <label>{{ t('config.variant.measure') }}
+                        <select name="{{ p }}[measure]">{% for m in measures %}<option value="{{ m }}" {% if v.measure == m %}selected{% endif %}>{{ t('config.measure.' ~ m) }}</option>{% endfor %}</select>{{ err(errors, p ~ '.measure') }}</label>
+                    <label>{{ t('config.variant.better') }}
+                        <select name="{{ p }}[better]">{% for b in ['lower', 'higher'] %}<option value="{{ b }}" {% if v.better == b %}selected{% endif %}>{{ t('config.better.' ~ b) }}</option>{% endfor %}</select>{{ err(errors, p ~ '.better') }}</label>
+                    <label>{{ t('config.variant.attempts') }} <input type="number" min="1" name="{{ p }}[attempts]" value="{{ v.attempts }}">{{ err(errors, p ~ '.attempts') }}</label>
+                    <label>{{ t('config.variant.foul_mode') }}
+                        <select name="{{ p }}[foul_mode]">{% for f in ['strict', 'lenient'] %}<option value="{{ f }}" {% if v.foul_mode == f %}selected{% endif %}>{{ t('config.foul_mode.' ~ f) }}</option>{% endfor %}</select></label>
+                    <label>{{ t('config.variant.range_min') }} <input type="text" inputmode="decimal" name="{{ p }}[range_min]" value="{{ v.range_min ?? '' }}"></label>
+                    <label>{{ t('config.variant.range_max') }} <input type="text" inputmode="decimal" name="{{ p }}[range_max]" value="{{ v.range_max ?? '' }}">{{ err(errors, p ~ '.plausible_range') }}</label>
+                </div>
+                <h3>{{ t('config.measure.time') }}</h3>
+                <div class="form-grid">
+                    <label>{{ t('config.variant.time_format') }}
+                        <select name="{{ p }}[time_format]">{% for f in ['ss.cc', 'm:ss.cc'] %}<option value="{{ f }}" {% if (v.time_format ?? '') == f %}selected{% endif %}>{{ f }}</option>{% endfor %}</select>{{ err(errors, p ~ '.time_format') }}</label>
+                    <label>{{ t('config.variant.bibs_per_timer') }}
+                        <select name="{{ p }}[bibs_per_timer]">{% for n in ['1', '2'] %}<option value="{{ n }}" {% if (v.bibs_per_timer ?? '1') == n %}selected{% endif %}>{{ n }}</option>{% endfor %}</select>{{ err(errors, p ~ '.bibs_per_timer') }}</label>
+                </div>
+                <h3>{{ t('config.variant.modifiers') }}</h3>
+                <p class="meta">{{ t('config.variant.modifiers_hint') }}</p>
+                {% for k, m in v.modifiers %}
+                    <div class="form-grid">
+                        <label>{{ t('config.variant.item_id') }} <input type="text" pattern="[a-z0-9_]+" name="{{ p }}[modifiers][{{ k }}][id]" value="{{ m.id }}">{{ err(errors, p ~ '.modifiers[' ~ k ~ '].id') }}</label>
+                        <label>{{ t('config.workshop.name') }} <input type="text" name="{{ p }}[modifiers][{{ k }}][name]" value="{{ m.name }}"></label>
+                        <label>{{ t('config.variant.modifier_value') }} <input type="text" inputmode="decimal" name="{{ p }}[modifiers][{{ k }}][value]" value="{{ m.value }}">{{ err(errors, p ~ '.modifiers[' ~ k ~ '].value') }}</label>
+                        <label class="choice"><input type="checkbox" name="{{ p }}[modifiers][{{ k }}][repeatable]" value="1" {% if m.repeatable %}checked{% endif %}> {{ t('config.variant.repeatable') }}</label>
+                    </div>
+                {% endfor %}
+                <h3>{{ t('config.measure.counter') }}</h3>
+                <div class="form-grid">
+                    <label>{{ t('config.variant.limit_type') }}
+                        <select name="{{ p }}[limit_type]"><option value="">—</option>{% for l in ['duration', 'shots'] %}<option value="{{ l }}" {% if (v.limit_type ?? '') == l %}selected{% endif %}>{{ t('config.limit.' ~ l) }}</option>{% endfor %}</select></label>
+                    <label>{{ t('config.variant.limit_value') }} <small>{{ t('config.variant.limit_hint') }}</small> <input type="text" name="{{ p }}[limit_value]" value="{{ v.limit_value ?? '' }}">{{ err(errors, p ~ '.limit.value') }}{{ err(errors, p ~ '.limit') }}</label>
+                    <label>{{ t('config.variant.max_value') }} <input type="number" min="1" name="{{ p }}[max_value]" value="{{ v.max_value ?? '' }}">{{ err(errors, p ~ '.max_value') }}</label>
+                </div>
+                {{ err(errors, p ~ '.actions') }}
+                {% for k, a in v.actions %}
+                    <div class="form-grid">
+                        <label>{{ t('config.variant.item_id') }} <input type="text" pattern="[a-z0-9_]+" name="{{ p }}[actions][{{ k }}][id]" value="{{ a.id }}">{{ err(errors, p ~ '.actions[' ~ k ~ '].id') }}</label>
+                        <label>{{ t('config.workshop.name') }} <input type="text" name="{{ p }}[actions][{{ k }}][name]" value="{{ a.name }}"></label>
+                        <label>{{ t('config.variant.points') }} <input type="number" name="{{ p }}[actions][{{ k }}][points]" value="{{ a.points }}">{{ err(errors, p ~ '.actions[' ~ k ~ '].points') }}</label>
+                    </div>
+                {% endfor %}
+                {% if not (v.new ?? false) %}<label class="choice"><input type="checkbox" name="{{ p }}[delete]" value="1"> {{ t('config.variant.delete') }}</label>{% endif %}
+            </fieldset>
+        {% endfor %}
+        </fieldset>
+        {% if editable %}<button type="submit" class="button">{{ t('config.save') }}</button>{% endif %}
+    </form>
+{% endblock %}

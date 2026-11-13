@@ -1,0 +1,137 @@
+{% extends 'layout.html.twig' %}
+{% from 'admin/_config-head.html.twig' import err %}
+
+{% block title %}{{ t('config.title') }} · {{ t('config.tab.' ~ tab) }}{% endblock %}
+
+{% block content %}
+    {% include 'admin/_config-head.html.twig' %}
+    {% set v = values %}
+    {% set off = editable ? '' : 'disabled' %}
+
+    {% if tab == 'workshops' %}
+        <p class="meta">{{ t('config.workshops_hint') }}</p>
+        <div class="table-scroll">
+            <table>
+                <thead><tr><th>{{ t('config.workshop.name') }}</th><th>{{ t('config.workshop.id') }}</th><th>{{ t('config.workshop.variants') }}</th><th></th></tr></thead>
+                <tbody>
+                {% for workshop in workshops %}
+                    <tr>
+                        <td><a href="{{ url_for('admin-config-workshop', {tab: 'workshops', workshop: loop.index0}) }}">{{ t('workshop.' ~ workshop.id ~ '.name') }}</a></td>
+                        <td><code>{{ workshop.id }}</code></td>
+                        <td>{% for variant in workshop.variants ?? [] %}{{ variant.group ?? '' }}{% if variant.label is defined %} ({{ t(variant.label) }}){% endif %}{% if not loop.last %}, {% endif %}{% endfor %}</td>
+                        <td class="nowrap">
+                            {% if editable %}
+                                {% for op in ['up', 'down', 'duplicate', 'delete'] %}
+                                    {% if not (op == 'up' and loop.parent.loop.first) and not (op == 'down' and loop.parent.loop.last) %}
+                                        <form method="post" class="inline-form" {% if op == 'delete' %}data-confirm="{{ t('config.workshop.delete_confirm') }}"{% endif %}>
+                                            {{ csrf_field() }}<input type="hidden" name="index" value="{{ loop.parent.loop.index0 }}"><input type="hidden" name="op" value="{{ op }}">
+                                            <button type="submit" class="button small secondary {% if op == 'delete' %}danger{% endif %}" title="{{ t('config.workshop.' ~ op) }}">{{ t('config.workshop.' ~ op ~ '_short') }}</button>
+                                        </form>
+                                    {% endif %}
+                                {% endfor %}
+                            {% endif %}
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% if editable %}<p><a class="button" href="{{ url_for('admin-config-workshop', {tab: 'workshops', workshop: 'new'}) }}">{{ t('config.workshop.add') }}</a></p>{% endif %}
+
+    {% elseif tab == 'file' %}
+        <h2>{{ t('config.file.export') }}</h2>
+        <p><a class="button secondary" href="{{ url_for('admin-config', {tab: 'file'}) }}?export=1">{{ t('config.file.download') }}</a></p>
+        {% if editable %}
+            <h2>{{ t('config.file.import') }}</h2>
+            <form method="post" class="form" enctype="multipart/form-data">
+                {{ csrf_field() }}<input type="hidden" name="op" value="import">
+                <label>{{ t('config.file.import_label') }} <input type="file" name="file" accept=".toml,text/plain" required></label>
+                <button type="submit" class="button secondary">{{ t('config.file.preview') }}</button>
+            </form>
+        {% endif %}
+        <h2>{{ t('config.file.history') }}</h2>
+        {% if history is empty %}<p class="meta">{{ t('config.file.no_history') }}</p>{% else %}
+            <ul class="history">
+                {% for version in history %}
+                    <li>{{ version.saved_at|date('d/m/Y H:i:s') }}
+                        {% if editable %}<form method="post" class="inline-form">{{ csrf_field() }}<input type="hidden" name="op" value="restore"><input type="hidden" name="file" value="{{ version.file }}"><button type="submit" class="button small secondary">{{ t('config.file.restore') }}</button></form>{% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        <h2>{{ t('config.file.advanced') }}</h2>
+        <p class="meta">{{ t('config.file.advanced_hint') }}</p>
+        <form method="post" class="form wide-form">
+            {{ csrf_field() }}<input type="hidden" name="op" value="edit">
+            <textarea name="toml" rows="30" class="code" spellcheck="false" {{ editable ? '' : 'readonly' }}>{{ toml }}</textarea>
+            {% if editable %}<button type="submit" class="button">{{ t('config.save') }}</button>{% endif %}
+        </form>
+
+    {% else %}
+        <form method="post" class="form wide-form">
+            {{ csrf_field() }}
+            <fieldset {{ off }}>
+            {% if tab == 'edition' %}
+                <div class="form-grid">
+                    {% for key, type in {name: 'text', organizer: 'text', date: 'date', start: 'time', end: 'time', venue: 'text', contact_email: 'email'} %}
+                        <label>{{ t('config.edition.' ~ key) }} <input type="{{ type }}" name="{{ key }}" value="{{ v[key] }}">{{ err(errors, 'edition.' ~ key) }}</label>
+                    {% endfor %}
+                    <label>{{ t('config.edition.default_locale') }}
+                        <select name="default_locale">{% for code in ['fr', 'en'] %}<option value="{{ code }}" {% if v.default_locale == code %}selected{% endif %}>{{ t('config.locale.' ~ code) }}</option>{% endfor %}</select>
+                    </label>
+                </div>
+            {% elseif tab == 'participants' %}
+                <div class="form-grid">
+                    {% for key in ['levels', 'genders', 'schools'] %}
+                        <label>{{ t('config.participants.' ~ key) }} <small>{{ t('config.one_per_line') }}</small>
+                            <textarea name="{{ key }}" rows="6">{{ v[key] }}</textarea>{{ err(errors, 'participants.' ~ key) }}</label>
+                    {% endfor %}
+                </div>
+                <label>{{ t('config.participants.level_groups') }} <small>{{ t('config.participants.level_groups_hint') }}</small>
+                    <textarea name="level_groups" rows="4">{{ v.level_groups }}</textarea></label>
+                {% for path, messages in errors %}{% if path starts with 'level_groups' %}{{ err(errors, path) }}{% endif %}{% endfor %}
+                <p class="meta">{{ t('config.participants.hint') }}</p>
+            {% elseif tab == 'registration' %}
+                <div class="form-grid">
+                    {% for key, type in {opens_at: 'datetime-local', closes_at: 'datetime-local', quota: 'number', first_bib: 'number'} %}
+                        <label>{{ t('config.registration.' ~ key) }} <input type="{{ type }}" name="{{ key }}" value="{{ v[key] }}" {% if type == 'number' %}min="1"{% endif %}>{{ err(errors, 'registration.' ~ key) }}</label>
+                    {% endfor %}
+                </div>
+            {% elseif tab == 'scoring' %}
+                <div class="form-grid">
+                    {% for key in ['max_score', 'floor', 'foul_score', 'dnf_score'] %}
+                        <label>{{ t('config.scoring.' ~ key) }} <input type="number" name="{{ key }}" value="{{ v[key] }}" min="0">{{ err(errors, 'scoring.' ~ key) }}</label>
+                    {% endfor %}
+                </div>
+                <h2>{{ t('config.scoring.tie_breakers') }}</h2>
+                <div class="form-grid">
+                    {% for i in 0..(tie_breakers|length - 1) %}
+                        <label>{{ t('config.scoring.tie_breaker_n', {n: i + 1}) }}
+                            <select name="tie_breakers[]"><option value="">—</option>{% for item in tie_breakers %}<option value="{{ item }}" {% if (v.tie_breakers[i] ?? '') == item %}selected{% endif %}>{{ t('config.tie_breaker.' ~ item) }}</option>{% endfor %}</select>
+                        </label>
+                    {% endfor %}
+                </div>
+                {% for path, messages in errors %}{% if path starts with 'scoring.tie_breakers' %}{{ err(errors, path) }}{% endif %}{% endfor %}
+            {% elseif tab == 'import' %}
+                <p class="meta">{{ t('config.import.hint') }}</p>
+                <div class="form-grid">
+                    {% for key in import_fields %}
+                        <label>{{ t('config.import.' ~ key) }} <input type="text" name="{{ key }}" value="{{ v[key] }}">{{ err(errors, 'import.columns.' ~ key) }}</label>
+                    {% endfor %}
+                </div>
+            {% elseif tab == 'contacts' %}
+                <p class="meta">{{ t('config.contacts.hint') }}</p>
+                {% for i, contact in v|merge([{role: '', label: '', name: '', phone: ''}, {role: '', label: '', name: '', phone: ''}]) %}
+                    <fieldset class="form-grid">
+                        <legend>{{ t('config.contacts.n', {n: i + 1}) }}</legend>
+                        {% for key in ['role', 'label', 'name', 'phone'] %}
+                            <label>{{ t('config.contacts.' ~ key) }} <input type="{{ key == 'phone' ? 'tel' : 'text' }}" name="contacts[{{ i }}][{{ key }}]" value="{{ contact[key] }}">{{ err(errors, 'contacts[' ~ i ~ '].' ~ key) }}</label>
+                        {% endfor %}
+                    </fieldset>
+                {% endfor %}
+            {% endif %}
+            </fieldset>
+            {% if editable %}<button type="submit" class="button">{{ t('config.save') }}</button>{% endif %}
+        </form>
+    {% endif %}
+{% endblock %}
