@@ -365,6 +365,10 @@ newer = "Plus récentes"
 older = "Plus anciennes"
 
 [audit.actions]
+"registration.signup_submitted" = "Inscription en ligne envoyée"
+"registration.signup_verified" = "Inscription en ligne confirmée par la famille"
+"registration.withdrawn_online" = "Désistement par le lien de l'email"
+"registration.window_forced" = "Ouverture des inscriptions en ligne changée"
 "auth.login" = "Connexion"
 "auth.login_failed" = "Échec de connexion"
 "auth.logout" = "Déconnexion"
@@ -633,6 +637,9 @@ subject = "{edition} : inscription de {first_name} confirmée"
 volunteer = """
 Vous vous êtes proposé(e) comme volontaire pour aider à tenir un stand : merci ! L'équipe d'organisation reviendra vers vous avant la manifestation.
 """
+withdraw = """
+Si {first_name} ne peut plus venir, merci d'annuler l'inscription pour libérer la place :
+{link}"""
 body = """
 Bonjour {guardian},
 
@@ -643,12 +650,13 @@ Rendez-vous le {date} à {venue}, accueil à partir de {start}.
 {volunteer}
 Rappel : l'enfant reste sous l'entière responsabilité de l'adulte qui l'accompagne pendant toute la manifestation.
 
-Pour toute question, ou pour annuler l'inscription : {contact}
+Pour toute question : {contact}
+
+{withdraw}
 
 À bientôt,
 {organizer}
 """
-
 [referee.action]
 disconnect_device = "Déconnecter"
 block = "Bloquer"
@@ -1128,3 +1136,143 @@ go = "Aller"
 up_label = "Monter {category}"
 down_label = "Descendre {category}"
 go_label = "Passer à {category}"
+
+[signup]
+title = "Inscrire un enfant"
+lead = "Remplissez un formulaire par enfant. Vous recevrez ensuite un email pour confirmer l'inscription."
+language = "Langue"
+child = "L'enfant"
+level_hint = "Classe de l'enfant à l'école cette année : CP (6-7 ans), CE1 (7-8 ans), CE2 (8-9 ans), CM1 (9-10 ans), CM2 (10-11 ans)."
+responsibility = "J'ai compris que l'enfant est placé sous l'entière responsabilité de l'adulte l'accompagnant pendant tout l'évènement."
+rules_accept = "J'ai lu et j'accepte le règlement."
+rules_link = "Lire le règlement"
+submit = "Envoyer l'inscription"
+privacy_title = "Vos données personnelles"
+privacy = "Les informations de ce formulaire sont recueillies par {organizer} pour organiser la manifestation : inscription, accueil, résultats et contact de l'adulte responsable. Elles ne sont transmises à personne d'autre et sont hébergées en France. Les résultats sont affichés avec le prénom et l'initiale du nom de l'enfant. Toutes les données sont supprimées un mois après la manifestation. Pour les consulter, les corriger ou les faire effacer, écrivez à {contact}."
+required_responsibility = "Merci de cocher la case sur la responsabilité de l'adulte."
+required_rules = "Merci d'accepter le règlement."
+duplicate = "Cet enfant est déjà inscrit ou en cours d'inscription. Pour toute question : {contact}."
+too_fast = "Le formulaire a été envoyé trop vite. Vérifiez les informations, puis envoyez-le à nouveau."
+too_many = "Trop d'inscriptions envoyées depuis cette connexion. Merci de réessayer dans une heure."
+full_notice = "Le nombre maximal de participants est atteint : les nouvelles inscriptions vont en liste d'attente."
+sent_title = "Vérifiez votre messagerie"
+sent = "Un email a été envoyé à {email}. Cliquez sur le lien qu'il contient dans les {hours} heures pour confirmer l'inscription de {first_name}. Pensez à regarder dans les courriers indésirables."
+sent_failed = "La demande est enregistrée, mais l'email n'a pas pu être envoyé à {email}. Merci de contacter l'organisation."
+another = "Inscrire un autre enfant"
+back_home = "Retour à l'accueil"
+
+[signup.result.verified]
+title = "Inscription confirmée"
+text = "L'inscription de {first_name} est confirmée. Numéro de dossard : {bib}. Un email de confirmation vous a été envoyé."
+
+[signup.result.waitlisted]
+title = "Liste d'attente"
+text = "Le nombre maximal de participants est atteint : {first_name} est sur liste d'attente. Nous vous écrirons si une place se libère."
+
+[signup.result.already]
+title = "Déjà confirmée"
+text = "Cette inscription a déjà été confirmée."
+
+[signup.result.expired]
+title = "Lien expiré"
+text = "Ce lien n'est plus valable : l'inscription n'a pas été confirmée dans les 48 heures. Merci de remplir à nouveau le formulaire."
+
+[signup.result.invalid]
+title = "Lien non valable"
+text = "Ce lien n'est pas valable. Vérifiez qu'il a été copié en entier."
+
+[signup.withdraw]
+title = "Annuler l'inscription"
+question = "Voulez-vous vraiment annuler l'inscription de {child} ?"
+confirm = "Oui, annuler l'inscription"
+done = "L'inscription de {first_name} est annulée. Merci de nous avoir prévenus."
+closed = "La compétition a commencé : pour annuler l'inscription, merci de contacter l'organisation ({contact})."
+invalid = "Ce lien n'est pas valable ou a déjà été utilisé. Pour toute question : {contact}."
+
+[email.signup_verify]
+subject = "{edition} : confirmez l'inscription de {first_name}"
+body = """
+Bonjour {guardian},
+
+Vous avez demandé l'inscription de {child} ({level}) à {edition}, le {date}.
+
+Pour la confirmer, cliquez sur ce lien dans les 48 heures :
+{link}
+
+Sans confirmation, la demande sera annulée. Si vous n'êtes pas à l'origine de cette demande, ignorez ce message.
+
+{organizer}
+"""
+
+[email.signup_waitlisted]
+subject = "{edition} : {first_name} est sur liste d'attente"
+withdraw = """
+Pour retirer la demande :
+{link}"""
+body = """
+Bonjour {guardian},
+
+La demande d'inscription de {child} ({level}) à {edition} est bien enregistrée, mais le nombre maximal de participants est atteint : {first_name} est sur liste d'attente. Nous vous écrirons si une place se libère.
+
+Pour toute question : {contact}
+
+{withdraw}
+
+{organizer}
+"""
+
+[email.signup_withdrawn]
+subject = "{edition} : inscription de {first_name} annulée"
+body = """
+Bonjour {guardian},
+
+L'inscription de {child} à {edition} est annulée. Merci de nous avoir prévenus.
+
+Pour toute question : {contact}
+
+{organizer}
+"""
+
+[public.state_short]
+unscheduled = "dates non fixées"
+upcoming = "pas encore ouvertes"
+open = "ouvertes"
+full = "complètes (liste d'attente)"
+closed = "fermées"
+
+[registration.window]
+title = "Ouverture des inscriptions en ligne"
+now = "Inscriptions en ligne : {state}."
+forced_note = "état forcé à la main"
+apply = "Appliquer"
+
+[registration.window.choice]
+auto = "Selon les dates de la configuration"
+open = "Forcer l'ouverture"
+closed = "Forcer la fermeture"
+
+[registration.window.changed]
+auto = "Les inscriptions en ligne suivent de nouveau les dates de la configuration."
+open = "Inscriptions en ligne ouvertes à la main."
+closed = "Inscriptions en ligne fermées à la main."
+
+[email.common]
+french_version = "Version française :"
+
+[email.organizers.waitlisted]
+subject = "Liste d'attente : {child}"
+body = """
+{child} ({level}, {school}) a confirmé son inscription en ligne, mais le quota est atteint : l'enfant est en liste d'attente.
+Enfants en liste d'attente : {waitlist}.
+
+Fiche : {link}
+"""
+
+[email.organizers.withdrawn]
+subject = "Désistement : {child}"
+body = """
+La famille de {child} ({level}, dossard {bib}) a annulé l'inscription avec le lien de l'email.
+Enfants en liste d'attente : {waitlist}.
+
+Fiche : {link}
+"""

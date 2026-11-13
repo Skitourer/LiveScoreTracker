@@ -1,0 +1,179 @@
+# Arabic texts of the public registration pages and of the emails sent to
+# families (spec § 5.1). Other texts fall back to English. Any key can be
+# overridden by the i18n/ar.toml file of the installation's data folder.
+
+[nav]
+login = "تسجيل الدخول"
+
+[gender.girl]
+one = "بنت"
+many = "بنات"
+
+[gender.boy]
+one = "ولد"
+many = "أولاد"
+
+[registration]
+guardian = "الشخص البالغ المسؤول الحاضر يوم النشاط"
+optional = "اختياري"
+volunteer_label = "متطوع للمساعدة في الإشراف على أحد الأجنحة"
+confirm_warnings = "لقد تحققت: احفظ على أي حال"
+date_invalid = "تاريخ ميلاد غير صحيح: «{value}»."
+gender_unknown = "جنس غير معروف: «{value}»."
+level_unknown = "قسم دراسي غير معروف: «{value}»."
+school_unknown = "المدرسة غير موجودة في القائمة: «{value}»."
+phone_invalid = "رقم هاتف غير صحيح: «{value}» (10 أرقام تبدأ بـ 0، أو الصيغة الدولية ‎+33 6…)."
+phone_format = "10 أرقام تبدأ بـ 0، أو الصيغة الدولية (‎+33 6…)"
+email_format = "عنوان بريد إلكتروني كامل، مثل prenom.nom@example.com"
+email_invalid = "عنوان بريد إلكتروني غير صحيح: «{value}»."
+age_unusual = "تاريخ ميلاد غير معتاد لطفل في قسم {level} (يولد عادة سنة {year})."
+
+[registration.field]
+last_name = "اللقب (اسم العائلة)"
+first_name = "الاسم"
+birth_date = "تاريخ الميلاد"
+gender = "الجنس"
+level = "القسم الدراسي"
+school = "المدرسة"
+guardian_name = "الاسم الكامل للشخص البالغ"
+guardian_phone = "الهاتف"
+guardian_email = "البريد الإلكتروني"
+
+[registration.required]
+last_name = "اللقب مطلوب."
+first_name = "الاسم مطلوب."
+birth_date = "تاريخ الميلاد مطلوب."
+gender = "الجنس مطلوب."
+school = "المدرسة مطلوبة."
+level = "القسم الدراسي مطلوب."
+guardian_name = "اسم الشخص البالغ مطلوب."
+guardian_phone = "رقم الهاتف مطلوب."
+guardian_email = "البريد الإلكتروني مطلوب."
+
+[public.state]
+upcoming = "يُفتح التسجيل يوم {date}."
+full = "العدد مكتمل: تُدرج طلبات التسجيل الجديدة في قائمة الانتظار."
+closed = "التسجيل مغلق."
+unscheduled = "سيُعلن عن مواعيد التسجيل قريبًا."
+
+[signup]
+title = "تسجيل طفل"
+lead = "املؤوا استمارة واحدة لكل طفل. ستصلكم بعد ذلك رسالة بالبريد الإلكتروني لتأكيد التسجيل."
+language = "اللغة"
+child = "الطفل"
+level_hint = "قسم الطفل في المدرسة هذه السنة (النظام المدرسي الفرنسي): CP (6–7 سنوات)، CE1 (7–8)، CE2 (8–9)، CM1 (9–10)، CM2 (10–11)."
+responsibility = "فهمت أن الطفل يبقى تحت المسؤولية الكاملة للشخص البالغ المرافق له طوال النشاط."
+rules_accept = "قرأت النظام الداخلي وأوافق عليه."
+rules_link = "قراءة النظام الداخلي"
+submit = "إرسال التسجيل"
+privacy_title = "بياناتكم الشخصية"
+privacy = "يجمع {organizer} المعلومات الواردة في هذه الاستمارة لتنظيم النشاط: التسجيل والاستقبال والنتائج والتواصل مع الشخص البالغ المسؤول. لا تُرسل هذه المعلومات إلى أي جهة أخرى، وهي مخزّنة في فرنسا. تُعرض النتائج باسم الطفل والحرف الأول من لقبه فقط. تُحذف جميع البيانات بعد شهر من النشاط. للاطلاع عليها أو تصحيحها أو حذفها، راسلونا على {contact}."
+required_responsibility = "يرجى وضع علامة على الخانة الخاصة بمسؤولية الشخص البالغ."
+required_rules = "يرجى الموافقة على النظام الداخلي."
+duplicate = "هذا الطفل مسجّل من قبل أو تسجيله قيد التأكيد. لأي سؤال: {contact}."
+too_fast = "أُرسلت الاستمارة بسرعة كبيرة. يرجى التحقق من المعلومات ثم إرسالها من جديد."
+too_many = "أُرسل عدد كبير من التسجيلات من هذا الاتصال. يرجى المحاولة مرة أخرى بعد ساعة."
+full_notice = "اكتمل العدد الأقصى للمشاركين: تُدرج طلبات التسجيل الجديدة في قائمة الانتظار."
+sent_title = "تفقّدوا بريدكم الإلكتروني"
+sent = "أُرسلت رسالة إلى {email}. اضغطوا على الرابط الموجود فيها خلال {hours} ساعة لتأكيد تسجيل {first_name}. لا تنسوا تفقّد مجلد الرسائل غير المرغوب فيها."
+sent_failed = "حُفظ الطلب، لكن تعذّر إرسال الرسالة إلى {email}. يرجى الاتصال بالمنظمين."
+another = "تسجيل طفل آخر"
+back_home = "العودة إلى الصفحة الرئيسية"
+
+[signup.result.verified]
+title = "تم تأكيد التسجيل"
+text = "تم تأكيد تسجيل {first_name}. رقم الصدرية: {bib}. أُرسلت إليكم رسالة تأكيد."
+
+[signup.result.waitlisted]
+title = "قائمة الانتظار"
+text = "اكتمل العدد الأقصى للمشاركين: {first_name} في قائمة الانتظار. سنراسلكم إذا شغر مكان."
+
+[signup.result.already]
+title = "مؤكَّد من قبل"
+text = "تم تأكيد هذا التسجيل من قبل."
+
+[signup.result.expired]
+title = "انتهت صلاحية الرابط"
+text = "لم يعد هذا الرابط صالحًا: لم يُؤكَّد التسجيل خلال 48 ساعة. يرجى ملء الاستمارة من جديد."
+
+[signup.result.invalid]
+title = "رابط غير صالح"
+text = "هذا الرابط غير صالح. تأكدوا من نسخه كاملًا."
+
+[signup.withdraw]
+title = "إلغاء التسجيل"
+question = "هل تريدون فعلًا إلغاء تسجيل {child}؟"
+confirm = "نعم، ألغوا التسجيل"
+done = "أُلغي تسجيل {first_name}. شكرًا لإعلامنا."
+closed = "بدأت المنافسة: لإلغاء التسجيل، يرجى الاتصال بالمنظمين ({contact})."
+invalid = "هذا الرابط غير صالح أو سبق استعماله. لأي سؤال: {contact}."
+
+[email.signup_verify]
+subject = "{edition}: يرجى تأكيد تسجيل {first_name}"
+body = """
+مرحبًا {guardian}،
+
+طلبتم تسجيل {child} ({level}) في {edition}، يوم {date}.
+
+لتأكيد التسجيل، اضغطوا على هذا الرابط خلال 48 ساعة:
+{link}
+
+إذا لم يُؤكَّد الطلب فسيُلغى. إن لم تكونوا أنتم من قدّم هذا الطلب، فتجاهلوا هذه الرسالة.
+
+{organizer}
+"""
+
+[email.registration_confirmed]
+subject = "{edition}: تم تأكيد تسجيل {first_name}"
+volunteer = """
+تطوعتم للمساعدة في الإشراف على أحد الأجنحة: شكرًا لكم! سيتواصل معكم فريق التنظيم قبل النشاط.
+"""
+withdraw = """
+إذا لم يعد بإمكان {first_name} الحضور، يرجى إلغاء التسجيل لإتاحة المكان لطفل آخر:
+{link}"""
+body = """
+مرحبًا {guardian}،
+
+تم تأكيد تسجيل {child} ({level}) في {edition}.
+رقم الصدرية: {bib}.
+
+الموعد يوم {date} في {venue}، والاستقبال ابتداءً من {start}.
+{volunteer}
+تذكير: يبقى الطفل تحت المسؤولية الكاملة للشخص البالغ المرافق له طوال النشاط.
+
+لأي سؤال: {contact}
+
+{withdraw}
+
+إلى اللقاء قريبًا،
+{organizer}
+"""
+
+[email.signup_waitlisted]
+subject = "{edition}: {first_name} في قائمة الانتظار"
+withdraw = """
+لسحب الطلب:
+{link}"""
+body = """
+مرحبًا {guardian}،
+
+سُجّل طلب تسجيل {child} ({level}) في {edition}، لكن العدد الأقصى للمشاركين اكتمل: {first_name} في قائمة الانتظار. سنراسلكم إذا شغر مكان.
+
+لأي سؤال: {contact}
+
+{withdraw}
+
+{organizer}
+"""
+
+[email.signup_withdrawn]
+subject = "{edition}: أُلغي تسجيل {first_name}"
+body = """
+مرحبًا {guardian}،
+
+أُلغي تسجيل {child} في {edition}. شكرًا لإعلامنا.
+
+لأي سؤال: {contact}
+
+{organizer}
+"""

@@ -365,6 +365,10 @@ newer = "Newer"
 older = "Older"
 
 [audit.actions]
+"registration.signup_submitted" = "Online registration sent"
+"registration.signup_verified" = "Online registration confirmed by the family"
+"registration.withdrawn_online" = "Withdrawal through the email link"
+"registration.window_forced" = "Online registration opening changed"
 "auth.login" = "Login"
 "auth.login_failed" = "Failed login"
 "auth.logout" = "Logout"
@@ -633,6 +637,9 @@ subject = "{edition}: {first_name}'s registration confirmed"
 volunteer = """
 You offered to help run a stand: thank you! The organizing team will contact you before the event.
 """
+withdraw = """
+If {first_name} can no longer come, please cancel the registration to free the place:
+{link}"""
 body = """
 Hello {guardian},
 
@@ -643,12 +650,13 @@ See you on {date} at {venue}, welcome from {start}.
 {volunteer}
 Reminder: the child remains under the full responsibility of the accompanying adult throughout the event.
 
-For any question, or to cancel the registration: {contact}
+For any question: {contact}
+
+{withdraw}
 
 See you soon,
 {organizer}
 """
-
 [referee.action]
 disconnect_device = "Disconnect"
 block = "Block"
@@ -1128,3 +1136,143 @@ go = "Go"
 up_label = "Move {category} up"
 down_label = "Move {category} down"
 go_label = "Go to {category}"
+
+[signup]
+title = "Register a child"
+lead = "Fill in one form per child. You will then receive an email to confirm the registration."
+language = "Language"
+child = "The child"
+level_hint = "The child's class at school this year (French school system): CP (age 6-7), CE1 (7-8), CE2 (8-9), CM1 (9-10), CM2 (10-11)."
+responsibility = "I understand that the child is under the full responsibility of the accompanying adult throughout the event."
+rules_accept = "I have read and accept the rules."
+rules_link = "Read the rules"
+submit = "Send the registration"
+privacy_title = "Your personal data"
+privacy = "The information in this form is collected by {organizer} to organize the event: registration, welcome, results and contact with the responsible adult. It is not passed on to anyone else and is hosted in France. Results are shown with the child's first name and last-name initial. All data is deleted one month after the event. To see, correct or delete it, write to {contact}."
+required_responsibility = "Please tick the box about the adult's responsibility."
+required_rules = "Please accept the rules."
+duplicate = "This child is already registered or being registered. For any question: {contact}."
+too_fast = "The form was sent too quickly. Please check the information and send it again."
+too_many = "Too many registrations sent from this connection. Please try again in an hour."
+full_notice = "The maximum number of participants has been reached: new registrations go to the waiting list."
+sent_title = "Check your mailbox"
+sent = "An email has been sent to {email}. Click the link it contains within {hours} hours to confirm {first_name}'s registration. Remember to check your spam folder."
+sent_failed = "The request is saved, but the email could not be sent to {email}. Please contact the organizers."
+another = "Register another child"
+back_home = "Back to the home page"
+
+[signup.result.verified]
+title = "Registration confirmed"
+text = "{first_name}'s registration is confirmed. Bib number: {bib}. A confirmation email has been sent to you."
+
+[signup.result.waitlisted]
+title = "Waiting list"
+text = "The maximum number of participants has been reached: {first_name} is on the waiting list. We will write to you if a place becomes free."
+
+[signup.result.already]
+title = "Already confirmed"
+text = "This registration has already been confirmed."
+
+[signup.result.expired]
+title = "Link expired"
+text = "This link is no longer valid: the registration was not confirmed within 48 hours. Please fill in the form again."
+
+[signup.result.invalid]
+title = "Invalid link"
+text = "This link is not valid. Please check that it was copied in full."
+
+[signup.withdraw]
+title = "Cancel the registration"
+question = "Do you really want to cancel the registration of {child}?"
+confirm = "Yes, cancel the registration"
+done = "{first_name}'s registration is cancelled. Thank you for letting us know."
+closed = "The competition has started: to cancel the registration, please contact the organizers ({contact})."
+invalid = "This link is not valid or has already been used. For any question: {contact}."
+
+[email.signup_verify]
+subject = "{edition}: please confirm {first_name}'s registration"
+body = """
+Hello {guardian},
+
+You asked to register {child} ({level}) for {edition}, on {date}.
+
+To confirm, click this link within 48 hours:
+{link}
+
+Without confirmation, the request will be cancelled. If you did not make this request, please ignore this message.
+
+{organizer}
+"""
+
+[email.signup_waitlisted]
+subject = "{edition}: {first_name} is on the waiting list"
+withdraw = """
+To withdraw the request:
+{link}"""
+body = """
+Hello {guardian},
+
+The registration request of {child} ({level}) for {edition} is saved, but the maximum number of participants has been reached: {first_name} is on the waiting list. We will write to you if a place becomes free.
+
+For any question: {contact}
+
+{withdraw}
+
+{organizer}
+"""
+
+[email.signup_withdrawn]
+subject = "{edition}: {first_name}'s registration cancelled"
+body = """
+Hello {guardian},
+
+The registration of {child} for {edition} is cancelled. Thank you for letting us know.
+
+For any question: {contact}
+
+{organizer}
+"""
+
+[public.state_short]
+unscheduled = "dates not set"
+upcoming = "not open yet"
+open = "open"
+full = "full (waiting list)"
+closed = "closed"
+
+[registration.window]
+title = "Online registration"
+now = "Online registration: {state}."
+forced_note = "state forced by hand"
+apply = "Apply"
+
+[registration.window.choice]
+auto = "Follow the configured dates"
+open = "Force open"
+closed = "Force closed"
+
+[registration.window.changed]
+auto = "Online registration follows the configured dates again."
+open = "Online registration opened by hand."
+closed = "Online registration closed by hand."
+
+[email.common]
+french_version = "French version:"
+
+[email.organizers.waitlisted]
+subject = "Waiting list: {child}"
+body = """
+{child} ({level}, {school}) confirmed the online registration, but the quota is reached: the child is on the waiting list.
+Children on the waiting list: {waitlist}.
+
+Record: {link}
+"""
+
+[email.organizers.withdrawn]
+subject = "Withdrawal: {child}"
+body = """
+The family of {child} ({level}, bib {bib}) cancelled the registration with the email link.
+Children on the waiting list: {waitlist}.
+
+Record: {link}
+"""

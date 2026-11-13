@@ -26,6 +26,7 @@ final class RegistrationWindowTest extends TestCase
     private string $dataDir;
     private Settings $settings;
     private RegistrationRepository $registrations;
+    private AppState $appState;
 
     protected function setUp(): void
     {
@@ -33,7 +34,8 @@ final class RegistrationWindowTest extends TestCase
         $this->settings = Settings::fromEnvironment(\dirname(__DIR__, 3), ['APP_ENV' => 'test', 'DATA_DIR' => $this->dataDir, 'DB_DRIVER' => 'sqlite']);
         $pdo = ConnectionFactory::create($this->settings);
         (new Migrator($pdo, \dirname(__DIR__, 3) . '/migrations'))->migrate();
-        $this->registrations = new RegistrationRepository($pdo, new Clock(), new AppState($pdo));
+        $this->appState = new AppState($pdo);
+        $this->registrations = new RegistrationRepository($pdo, new Clock(), $this->appState);
     }
 
     protected function tearDown(): void
@@ -54,10 +56,32 @@ final class RegistrationWindowTest extends TestCase
         self::assertSame(RegistrationWindow::UNSCHEDULED, $this->at('2027-04-01 12:00:00', $this->config(quota: 3, scheduled: false))['state']);
     }
 
+    public function testAnAdminMayForceTheStateWhateverTheDates(): void
+    {
+        $config = $this->config(quota: 3);
+        $this->window('2027-01-01 12:00:00')->force(RegistrationWindow::OPEN);
+        self::assertSame(RegistrationWindow::OPEN, $this->at('2027-01-01 12:00:00', $config)['state']);
+        self::assertSame(RegistrationWindow::FULL, $this->at('2027-01-01 12:00:00', $this->config(quota: 0))['state'], 'The quota still applies');
+        self::assertTrue($this->window('2027-01-01 12:00:00')->acceptsRegistrations($config));
+
+        $this->window('2027-04-01 12:00:00')->force(RegistrationWindow::CLOSED);
+        self::assertSame(RegistrationWindow::CLOSED, $this->at('2027-04-01 12:00:00', $config)['state']);
+        self::assertFalse($this->window('2027-04-01 12:00:00')->acceptsRegistrations($config));
+
+        $this->window('2027-04-01 12:00:00')->force('');
+        self::assertSame(RegistrationWindow::OPEN, $this->at('2027-04-01 12:00:00', $config)['state']);
+        self::assertSame('', $this->at('2027-04-01 12:00:00', $config)['forced']);
+    }
+
     /**
-     * @return array{state: string, opens_at: DateTimeImmutable|null, closes_at: DateTimeImmutable|null, quota: int, remaining: int}
+     * @return array{state: string, opens_at: DateTimeImmutable|null, closes_at: DateTimeImmutable|null, quota: int, remaining: int, forced: string}
      */
     private function at(string $utc, CompetitionConfig $config): array
+    {
+        return $this->window($utc)->status($config);
+    }
+
+    private function window(string $utc): RegistrationWindow
     {
         $clock = new class ($utc) extends Clock {
             public function __construct(private readonly string $utc) {}
@@ -68,7 +92,7 @@ final class RegistrationWindowTest extends TestCase
             }
         };
 
-        return (new RegistrationWindow($this->registrations, $clock, $this->settings))->status($config);
+        return new RegistrationWindow($this->registrations, $clock, $this->settings, $this->appState);
     }
 
     private function config(int $quota, bool $scheduled = true): CompetitionConfig

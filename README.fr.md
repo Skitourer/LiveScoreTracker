@@ -10,7 +10,7 @@ C'est une application web pensée d'abord pour le téléphone, en PHP (Slim 4) a
 
 ## Fonctions
 
-- **Inscriptions** : saisie par l'admin, import et export Excel, liste d'attente, dossards, emails de confirmation (formulaire public en ligne à venir).
+- **Inscriptions** : formulaire public en ligne en 10 langues avec vérification par email, liste d'attente et lien de désistement ; saisie par l'admin, import et export Excel, dossards, emails de confirmation (dans la langue de la famille et en français).
 - **Accueil** : liste d'accueil imprimable (PDF), arrivée et départ sur un téléphone.
 - **Saisie des résultats** sur le téléphone des arbitres : essais, nuls, modificateurs, chrono intégré pour 1 ou 2 coureurs, mode compteur, corrections avec historique complet.
 - **Hors ligne** : le téléphone construit lui-même ses écrans de saisie, le suivi et l'aide à partir du « paquet de l'atelier », garde les saisies et les envoie au retour du réseau.

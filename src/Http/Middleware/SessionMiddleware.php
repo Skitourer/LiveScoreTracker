@@ -47,6 +47,8 @@ final class SessionMiddleware implements MiddlewareInterface
         }
         $this->context->setSession($session);
         $server = $request->getServerParams();
+        $uri = $request->getUri();
+        $this->context->baseUrl = $uri->getScheme() . '://' . $uri->getAuthority();
         $this->context->ip = \is_string($server['REMOTE_ADDR'] ?? null) ? $server['REMOTE_ADDR'] : null;
 
         $response = $handler->handle($request);

@@ -31,8 +31,7 @@
                     {% elseif state == 'open' or state == 'full' %}
                         <p class="public-places">{{ state == 'full' ? t('public.state.full') : t('public.places_left', {count: registration.remaining, quota: registration.quota}) }}</p>
                         {% if registration.closes_at %}<p class="meta">{{ t('public.closes', {date: long_date(registration.closes_at, true)}) }}</p>{% endif %}
-                        {# The online form comes with step 11. #}
-                        <p><span class="button disabled" aria-disabled="true">{{ t('public.register') }}</span> <small class="muted">{{ t('dashboard.coming_soon') }}</small></p>
+                        <p><a class="button" href="{{ url_for('signup') }}">{{ t('public.register') }}</a></p>
                     {% elseif state == 'closed' %}
                         <p>{{ t('public.state.closed') }}</p>
                     {% else %}

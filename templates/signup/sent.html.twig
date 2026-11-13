@@ -1,0 +1,18 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('signup.sent_title') }}{% endblock %}
+{% block flashes %}{% endblock %}
+
+{% block content %}
+    {% include 'signup/_languages.html.twig' %}
+    <h1>{{ t('signup.sent_title') }}</h1>
+    {% if failed %}
+        <p class="notice warning">{{ t('signup.sent_failed', {email: email}) }}</p>
+    {% else %}
+        <p class="notice">{{ t('signup.sent', {email: email, first_name: first_name, hours: hours}) }}</p>
+    {% endif %}
+    <p class="toolbar">
+        <a class="button" href="{{ url_for('signup') }}?another=1">{{ t('signup.another') }}</a>
+        <a class="button secondary" href="{{ url_for('home') }}">{{ t('signup.back_home') }}</a>
+    </p>
+{% endblock %}

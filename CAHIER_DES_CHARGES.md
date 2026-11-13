@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.25 — 12 novembre 2026
+> Version 1.26 — 13 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -141,14 +141,17 @@ Accessible sans compte, sur le site de l'application. Champs :
 
 Contrôles : champs obligatoires, format de l'email (adresse complète avec domaine) et du téléphone (10 chiffres commençant par 0, ou format international « +33 6… » ; un zéro initial perdu par un tableur est rétabli), vérifiés dans le navigateur et sur le serveur, cohérence date de naissance / classe (avertissement), doublon probable (même nom + prénom + date de naissance : refus avec message).
 
-Protection anti-robots **sans service tiers** : champ piège invisible, délai minimal de remplissage, limitation du nombre d'envois par adresse IP.
+Protection anti-robots **sans service tiers** : champ piège invisible (rempli : la page fait comme si tout allait bien, rien n'est enregistré), délai minimal de remplissage de **5 s**, au plus **10 inscriptions par heure** depuis une même adresse IP.
 
-Un parent peut inscrire **plusieurs enfants** (fratrie) : après une inscription, proposer « inscrire un autre enfant » en conservant les informations de l'adulte.
+Un parent peut inscrire **plusieurs enfants** (fratrie) : après une inscription, proposer « inscrire un autre enfant » en conservant les informations de l'adulte (ainsi que l'école et le volontariat). **Un email de vérification par enfant.**
+
+**Langues** (étape 11) : le formulaire public (`/inscription`), la page « vérifiez votre messagerie », les pages de confirmation et de désistement existent en **français, anglais, italien, allemand, néerlandais, espagnol, portugais, ukrainien, chinois simplifié et arabe** (de droite à gauche). Un menu, sans drapeaux, présente chaque langue dans sa propre langue (中文, العربية…). Langue choisie : menu (gardée pour la session), sinon langue du navigateur si elle est proposée, sinon langue de l'installation. La langue est enregistrée avec l'inscription : **les emails à la famille sont écrits dans cette langue, suivis de la version française**. Les inscriptions faites par l'organisation reçoivent les emails dans la langue de l'installation. Le règlement et la présentation de l'accueil restent dans les langues fournies (§ 12.4). Une ligne d'aide rappelle l'âge habituel de chaque classe pour les familles qui ne connaissent pas l'école française.
 
 ### 5.2 Ouverture, fermeture, quota
 
 - **Date et heure d'ouverture et de fermeture** configurables. Hors période, le formulaire affiche un message (« ouverture le … » / « inscriptions closes »).
-- L'admin peut **forcer l'état** à la main (ouvrir/fermer) indépendamment des dates.
+- L'admin peut **forcer l'état** à la main (ouvrir/fermer) indépendamment des dates, depuis l'écran « Inscriptions » (état gardé dans `app_meta`, clé `registration_override`). Le quota s'applique toujours : forcé ouvert et complet = liste d'attente.
+- Le formulaire public n'accepte d'inscriptions qu'en phase « préparation ».
 - **Quota** configurable (100 par défaut).
 
 ### 5.3 Parcours d'inscription
@@ -158,7 +161,9 @@ Un parent peut inscrire **plusieurs enfants** (fratrie) : après une inscription
 3. Le parent clique : l'inscription est **vérifiée**.
    - Si le quota n'est pas atteint : statut **inscrit**, dossard attribué, **email de confirmation**.
    - Sinon : statut **en liste d'attente**, email « vous êtes en liste d'attente », notification à l'admin.
-4. Une inscription non vérifiée sous 48 h **expire**. Seules les inscriptions vérifiées comptent dans le quota. L'admin peut valider manuellement une inscription en suspens.
+4. Une inscription non vérifiée sous 48 h **expire** (contrôlé à l'affichage du formulaire, des liens et de l'écran « Inscriptions », sans tâche planifiée) ; la famille doit alors remplir à nouveau le formulaire. Seules les inscriptions vérifiées comptent dans le quota. L'admin peut valider manuellement une inscription en suspens.
+
+Liens des emails : jeton aléatoire, seule son empreinte SHA-256 est stockée (migration 0009). Cliquer une seconde fois sur le lien de vérification affiche « déjà confirmée ». Les **notifications à l'organisation** (passage en liste d'attente, désistement par la famille) partent à l'adresse `NOTIFY_EMAIL` du `.env` du serveur, sinon à l'adresse de contact de l'édition ; elles donnent le lien vers la fiche et le nombre d'enfants en liste d'attente.
 
 Statuts d'une inscription : `pending_verification` → `registered` | `waitlisted` → `registered` | `withdrawn` | `expired`. Un enfant désinscrit peut être **réinscrit** par l'admin (ou remis en liste d'attente).
 
@@ -171,7 +176,7 @@ Statuts d'une inscription : `pending_verification` → `registered` | `waitliste
 ### 5.5 Désistement
 
 Deux voies :
-- **Lien de désinscription** dans l'email de confirmation (avec confirmation) ;
+- **Lien de désinscription** dans l'email de confirmation et dans l'email de liste d'attente (avec une page de confirmation), **seulement en phase « préparation »** ; ensuite la page invite à contacter l'organisation. Chaque nouvel envoi crée un nouveau lien qui remplace le précédent ; un lien ne sert qu'une fois. La famille reçoit un email « inscription annulée » ;
 - **Désinscription par l'admin** (sur demande du parent).
 
 Dans les deux cas, l'admin est notifié, pour éventuellement valider un enfant de la liste d'attente.
@@ -656,6 +661,7 @@ Un exemple complet, **avec des données fictives**, figure en **annexe A**.
 
 - **Tous** les textes affichés (interface, messages d'erreur, emails, PDF) passent par des **clés** définies dans `i18n/<langue>.toml`.
 - Langue par défaut configurable. Aucun texte en dur dans le code.
+- Catalogues complets en français et en anglais (mêmes clés). Pour les pages publiques d'inscription et les emails aux familles, catalogues partiels `it`, `de`, `nl`, `es`, `pt`, `uk`, `zh`, `ar` : les autres textes retombent sur l'anglais. Liste des langues proposées : `Infrastructure/I18n/PublicLanguages`.
 
 ### 12.5 Textes des emails
 
@@ -961,7 +967,7 @@ Chaque étape est livrée sur une branche avec une *pull request*, déployée su
 | **8. Suivi et classements** | Résultats par épreuve, classements, épreuves manquantes, contrôles, phases et clôture | Simulation d'une compétition complète |
 | **9. Participant et affichages** | Page participant, écran d'avancement, écran de cérémonie | |
 | **10. Documents et secours** | PDF (podiums, feuilles de secours…), modèle et import Excel de secours, exports | |
-| **11. Inscriptions en ligne** | Formulaire public, vérification email, liste d'attente, désistement, emails automatiques | Inscription test de bout en bout |
+| **11. Inscriptions en ligne** | Formulaire public en 10 langues, vérification email, liste d'attente, désistement, emails automatiques (langue choisie + français), ouverture forcée par l'admin | Inscription test de bout en bout |
 | **12. Configuration en ligne** | Écran de configuration, éditeur d'aide, personnalisation de l'habillage (couleur, logo), garde-fous en cours de compétition | |
 | **13. Sauvegardes et cycle annuel** | Sauvegardes, Drive chiffré, restauration, purge J+30, statistiques, nouvelle édition | |
 | **14. Répétition générale** | Choix de l'habillage final, simulation grandeur nature avec des bénévoles, corrections | Go/no-go pour la production |

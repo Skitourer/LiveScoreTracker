@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.25 — 12 November 2026
+> Version 1.26 — 13 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -141,14 +141,17 @@ Accessible without an account, on the application website. Fields:
 
 Checks: required fields, format of the email (full address with a domain) and of the phone (10 digits starting with 0, or international format "+33 6…"; a leading zero lost by a spreadsheet is restored), checked in the browser and on the server, date of birth / grade consistency (warning), probable duplicate (same last name + first name + date of birth: rejected with a message).
 
-Anti-bot protection **without any third-party service**: invisible honeypot field, minimum fill-in time, rate limiting per IP address.
+Anti-bot protection **without any third-party service**: invisible honeypot field (when filled, the page pretends all went well and stores nothing), minimum fill-in time of **5 s**, at most **10 registrations per hour** from one IP address.
 
-A parent can register **several children** (siblings): after one registration, offer "register another child" while keeping the adult's details.
+A parent can register **several children** (siblings): after one registration, offer "register another child" while keeping the adult's details (and the school and volunteering). **One verification email per child.**
+
+**Languages** (step 11): the public form (`/inscription`), the "check your mailbox" page, the confirmation and withdrawal pages exist in **French, English, Italian, German, Dutch, Spanish, Portuguese, Ukrainian, Simplified Chinese and Arabic** (right to left). A menu, without flags, shows each language in its own language (中文, العربية…). Chosen language: menu (kept for the session), else the browser's language when offered, else the installation's language. The language is stored with the registration: **emails to the family are written in that language, followed by the French version**. Registrations made by the organization get emails in the installation's language. The rules and the home presentation stay in the languages provided (§ 12.4). A help line gives the usual age of each grade for families who do not know the French school system.
 
 ### 5.2 Opening, closing, quota
 
 - Configurable **opening and closing date and time**. Outside that period, the form shows a message ("opens on …" / "registration closed").
-- The admin can **force the state** manually (open/close) regardless of the dates.
+- The admin can **force the state** manually (open/close) regardless of the dates, from the "Registrations" screen (state kept in `app_meta`, key `registration_override`). The quota still applies: forced open and full = waiting list.
+- The public form only takes registrations in the "preparation" phase.
 - Configurable **quota** (100 by default).
 
 ### 5.3 Registration flow
@@ -158,7 +161,9 @@ A parent can register **several children** (siblings): after one registration, o
 3. The parent clicks: the registration is **verified**.
    - If the quota is not reached: status **registered**, bib assigned, **confirmation email**.
    - Otherwise: status **waitlisted**, "you are on the waiting list" email, admin notification.
-4. A registration not verified within 48 h **expires**. Only verified registrations count toward the quota. The admin can manually approve a pending registration.
+4. A registration not verified within 48 h **expires** (checked when the form, the links and the "Registrations" screen are displayed, no scheduled task); the family then fills in the form again. Only verified registrations count toward the quota. The admin can manually approve a pending registration.
+
+Email links: random token, only its SHA-256 hash is stored (migration 0009). Clicking the verification link a second time shows "already confirmed". **Notifications to the organization** (waiting list, withdrawal by the family) go to the `NOTIFY_EMAIL` address of the server's `.env`, else to the edition's contact address; they give the link to the record and the number of children on the waiting list.
 
 Registration statuses: `pending_verification` → `registered` | `waitlisted` → `registered` | `withdrawn` | `expired`. A withdrawn child can be **registered again** by the admin (or put back on the waiting list).
 
@@ -171,7 +176,7 @@ Registration statuses: `pending_verification` → `registered` | `waitlisted` �
 ### 5.5 Withdrawal
 
 Two ways:
-- **Unsubscribe link** in the confirmation email (with confirmation);
+- **Unsubscribe link** in the confirmation email and in the waiting-list email (with a confirmation page), **only in the "preparation" phase**; afterwards the page asks the family to contact the organization. Each new email creates a new link replacing the previous one; a link works once. The family receives a "registration cancelled" email;
 - **Removal by the admin** (at the parent's request).
 
 In both cases the admin is notified, so they can approve a child from the waiting list.
@@ -656,6 +661,7 @@ A complete example **with fictitious data** is given in **appendix A**.
 
 - **All** displayed texts (interface, error messages, emails, PDFs) go through **keys** defined in `i18n/<locale>.toml`.
 - Configurable default locale. No hard-coded text in the code.
+- Full catalogs in French and English (same keys). For the public registration pages and the emails to families, partial catalogs `it`, `de`, `nl`, `es`, `pt`, `uk`, `zh`, `ar`: other texts fall back to English. List of offered languages: `Infrastructure/I18n/PublicLanguages`.
 
 ### 12.5 Email texts
 
@@ -961,7 +967,7 @@ Each step is delivered on a branch with a pull request, deployed to the test sit
 | **8. Monitoring and rankings** | Results per event, rankings, missing events, checks, phases and closing | Simulation of a full competition |
 | **9. Participant and displays** | Participant page, progress screen, ceremony screen | |
 | **10. Documents and fallbacks** | PDFs (podiums, backup sheets…), backup template and import, exports | |
-| **11. Online registration** | Public form, email verification, waiting list, withdrawal, automatic emails | End-to-end test registration |
+| **11. Online registration** | Public form in 10 languages, email verification, waiting list, withdrawal, automatic emails (chosen language + French), opening forced by the admin | End-to-end test registration |
 | **12. Online configuration** | Configuration screen, help editor, theme customization (color, logo), in-competition safeguards | |
 | **13. Backups and yearly cycle** | Backups, encrypted Drive copy, restore, D+30 purge, statistics, new edition | |
 | **14. Dress rehearsal** | Choice of the final theme, full-scale simulation with volunteers, fixes | Go/no-go for production |

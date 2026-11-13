@@ -1,0 +1,8 @@
+{# Language menu of the public registration pages: each language in its own language. #}
+<nav aria-label="{{ t('signup.language') }}">
+    <ul class="language-menu">
+        {% for code, name in languages %}
+            <li><a href="{{ base_path() }}{{ page }}?lang={{ code }}" lang="{{ code }}" hreflang="{{ code }}"{% if code == lang %} aria-current="true"{% endif %}>{{ name }}</a></li>
+        {% endfor %}
+    </ul>
+</nav>

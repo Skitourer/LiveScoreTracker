@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace LiveScoreTracker\Tests\Integration;
 
+use LiveScoreTracker\Infrastructure\Clock;
 use LiveScoreTracker\Infrastructure\Database\ConnectionFactory;
 use LiveScoreTracker\Infrastructure\Database\Migrator;
 use LiveScoreTracker\Infrastructure\Mail\LogMailer;
@@ -27,6 +28,8 @@ final class WebClient
     /** @var array<string, string> */
     public array $cookies = [];
     public LogMailer $mailer;
+    /** Shared clock that tests may move forward (min. filling time, 48 h links). */
+    public ShiftedClock $clock;
     public string $ip = '192.0.2.10';
     private ?string $csrf = null;
     public string $lastBody = '';
@@ -36,6 +39,7 @@ final class WebClient
         private readonly string $environment = 'test',
     ) {
         $this->mailer = new LogMailer(null);
+        $this->clock = new ShiftedClock();
     }
 
     public static function migrated(string $dataDir, string $environment = 'test'): self
@@ -53,6 +57,7 @@ final class WebClient
     {
         $other = new self($this->dataDir, $this->environment);
         $other->mailer = $this->mailer;
+        $other->clock = $this->clock;
 
         return $other;
     }
@@ -146,7 +151,7 @@ final class WebClient
                 ->withHeader('Content-Type', $files === [] ? 'application/x-www-form-urlencoded' : 'multipart/form-data; boundary=test');
         }
 
-        $response = Kernel::createApp($this->settings(), [Mailer::class => $this->mailer])->handle($request);
+        $response = Kernel::createApp($this->settings(), [Mailer::class => $this->mailer, Clock::class => $this->clock])->handle($request);
 
         foreach ($response->getHeader('Set-Cookie') as $header) {
             $parts = explode(';', $header);

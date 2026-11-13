@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace LiveScoreTracker\Action\Registration;
 
 use LiveScoreTracker\Action\Support\Responder;
+use LiveScoreTracker\Application\OnlineRegistration;
+use LiveScoreTracker\Application\RegistrationWindow;
 use LiveScoreTracker\Domain\Config\CompetitionConfig;
 use LiveScoreTracker\Domain\Registration\RegistrationStatus;
 use LiveScoreTracker\Infrastructure\Persistence\RegistrationRepository;
@@ -21,10 +23,13 @@ final class RegistrationsAction
         private readonly Responder $responder,
         private readonly RegistrationRepository $registrations,
         private readonly CompetitionConfig $config,
+        private readonly OnlineRegistration $online,
+        private readonly RegistrationWindow $window,
     ) {}
 
     public function __invoke(ServerRequestInterface $request, ResponseInterface $response): ResponseInterface
     {
+        $this->online->expireStale();
         $status = RegistrationStatus::tryFrom(Responder::query($request, 'status'));
         $filters = [
             'q' => Responder::query($request, 'q'),
@@ -45,6 +50,7 @@ final class RegistrationsAction
             'filters' => [...$filters, 'status' => Responder::query($request, 'status')],
             'statuses' => RegistrationStatus::cases(),
             'config' => $this->config,
+            'window' => $this->window->status($this->config),
         ]);
     }
 }

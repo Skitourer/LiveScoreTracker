@@ -21,6 +21,8 @@ final class Registration
         public readonly ?string $checkedInAt = null,
         public readonly ?string $bibReturnedAt = null,
         public readonly ?string $giftGivenAt = null,
+        public readonly ?string $locale = null,
+        public readonly ?string $verifyExpiresAt = null,
     ) {}
 
     /**

@@ -10,17 +10,64 @@ namespace LiveScoreTracker\Infrastructure\I18n;
  * Lookup order: the requested locale, then the fallback locale, then the key
  * itself (so a missing text is visible instead of silently empty).
  * Placeholders such as `{first_name}` are replaced by the given parameters.
+ *
+ * The public registration pages and the emails sent to families may use
+ * another language than the installation's (spec § 5.1): catalogs of other
+ * locales are then loaded on demand.
  */
 final class Translator
 {
+    /** @var (\Closure(string): array<string, string>)|null */
+    private readonly ?\Closure $loader;
+
     /**
-     * @param array<string, array<string, string>> $catalogs locale => (key => text)
+     * @param array<string, array<string, string>>         $catalogs locale => (key => text)
+     * @param (callable(string): array<string, string>)|null $loader   loads the catalog of another locale
      */
     public function __construct(
-        private readonly string $locale,
-        private readonly array $catalogs,
+        private string $locale,
+        private array $catalogs,
         private readonly string $fallbackLocale = 'en',
-    ) {}
+        ?callable $loader = null,
+    ) {
+        $this->loader = $loader === null ? null : $loader(...);
+    }
+
+    /**
+     * Switches the language of the texts for the rest of the request (public registration pages).
+     */
+    public function useLocale(string $locale): void
+    {
+        $this->ensure($locale);
+        $this->locale = $locale;
+    }
+
+    /**
+     * Text in a given language, whatever the current one (emails to families).
+     *
+     * @param array<string, string|int|float> $params
+     */
+    public function transIn(string $locale, string $key, array $params = []): string
+    {
+        $current = $this->locale;
+        $this->useLocale($locale);
+        try {
+            return $this->trans($key, $params);
+        } finally {
+            $this->locale = $current;
+        }
+    }
+
+    public function labelIn(string $locale, string $text): string
+    {
+        $current = $this->locale;
+        $this->useLocale($locale);
+        try {
+            return $this->label($text);
+        } finally {
+            $this->locale = $current;
+        }
+    }
 
     public function locale(): string
     {
@@ -58,6 +105,13 @@ final class Translator
     public function label(string $text): string
     {
         return $this->find($text) ?? $text;
+    }
+
+    private function ensure(string $locale): void
+    {
+        if (!isset($this->catalogs[$locale]) && $this->loader !== null) {
+            $this->catalogs[$locale] = ($this->loader)($locale);
+        }
     }
 
     private function find(string $key): ?string

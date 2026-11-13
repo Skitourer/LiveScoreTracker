@@ -32,7 +32,7 @@ final class CatalogLoader
             $catalogs[$code] = $this->load($code);
         }
 
-        return new Translator($locale, $catalogs, $fallbackLocale);
+        return new Translator($locale, $catalogs, $fallbackLocale, $this->load(...));
     }
 
     /**
