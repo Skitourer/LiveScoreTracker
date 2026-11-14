@@ -18,11 +18,26 @@ final class SmtpMailer implements Mailer
 
     public function send(string $to, string $subject, string $body): void
     {
+        if (self::isFictitious($to)) {
+            throw new MailSkipped('Fictitious address (reserved example domain): nothing sent.');
+        }
         try {
             $this->message($to, $subject, $body)->send();
         } catch (PHPMailerException $exception) {
             throw new MailFailed($exception->getMessage(), 0, $exception);
         }
+    }
+
+    /**
+     * Addresses of the domains reserved for examples and tests (RFC 2606, RFC 6761),
+     * such as the fictitious children's: they exist nowhere, and sending to them
+     * gets the sending account flagged as a spammer.
+     */
+    public static function isFictitious(string $address): bool
+    {
+        $domain = strtolower(trim(substr((string) strrchr($address, '@'), 1), '. '));
+
+        return preg_match('/(^|\.)(example\.(com|org|net)|example|test|invalid|localhost)$/', $domain) === 1;
     }
 
     /**
@@ -33,6 +48,9 @@ final class SmtpMailer implements Mailer
      */
     public function diagnose(string $to, string $subject, string $body): array
     {
+        if (self::isFictitious($to)) {
+            return ['sent' => false, 'error' => 'Fictitious address (reserved example domain): nothing sent.', 'transcript' => []];
+        }
         $transcript = [];
         $mail = $this->message($to, $subject, $body);
         $mail->SMTPDebug = SMTP::DEBUG_SERVER;

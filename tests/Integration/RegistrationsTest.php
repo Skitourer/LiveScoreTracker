@@ -150,11 +150,13 @@ final class RegistrationsTest extends TestCase
         self::assertStringContainsString('/admin/mail-test', $this->admin->get('/status')->getBody()->__toString());
         self::assertStringContainsString('Email de test', $this->admin->get('/admin/mail-test')->getBody()->__toString());
 
-        $page = $this->admin->post('/admin/mail-test', ['to' => 'camille@example.org'])->getBody()->__toString();
-        self::assertStringContainsString('accepté le message pour camille@example.org', $page);
-        self::assertSame('camille@example.org', $this->admin->mailer->sent[0]['to']);
+        $page = $this->admin->post('/admin/mail-test', ['to' => 'camille@ecole-des-tilleuls-fictive.fr'])->getBody()->__toString();
+        self::assertStringContainsString('accepté le message pour camille@ecole-des-tilleuls-fictive.fr', $page);
+        self::assertSame('camille@ecole-des-tilleuls-fictive.fr', $this->admin->mailer->sent[0]['to']);
         self::assertSame('LiveScoreTracker : email de test', $this->admin->mailer->sent[0]['subject']);
 
+        // Fictitious addresses (test data) are never sent to.
+        self::assertStringContainsString('adresse fictive', $this->admin->post('/admin/mail-test', ['to' => 'parent1@example.org'])->getBody()->__toString());
         self::assertStringContainsString('Adresse email invalide', $this->admin->post('/admin/mail-test', ['to' => 'camille'])->getBody()->__toString());
         self::assertCount(1, $this->admin->mailer->sent);
     }

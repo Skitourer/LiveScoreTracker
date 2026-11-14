@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace LiveScoreTracker\Tests\Unit\Mail;
 
+use LiveScoreTracker\Infrastructure\Mail\MailSkipped;
 use LiveScoreTracker\Infrastructure\Mail\SmtpMailer;
 use LiveScoreTracker\Infrastructure\Settings;
 use PHPUnit\Framework\TestCase;
@@ -25,15 +26,30 @@ final class SmtpMailerTest extends TestCase
         self::assertNull(SmtpMailer::safeLine('CLIENT -> SERVER: Bonjour'));
     }
 
+    public function testFictitiousAddressesAreNeverSentTo(): void
+    {
+        foreach (['parent1@example.org', 'a@EXAMPLE.com', 'a@mail.example.net', 'a@lst.test', 'a@foo.invalid', 'a@localhost'] as $address) {
+            self::assertTrue(SmtpMailer::isFictitious($address), $address);
+        }
+        foreach (['a@gmail.com', 'a@examples.org', 'a@example.fr', 'a@contest.fr', 'a@test.fr'] as $address) {
+            self::assertFalse(SmtpMailer::isFictitious($address), $address);
+        }
+
+        $mailer = new SmtpMailer(Settings::fromEnvironment(\dirname(__DIR__, 3), ['MAIL_TRANSPORT' => 'smtp', 'MAIL_HOST' => '127.0.0.1', 'MAIL_PORT' => '1']));
+        self::assertFalse($mailer->diagnose('parent1@example.org', 'Test', 'Test')['sent']);
+        $this->expectException(MailSkipped::class);
+        $mailer->send('parent1@example.org', 'Test', 'Test');
+    }
+
     public function testUnreachableServerIsReportedNotThrown(): void
     {
         $settings = Settings::fromEnvironment(\dirname(__DIR__, 3), [
             'MAIL_TRANSPORT' => 'smtp',
             'MAIL_HOST' => '127.0.0.1',
             'MAIL_PORT' => '1',
-            'MAIL_FROM' => 'noreply@example.org',
+            'MAIL_FROM' => 'noreply@ecole-des-tilleuls-fictive.fr',
         ]);
-        $result = (new SmtpMailer($settings))->diagnose('camille@example.org', 'Test', 'Test');
+        $result = (new SmtpMailer($settings))->diagnose('camille@ecole-des-tilleuls-fictive.fr', 'Test', 'Test');
         self::assertFalse($result['sent']);
         self::assertNotNull($result['error']);
     }

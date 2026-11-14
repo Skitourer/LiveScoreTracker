@@ -36,6 +36,8 @@ final class MailTestAction
             $to = TextCleaner::email(Responder::field($request, 'to'));
             if (!TextCleaner::isEmail($to)) {
                 $result = ['sent' => false, 'error' => $this->translator->trans('registration.email_invalid', ['value' => $to]), 'transcript' => []];
+            } elseif (SmtpMailer::isFictitious($to)) {
+                $result = ['sent' => false, 'error' => $this->translator->trans('mail_test.fictitious'), 'transcript' => []];
             } else {
                 $subject = $this->translator->trans('mail_test.subject');
                 $body = $this->translator->trans('mail_test.body', ['date' => gmdate('Y-m-d H:i:s') . ' UTC']);

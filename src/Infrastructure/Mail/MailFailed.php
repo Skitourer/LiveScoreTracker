@@ -6,4 +6,4 @@ namespace LiveScoreTracker\Infrastructure\Mail;
 
 use RuntimeException;
 
-final class MailFailed extends RuntimeException {}
+class MailFailed extends RuntimeException {}

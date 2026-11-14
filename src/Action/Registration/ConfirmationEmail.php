@@ -17,7 +17,11 @@ final class ConfirmationEmail
     {
         $sent = $mailer->sendConfirmation($registration);
         $email = ['email' => $registration->child->guardianEmail];
-        if (!$sent) {
+        if (!$sent && $mailer->lastSkipped) {
+            // Fictitious child (test data): never sent, see SmtpMailer::isFictitious().
+            $responder->audit('registration.email_skipped', ['bib' => $registration->bib]);
+            $responder->flash('warning', 'registration.email_fictitious', $email);
+        } elseif (!$sent) {
             $responder->audit('registration.email_failed', ['bib' => $registration->bib, 'error' => $mailer->lastError]);
             $responder->flash('warning', 'registration.email_failed', $email);
         } elseif (!$mailer->delivers()) {
