@@ -56,7 +56,7 @@
         <details class="card" {% if errors is not empty or warnings is not empty %}open{% endif %}>
             <summary>{{ t('registration.edit') }}</summary>
             {% include 'partials/errors.html.twig' %}
-            <form method="post" class="form wide-form">
+            <form method="post" class="form wide-form" novalidate>
                 {{ csrf_field() }}
                 <input type="hidden" name="op" value="update">
                 {% include 'registrations/_fields.html.twig' with {birthOptional: registration.source.value == 'on_site' or c.birthDate is null} %}

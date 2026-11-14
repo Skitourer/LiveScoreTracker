@@ -28,6 +28,9 @@ final class WebClient
     /** @var array<string, string> */
     public array $cookies = [];
     public LogMailer $mailer;
+
+    /** 'smtp' (default: emails are captured as if sent) or 'log'. */
+    public string $mailTransport = 'smtp';
     /** Shared clock that tests may move forward (min. filling time, 48 h links). */
     public ShiftedClock $clock;
     public string $ip = '192.0.2.10';
@@ -71,6 +74,7 @@ final class WebClient
             'DATA_DIR' => $this->dataDir,
             'DB_DRIVER' => 'sqlite',
             'DEPLOY_TOKEN' => 'test-deploy-token',
+            'MAIL_TRANSPORT' => $this->mailTransport,
         ]);
     }
 

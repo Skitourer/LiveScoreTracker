@@ -16,11 +16,17 @@ final class ConfirmationEmail
     public static function send(RegistrationMailer $mailer, Responder $responder, Registration $registration): void
     {
         $sent = $mailer->sendConfirmation($registration);
-        $responder->audit($sent ? 'registration.email_sent' : 'registration.email_failed', ['bib' => $registration->bib]);
-        $responder->flash(
-            $sent ? 'success' : 'warning',
-            $sent ? 'registration.email_sent' : 'registration.email_failed',
-            ['email' => $registration->child->guardianEmail],
-        );
+        $email = ['email' => $registration->child->guardianEmail];
+        if (!$sent) {
+            $responder->audit('registration.email_failed', ['bib' => $registration->bib, 'error' => $mailer->lastError]);
+            $responder->flash('warning', 'registration.email_failed', $email);
+        } elseif (!$mailer->delivers()) {
+            // Written to the mail log only: saying "sent" would be misleading.
+            $responder->audit('registration.email_logged', ['bib' => $registration->bib]);
+            $responder->flash('warning', 'registration.email_logged', $email);
+        } else {
+            $responder->audit('registration.email_sent', ['bib' => $registration->bib]);
+            $responder->flash('success', 'registration.email_sent', $email);
+        }
     }
 }

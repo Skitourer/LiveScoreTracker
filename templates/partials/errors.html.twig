@@ -1,5 +1,6 @@
 {% if errors is defined and errors is not empty %}
-    <ul class="form-errors" role="alert">
+    {# Focused on load so that the page scrolls to the messages. #}
+    <ul class="form-errors" role="alert" tabindex="-1" autofocus>
         {% for key, params in errors %}
             <li>{{ t(key, params) }}</li>
         {% endfor %}

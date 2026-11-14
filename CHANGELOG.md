@@ -29,6 +29,8 @@ Each step of the development plan (specification § 23) is one or more pull requ
 
 ### Fixed
 
+- Registration forms (child card, new registration, public form) no longer rely on the browser's own checks, which could block saving without any message: the server explains every missing or invalid field, and the page scrolls to the messages (#23).
+- Confirmation emails: when emails are only written to the mail log (`MAIL_TRANSPORT=log`), the screen no longer says "sent" but warns that sending is not enabled; `/status` shows whether emails are sent by SMTP; the reason of a failed sending is kept in the audit log (#24).
 - Podium rows of the rankings and of the calculation report were laid out as the ceremony podium (shared CSS class).
 - License year set to 2026, the year the project was published.
 - Exhausted attempts are blocked; every "Arrival" tap gives feedback and the last arrival can be undone (#12).

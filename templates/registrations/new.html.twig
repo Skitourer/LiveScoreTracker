@@ -7,7 +7,7 @@
     <h1>{{ t('registration.add') }}</h1>
     {% if onSite %}<p class="notice">{{ t('registration.on_site_notice') }}</p>{% endif %}
     {% include 'partials/errors.html.twig' %}
-    <form method="post" action="{{ url_for('registration-new') }}" class="form wide-form">
+    <form method="post" action="{{ url_for('registration-new') }}" class="form wide-form" novalidate>
         {{ csrf_field() }}
         {% include 'registrations/_fields.html.twig' with {birthOptional: onSite} %}
         <label class="choice"><input type="checkbox" name="send_email" value="1" {% if sendEmail %}checked{% endif %}> {{ t('registration.send_email') }}</label>

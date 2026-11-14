@@ -131,6 +131,36 @@ final class RegistrationsTest extends TestCase
         self::assertSame('anne@example.org', $this->admin->mailer->sent[2]['to']);
     }
 
+    public function testEmailsOnlyLoggedAreNotAnnouncedAsSent(): void
+    {
+        // MAIL_TRANSPORT=log: the email is written to a file, the screen must not say "sent".
+        $this->admin->mailTransport = 'log';
+        $this->add(['send_email' => '1']);
+        $page = $this->admin->follow($this->lastResponse())->getBody()->__toString();
+        self::assertStringNotContainsString('Email de confirmation envoyé', $page);
+        self::assertStringContainsString('Email pour anne@example.org non envoyé', $page);
+
+        self::assertStringContainsString('Emails : non envoyés', $this->admin->get('/status')->getBody()->__toString());
+        $this->admin->mailTransport = 'smtp';
+        self::assertStringContainsString('Emails : envoyés par SMTP', $this->admin->get('/status')->getBody()->__toString());
+    }
+
+    public function testCorrectingACardExplainsWhatIsWrong(): void
+    {
+        $this->add();
+        // The browser no longer blocks the form silently: the server answers with the messages.
+        $card = $this->admin->get('/registrations/1')->getBody()->__toString();
+        self::assertStringContainsString('<form method="post" class="form wide-form" novalidate>', $card);
+
+        $response = $this->admin->post('/registrations/1', [...self::form(['school' => '', 'guardian_phone' => '12']), 'op' => 'update']);
+        self::assertSame(422, $response->getStatusCode());
+        self::assertStringContainsString('<ul class="form-errors" role="alert" tabindex="-1" autofocus>', $this->admin->lastBody);
+        self::assertStringContainsString('école est obligatoire', $this->admin->lastBody);
+        self::assertStringContainsString('Numéro de téléphone invalide', $this->admin->lastBody);
+        self::assertStringContainsString('<details class="card" open>', $this->admin->lastBody);
+        self::assertStringContainsString('value="12"', $this->admin->lastBody);
+    }
+
     public function testPhoneNumbersMustBeComplete(): void
     {
         self::assertSame(422, $this->add(['guardian_phone' => '06 12 34 56'])->getStatusCode());
