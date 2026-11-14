@@ -412,6 +412,7 @@ older = "Plus anciennes"
 "registration.updated" = "Fiche enfant corrigée"
 "registration.status_changed" = "Statut d'inscription changé"
 "test_data.reset" = "Données de test réinitialisées"
+"mail.test" = "Email de test"
 "results.cleared" = "Résultats d'un dossard effacés"
 "results.checked" = "Résultat marqué vérifié"
 "ties.decided" = "Égalité tranchée"
@@ -933,6 +934,28 @@ direct_total = "Total des points"
 [entry.source]
 timer = "chrono intégré"
 timer_edited = "chrono intégré, temps modifié à la main"
+
+[mail_test]
+title = "Email de test"
+lead = "Envoie un court message à l'adresse indiquée et affiche le dialogue avec le serveur d'envoi, pour comprendre pourquoi des emails n'arrivent pas."
+server = "Serveur d'envoi"
+from = "Adresse d'expédition"
+auth = "Connexion"
+auth_same = "avec le compte de l'adresse d'expédition"
+auth_other = "avec un autre compte que l'adresse d'expédition"
+auth_none = "sans identifiant"
+to = "Destinataire"
+button = "Envoyer l'email de test"
+accepted = "Le serveur d'envoi a accepté le message pour {email}. S'il n'arrive pas (dossier des indésirables compris), le blocage est après ce serveur : la dernière réponse ci-dessous est à transmettre à l'hébergeur."
+logged = "Message pour {email} écrit dans le journal des emails (rien n'est envoyé)."
+failed = "Le message n'a pas été envoyé : {error}"
+transcript = "Dialogue avec le serveur"
+subject = "LiveScoreTracker : email de test"
+body = """
+Ceci est un email de test envoyé depuis LiveScoreTracker ({date}).
+
+S'il vous parvient, l'envoi des emails fonctionne.
+"""
 
 [test_data]
 title = "Données de test"

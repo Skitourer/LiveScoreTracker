@@ -412,6 +412,7 @@ older = "Older"
 "registration.updated" = "Child record corrected"
 "registration.status_changed" = "Registration status changed"
 "test_data.reset" = "Test data reset"
+"mail.test" = "Test email"
 "results.cleared" = "Results of a bib cleared"
 "results.checked" = "Result marked as checked"
 "ties.decided" = "Tie broken by hand"
@@ -933,6 +934,28 @@ direct_total = "Total points"
 [entry.source]
 timer = "built-in timer"
 timer_edited = "built-in timer, time edited by hand"
+
+[mail_test]
+title = "Test email"
+lead = "Sends a short message to the given address and shows the dialogue with the sending server, to find out why emails do not arrive."
+server = "Sending server"
+from = "Sender address"
+auth = "Login"
+auth_same = "with the account of the sender address"
+auth_other = "with another account than the sender address"
+auth_none = "without credentials"
+to = "Recipient"
+button = "Send the test email"
+accepted = "The sending server accepted the message for {email}. If it does not arrive (spam folder included), it is blocked after this server: pass the last answer below on to the hosting provider."
+logged = "Message for {email} written to the mail log (nothing is sent)."
+failed = "The message was not sent: {error}"
+transcript = "Dialogue with the server"
+subject = "LiveScoreTracker: test email"
+body = """
+This is a test email sent from LiveScoreTracker ({date}).
+
+If you receive it, sending emails works.
+"""
 
 [test_data]
 title = "Test data"

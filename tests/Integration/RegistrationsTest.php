@@ -145,6 +145,20 @@ final class RegistrationsTest extends TestCase
         self::assertStringContainsString('Emails : envoyés par SMTP', $this->admin->get('/status')->getBody()->__toString());
     }
 
+    public function testAdminCanSendATestEmail(): void
+    {
+        self::assertStringContainsString('/admin/mail-test', $this->admin->get('/status')->getBody()->__toString());
+        self::assertStringContainsString('Email de test', $this->admin->get('/admin/mail-test')->getBody()->__toString());
+
+        $page = $this->admin->post('/admin/mail-test', ['to' => 'camille@example.org'])->getBody()->__toString();
+        self::assertStringContainsString('accepté le message pour camille@example.org', $page);
+        self::assertSame('camille@example.org', $this->admin->mailer->sent[0]['to']);
+        self::assertSame('LiveScoreTracker : email de test', $this->admin->mailer->sent[0]['subject']);
+
+        self::assertStringContainsString('Adresse email invalide', $this->admin->post('/admin/mail-test', ['to' => 'camille'])->getBody()->__toString());
+        self::assertCount(1, $this->admin->mailer->sent);
+    }
+
     public function testCorrectingACardExplainsWhatIsWrong(): void
     {
         $this->add();

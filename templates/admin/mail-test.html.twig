@@ -1,0 +1,37 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('mail_test.title') }}{% endblock %}
+
+{% block content %}
+    <p><a href="{{ url_for('status') }}">← {{ t('home.system_status') }}</a></p>
+    <h1>{{ t('mail_test.title') }}</h1>
+    <p class="lead">{{ t('mail_test.lead') }}</p>
+
+    {% if smtp %}
+        <dl class="facts">
+            <dt>{{ t('mail_test.server') }}</dt><dd>{{ mail.host }} : {{ mail.port }} ({{ mail.encryption }})</dd>
+            <dt>{{ t('mail_test.from') }}</dt><dd>{{ mail.from }}</dd>
+            <dt>{{ t('mail_test.auth') }}</dt><dd>{{ mail.auth ? (mail.same_sender ? t('mail_test.auth_same') : t('mail_test.auth_other')) : t('mail_test.auth_none') }}</dd>
+        </dl>
+    {% else %}
+        <p class="notice warning">{{ t('home.mail_log') }}</p>
+    {% endif %}
+
+    {% if result %}
+        <p class="flash {{ result.sent ? 'success' : 'error' }}" role="alert" tabindex="-1" autofocus>
+            {{ result.sent ? t(smtp ? 'mail_test.accepted' : 'mail_test.logged', {email: to}) : t('mail_test.failed', {error: result.error}) }}
+        </p>
+        {% if result.transcript is not empty %}
+            <h2>{{ t('mail_test.transcript') }}</h2>
+            <pre class="details">{{ result.transcript|join("\n") }}</pre>
+        {% endif %}
+    {% endif %}
+
+    <form method="post" class="form" novalidate>
+        {{ csrf_field() }}
+        <label>{{ t('mail_test.to') }}
+            <input type="email" name="to" value="{{ to }}" autocomplete="off">
+        </label>
+        <button type="submit" class="button">{{ t('mail_test.button') }}</button>
+    </form>
+{% endblock %}
