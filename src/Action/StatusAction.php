@@ -34,6 +34,7 @@ final class StatusAction
             'environment' => $this->settings->environment,
             'status' => $this->status->check(),
             'config' => $this->configSummary(),
+            'mailDelivers' => $this->settings->mailTransport === 'smtp',
             'showReport' => !$this->settings->isProduction(),
         ]);
     }

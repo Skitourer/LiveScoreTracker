@@ -13,6 +13,7 @@ use LiveScoreTracker\Http\RequestContext;
 use LiveScoreTracker\Infrastructure\I18n\Translator;
 use LiveScoreTracker\Infrastructure\Mail\Mailer;
 use LiveScoreTracker\Infrastructure\Mail\MailFailed;
+use LiveScoreTracker\Infrastructure\Mail\MailSkipped;
 use LiveScoreTracker\Infrastructure\Persistence\AppState;
 use LiveScoreTracker\Infrastructure\Persistence\RegistrationRepository;
 use LiveScoreTracker\Infrastructure\Settings;
@@ -30,6 +31,12 @@ use LiveScoreTracker\Infrastructure\Settings;
  */
 final class RegistrationMailer
 {
+    /** Reason of the last failed sending (technical, for the audit log). */
+    public ?string $lastError = null;
+
+    /** True when the last email was not sent because the address is fictitious. */
+    public bool $lastSkipped = false;
+
     public function __construct(
         private readonly Mailer $mailer,
         private readonly Translator $translator,
@@ -39,6 +46,14 @@ final class RegistrationMailer
         private readonly Settings $settings,
         private readonly RequestContext $context,
     ) {}
+
+    /**
+     * False when emails are only written to a file (MAIL_TRANSPORT=log): nothing reaches the families.
+     */
+    public function delivers(): bool
+    {
+        return $this->settings->mailTransport === 'smtp';
+    }
 
     /**
      * "Please confirm the registration" email with the verification link.
@@ -137,9 +152,14 @@ final class RegistrationMailer
 
         try {
             $this->mailer->send($registration->child->guardianEmail, $subject, implode("\n", $parts));
+            $this->lastError = null;
+            $this->lastSkipped = false;
 
             return true;
-        } catch (MailFailed) {
+        } catch (MailFailed $failure) {
+            $this->lastError = mb_substr($failure->getMessage(), 0, 300);
+            $this->lastSkipped = $failure instanceof MailSkipped;
+
             return false;
         }
     }

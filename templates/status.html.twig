@@ -22,7 +22,12 @@
         {% else %}
             <li class="error">{{ t('home.config_error') }}</li>
         {% endif %}
+        <li class="{{ mailDelivers ? 'ok' : 'warning' }}">{{ mailDelivers ? t('home.mail_smtp') : t('home.mail_log') }}</li>
     </ul>
+
+    {% if can('manage_configuration') %}
+        <p><a class="button small secondary" href="{{ url_for('admin-mail-test') }}">{{ t('mail_test.title') }}</a></p>
+    {% endif %}
 
     {% if showReport %}
         <p><a class="button" href="{{ url_for('demo-report') }}">{{ t('home.report_link') }}</a></p>

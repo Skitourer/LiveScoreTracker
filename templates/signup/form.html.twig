@@ -19,7 +19,7 @@
         <p>{{ t('signup.lead') }}</p>
         {% if window.state == 'full' %}<p class="notice warning">{{ t('signup.full_notice') }}</p>{% endif %}
         {% include 'partials/errors.html.twig' %}
-        <form method="post" action="{{ url_for('signup') }}" class="form wide-form">
+        <form method="post" action="{{ url_for('signup') }}" class="form wide-form" novalidate>
             {{ csrf_field() }}
             <div class="signup-trap" aria-hidden="true">
                 <label>Website <input type="text" name="website" value="" tabindex="-1" autocomplete="off"></label>

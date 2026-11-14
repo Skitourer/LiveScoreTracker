@@ -1,4 +1,5 @@
-{# Registration fields (spec § 5.1). Expects: values, config, birthOptional; optional levelHint. #}
+{# Registration fields (spec § 5.1). Expects: values, config, birthOptional; optional levelHint.
+   The forms using them are "novalidate": the server checks and explains every error (some browsers block silently). #}
 <div class="form-grid">
     <label>{{ t('registration.field.last_name') }}
         <input type="text" name="last_name" value="{{ values.last_name }}" autocomplete="off" required>

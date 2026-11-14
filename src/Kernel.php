@@ -9,6 +9,7 @@ use Dotenv\Dotenv;
 use LiveScoreTracker\Action\AccountAction;
 use LiveScoreTracker\Action\Admin\AuditAction;
 use LiveScoreTracker\Action\Admin\ConfigAction;
+use LiveScoreTracker\Action\Admin\MailTestAction;
 use LiveScoreTracker\Action\Admin\PhaseAction;
 use LiveScoreTracker\Action\Admin\RefereeAccountAction;
 use LiveScoreTracker\Action\Admin\TestDataAction;
@@ -240,6 +241,7 @@ final class Kernel
             $admin->map(['GET', 'POST'], '/phase', PhaseAction::class)->setName('admin-phase')->add($guard(Permission::ChangePhase));
             $admin->map(['GET', 'POST'], '/config[/{tab:[a-z]+}]', ConfigAction::class)->setName('admin-config')->add($guard(Permission::ManageConfiguration));
             $admin->map(['GET', 'POST'], '/config/{tab:workshops}/{workshop:[0-9]+|new}', ConfigAction::class)->setName('admin-config-workshop')->add($guard(Permission::ManageConfiguration));
+            $admin->map(['GET', 'POST'], '/mail-test', MailTestAction::class)->setName('admin-mail-test')->add($guard(Permission::ManageConfiguration));
             $admin->get('/audit', AuditAction::class)->setName('admin-audit')->add($guard(Permission::ViewAuditLog));
         });
     }
