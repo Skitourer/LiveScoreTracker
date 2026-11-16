@@ -54,6 +54,7 @@ final class RunningChangesTest extends TestCase
         $response = $this->admin->post('/admin/config/workshops/' . self::LONG_JUMP, $this->longJump(['measure' => 'score']));
         self::assertSame(422, $response->getStatusCode());
         self::assertStringContainsString('cette épreuve a déjà des résultats', $this->admin->lastBody);
+        self::assertStringContainsString('Ateliers › Saut en longueur (senior) › Type de mesure', $this->admin->lastBody);
 
         $this->admin->post('/admin/config/workshops', ['index' => (string) self::LONG_JUMP, 'op' => 'delete']);
         self::assertFileDoesNotExist($this->dataDir . '/competition.toml');

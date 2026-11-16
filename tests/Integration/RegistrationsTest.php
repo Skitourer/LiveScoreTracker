@@ -103,6 +103,7 @@ final class RegistrationsTest extends TestCase
         $unusual = $this->add(['last_name' => 'Bernard', 'birth_date' => '2019-02-01']);
         self::assertSame(422, $unusual->getStatusCode());
         self::assertStringContainsString('inhabituelle', $this->admin->lastBody);
+        self::assertStringContainsString('class="notice warning" role="alert" tabindex="-1" data-focus-on-load', $this->admin->lastBody);
         $confirmed = $this->add(['last_name' => 'Bernard', 'birth_date' => '2019-02-01', 'confirm_warnings' => '1']);
         self::assertSame('/registrations/2', $confirmed->getHeaderLine('Location'));
     }
@@ -171,7 +172,7 @@ final class RegistrationsTest extends TestCase
 
         $response = $this->admin->post('/registrations/1', [...self::form(['school' => '', 'guardian_phone' => '12']), 'op' => 'update']);
         self::assertSame(422, $response->getStatusCode());
-        self::assertStringContainsString('<ul class="form-errors" role="alert" tabindex="-1" autofocus>', $this->admin->lastBody);
+        self::assertStringContainsString('<ul class="form-errors" role="alert" tabindex="-1" autofocus data-focus-on-load>', $this->admin->lastBody);
         self::assertStringContainsString('école est obligatoire', $this->admin->lastBody);
         self::assertStringContainsString('Numéro de téléphone invalide', $this->admin->lastBody);
         self::assertStringContainsString('<details class="card" open>', $this->admin->lastBody);

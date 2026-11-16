@@ -558,7 +558,7 @@ final class ConfigAction
     private function errorList(array $errors): array
     {
         return array_map(
-            fn(ConfigError $error): string => ($error->path === '' ? '' : $error->path . ' : ') . $this->message($error),
+            fn(ConfigError $error): string => ($error->path === '' ? '' : $this->location($error->path) . ' : ') . $this->message($error),
             $errors,
         );
     }
@@ -566,7 +566,56 @@ final class ConfigAction
     private function message(ConfigError $error): string
     {
         $key = 'config.error.' . $error->key;
+        $params = $error->params;
+        // An event id ("long_jump.senior") is shown as its workshop name and group.
+        if ($error->key === 'event_has_results' && \is_string($params['id'] ?? null)) {
+            $params['id'] = $this->eventName($params['id']);
+        }
 
-        return $this->translator->has($key) ? $this->translator->trans($key, $error->params) : $error->english();
+        return $this->translator->has($key) ? $this->translator->trans($key, $params) : $error->english();
+    }
+
+    /**
+     * Readable place of an error: "Ateliers › Saut en longueur (senior) › Type de mesure"
+     * rather than "workshops[4].variants[0].measure".
+     */
+    private function location(string $path): string
+    {
+        if (preg_match('/^workshops(?:\[(\d+)\](?:\.variants\[(\d+)\])?)?(?:\.([a-z_]+))?/', $path, $m) === 1) {
+            $parts = [$this->translator->trans('config.tab.workshops')];
+            $list = $this->workshops($this->store->data());
+            if (($m[1] ?? '') !== '') {
+                $workshop = $list[(int) $m[1]] ?? [];
+                $id = \is_string($workshop['id'] ?? null) ? $workshop['id'] : '';
+                $name = $id === '' ? '#' . ((int) $m[1] + 1) : $this->translator->trans('workshop.' . $id . '.name');
+                if (($m[2] ?? '') !== '') {
+                    $variants = \is_array($workshop['variants'] ?? null) ? array_values($workshop['variants']) : [];
+                    $variant = \is_array($variants[(int) $m[2]] ?? null) ? $variants[(int) $m[2]] : [];
+                    $name .= ' (' . (\is_string($variant['group'] ?? null) ? $variant['group'] : '#' . ((int) $m[2] + 1)) . ')';
+                }
+                $parts[] = $name;
+            }
+            $field = $m[3] ?? '';
+            if ($field !== '') {
+                $section = ($m[2] ?? '') !== '' ? 'config.variant.' : 'config.workshop.';
+                $parts[] = $this->translator->has($section . $field) ? $this->translator->trans($section . $field) : $field;
+            }
+
+            return implode(' › ', $parts);
+        }
+        if (preg_match('/^([a-z_]+)\.([a-z_]+)$/', $path, $m) === 1 && $this->translator->has('config.' . $m[1] . '.' . $m[2])) {
+            $tab = $this->translator->has('config.tab.' . $m[1]) ? $this->translator->trans('config.tab.' . $m[1]) . ' › ' : '';
+
+            return $tab . $this->translator->trans('config.' . $m[1] . '.' . $m[2]);
+        }
+
+        return $path;
+    }
+
+    private function eventName(string $id): string
+    {
+        [$workshop, $group] = array_pad(explode('.', $id, 2), 2, '');
+
+        return $this->translator->trans('workshop.' . $workshop . '.name') . ($group === '' ? '' : ' (' . $group . ')');
     }
 }

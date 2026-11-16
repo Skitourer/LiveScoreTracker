@@ -26,6 +26,15 @@ document.addEventListener('submit', (event) => {
   }
 });
 
+// After a refused save, bring the first error or warning into view and focus it,
+// so that nobody leaves thinking the form was saved.
+const message = document.querySelector('[data-focus-on-load]');
+if (message instanceof HTMLElement) {
+  message.closest('details')?.setAttribute('open', '');
+  message.scrollIntoView({ block: 'center' });
+  message.focus({ preventScroll: true });
+}
+
 initResultInputs();
 initStopwatch();
 initCounter();
