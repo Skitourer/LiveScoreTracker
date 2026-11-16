@@ -13,7 +13,7 @@ Thank you for your interest! This project is run by volunteers for a children's 
 The repository is public. It must **never** contain real personal data or anything identifying the organizer: names, birth dates, emails, phone numbers, association or school names, venue, production domain, real results, registration files or backups (spec § 25).
 
 - Use the fictitious examples (`config.example/`, the test data generator, the test fixtures).
-- Enable the git hooks once: `scripts/install-hooks.sh`. They block spreadsheets, databases, secrets and forbidden terms before a commit. Put your own forbidden terms (one per line) in `~/.config/livescoretracker/forbidden-terms.txt`; they are never stored in the repository.
+- Enable the git hooks once: `scripts/install-hooks.sh`. They block spreadsheets, databases, secrets and forbidden terms before a commit or a push. Put your own forbidden terms (one per line) in `~/.config/livescoretracker/forbidden-terms.txt`; they are never stored in the repository.
 - Screenshots in issues and pull requests must show fictitious data only.
 
 ## Development setup

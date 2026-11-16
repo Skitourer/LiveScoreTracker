@@ -708,7 +708,7 @@ Sujets et corps de tous les emails dans les fichiers de traduction, avec des var
 
 - Disponible **uniquement après la clôture**.
 - Affiché sur un grand écran, **piloté depuis le téléphone** d'un admin ou d'un organisateur : « série suivante », « révéler la place suivante ».
-- Pour chaque série : révélation du **3e, puis du 2e, puis du 1er**, en **prénom et nom complets** (les enfants sont appelés au micro ; demande de Boris, étape 9c) avec le total de points, sur l'écran comme sur la page de pilotage.
+- Pour chaque série : révélation du **3e, puis du 2e, puis du 1er**, en **prénom et nom complets** (les enfants sont appelés au micro ; étape 9c) avec le total de points, sur l'écran comme sur la page de pilotage.
 - Ordre des séries configurable.
 - Précisions (étape 9c) :
   - **Écran** `/ceremony` : sur l'ordinateur relié au vidéoprojecteur, **connecté en admin ou organisateur** (pas de lien public). Il suit l'état toutes les 2 secondes ; ni menu ni messages ; bouton « Plein écran ». Podium en marches (2e à gauche, 1er au centre, 3e à droite), place non révélée affichée « ? », dernière place révélée animée (sauf si l'appareil demande moins d'animations).
@@ -1027,7 +1027,7 @@ Seules des **données fictives** sont autorisées (exemples de configuration, je
    - détection de secrets (clés, mots de passe, jetons) ;
    - détection de fichiers interdits (tableurs, bases, sauvegardes) ;
    - détection de **termes interdits** : une liste de mots sensibles (noms réels, nom de l'association, domaine) stockée **dans un secret GitHub**, jamais dans le dépôt. Le *push* échoue si l'un d'eux apparaît.
-4. **Même contrôle en local** avant chaque commit (*hook* `pre-commit`), avec une liste de termes conservée hors du dépôt.
+4. **Même contrôle en local** avant chaque commit et chaque push (*hooks* `pre-commit`, `commit-msg` et `pre-push`), avec une liste de termes conservée hors du dépôt.
 5. **Messages de commit et descriptions de *pull request*** : même règle, aucune donnée réelle.
 6. **Captures d'écran** de la documentation : réalisées uniquement sur des données fictives.
 

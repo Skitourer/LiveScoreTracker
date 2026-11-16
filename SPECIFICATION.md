@@ -1026,7 +1026,7 @@ Only **fictitious data** is allowed (example configuration, test data sets, demo
    - secret detection (keys, passwords, tokens);
    - forbidden file detection (spreadsheets, databases, backups);
    - **forbidden terms** detection: a list of sensitive words (real names, association name, domain) stored **in a GitHub secret**, never in the repository. The push fails if any of them appears.
-4. **Same check locally** before each commit (`pre-commit` hook), with a term list kept outside the repository.
+4. **Same check locally** before each commit and each push (`pre-commit`, `commit-msg` and `pre-push` hooks), with a term list kept outside the repository.
 5. **Commit messages and pull request descriptions**: same rule, no real data.
 6. **Documentation screenshots**: taken on fictitious data only.
 
