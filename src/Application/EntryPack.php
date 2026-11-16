@@ -8,6 +8,8 @@ use LiveScoreTracker\Domain\Config\CompetitionConfig;
 use LiveScoreTracker\Domain\Config\Variant;
 use LiveScoreTracker\Domain\Config\Workshop;
 use LiveScoreTracker\Domain\Registration\RegistrationStatus;
+use LiveScoreTracker\Domain\Results\AttemptProgress;
+use LiveScoreTracker\Domain\Results\StoredAttempt;
 use LiveScoreTracker\Infrastructure\I18n\Translator;
 use LiveScoreTracker\Infrastructure\Persistence\AttemptRepository;
 use LiveScoreTracker\Infrastructure\Persistence\RegistrationRepository;
@@ -82,8 +84,14 @@ final class EntryPack
             if ($child->bib === null) {
                 continue;
             }
+            $variantId = $levels[$child->child->level] ?? null;
+            $own = array_values(array_filter($byChild[$child->id] ?? [], static fn(StoredAttempt $a): bool => $a->variantId === $variantId));
+            if ($variantId !== null) {
+                // Only the first allowed attempts count (spec § 10.4).
+                $own = (new AttemptProgress($this->config->variant($variantId), $own))->retained();
+            }
             $attempts = [];
-            foreach ($byChild[$child->id] ?? [] as $attempt) {
+            foreach ($own as $attempt) {
                 $attempts[] = [
                     'm' => $attempt->measured,
                     'r' => $attempt->result(),

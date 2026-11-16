@@ -253,7 +253,7 @@ final class ConfigParser
                 $this->error($path, 'table');
                 continue;
             }
-            $this->allowKeys($w, $path, ['id', 'name', 'help', 'variants']);
+            $this->allowKeys($w, $path, ['id', 'name', 'help', 'disabled', 'variants']);
             $id = $this->identifier($w, 'id', $path);
             $this->label($w, 'name', $path, "workshop.{$id}.name", $id);
             if ($id !== null && isset($ids[$id])) {
@@ -286,7 +286,7 @@ final class ConfigParser
             }
 
             if ($id !== null) {
-                $workshops[] = new Workshop($id, $this->string($w, 'help', $path, false), $variants);
+                $workshops[] = new Workshop($id, $this->string($w, 'help', $path, false), $variants, $this->bool($w, 'disabled', $path, false));
             }
         }
 
