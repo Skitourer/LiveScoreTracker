@@ -31,7 +31,7 @@ migrations/        numbered SQL files
 config.example/    fictitious example: competition.toml, i18n/, help/, pages/
 tests/             Unit/ (domain) and Integration/ (whole application on SQLite)
 bin/console.php    command line: migrate, status, config:check
-scripts/           privacy check, git hooks installer, style guide screenshots
+scripts/           privacy check, git hooks installer (pre-commit, commit-msg, pre-push), style guide screenshots
 ```
 
 Dependencies only point inwards: `Action` → `Application` → `Domain`, with `Infrastructure` implementing storage. The `Domain` folder knows nothing about HTTP, the database or files, which keeps the business core easy to test.
