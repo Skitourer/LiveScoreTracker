@@ -289,7 +289,7 @@ export const TRACKING_TABS = ['todo', 'started', 'finished', 'absent', 'all'];
  * it works without network. On a time workshop, ticking 1 or 2 children starts
  * their race.
  */
-export const trackingView = ({ rows, tab, counts, query, tx, format, race }) => `
+export const trackingView = ({ tab, counts, query, tx, race }) => `
   <p><a href="#">← ${h(tx('entry.back_to_entry'))}</a></p>
   <h1>${h(tx('entry.tracking.title'))}</h1>
   <nav class="chips" aria-label="${h(tx('entry.tracking.title'))}">
@@ -300,14 +300,20 @@ export const trackingView = ({ rows, tab, counts, query, tx, format, race }) => 
   </nav>
   <form class="check-in-search entry-tracking-search" role="search">
     <label>${h(tx('entry.tracking.search'))}
-      <input type="search" name="q" value="${h(query)}" autocomplete="off">
+      <input type="search" name="q" value="${h(query)}" autocomplete="off" enterkeyhint="search">
     </label>
   </form>
-  ${
-    rows.length === 0
-      ? `<p class="meta">${h(query ? tx('entry.tracking.no_match', { query }) : tx(`entry.tracking.empty.${tab}`))}</p>`
-      : `<form class="entry-tracking-race">
-          ${race ? `<p class="meta">${h(tx('entry.tracking.race_hint', { count: race }))}</p>` : ''}
+  ${race ? `<p class="meta">${h(tx('entry.tracking.race_hint', { count: race }))} ${h(tx('entry.tracking.race_search_hint'))}</p>` : ''}
+  <div class="entry-tracking-results"></div>`;
+
+/**
+ * List part of the follow-up, redrawn alone while typing in the search so
+ * that the field (and the phone keyboard mode) stays as it is.
+ */
+export const trackingResults = ({ rows, tab, query, tx, format, race, selected = [] }) =>
+  rows.length === 0
+    ? `<p class="meta">${h(query ? tx('entry.tracking.no_match', { query }) : tx(`entry.tracking.empty.${tab}`))}</p>`
+    : `<form class="entry-tracking-race">
           <div class="table-scroll"><table>
             <thead><tr>
               ${race ? '<th></th>' : ''}
@@ -316,8 +322,14 @@ export const trackingView = ({ rows, tab, counts, query, tx, format, race }) => 
             </tr></thead>
             <tbody>${rows
               .map(
-                ({ child, variant, used, best, toCheck }) => `<tr>
-                ${race ? `<td>${used < variant.attempts ? `<input type="checkbox" name="bibs" value="${h(child.bib)}" aria-label="${h(child.name)}">` : ''}</td>` : ''}
+                ({
+                  child,
+                  variant,
+                  used,
+                  best,
+                  toCheck,
+                }) => `<tr${selected.includes(String(child.bib)) ? ' class="selected"' : ''}>
+                ${race ? `<td>${used < variant.attempts ? `<input type="checkbox" name="bibs" value="${h(child.bib)}" aria-label="${h(child.name)}"${selected.includes(String(child.bib)) ? ' checked' : ''}>` : ''}</td>` : ''}
                 <td class="num"><a href="#bib/${h(child.bib)}"><span class="bib">${h(child.bib)}</span></a></td>
                 <td><a href="#bib/${h(child.bib)}">${h(child.name)}</a>
                   ${child.present ? '' : `<span class="badge muted">${h(tx('entry.not_checked_in'))}</span>`}
@@ -330,8 +342,7 @@ export const trackingView = ({ rows, tab, counts, query, tx, format, race }) => 
               .join('')}</tbody>
           </table></div>
           ${race ? `<div class="tracking-race-actions"><button type="submit" class="button large" disabled>${h(tx('entry.tracking.start_race'))}</button></div>` : ''}
-        </form>`
-  }`;
+        </form>`;
 
 /** Help of the workshop, kept on the phone (spec § 8.7). */
 export const helpView = ({ pack, tx }) => `

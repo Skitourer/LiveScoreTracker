@@ -32,6 +32,7 @@ import {
   queueView,
   raceView,
   TRACKING_TABS,
+  trackingResults,
   trackingView,
   warningList,
 } from './views.js';
@@ -551,63 +552,103 @@ export const initEntryApp = () => {
       .sort((a, b) => a.child.bib - b.child.bib);
 
   let trackingQuery = '';
+  // Children ticked for a race: kept while searching for the next one.
+  let raceSelection = [];
 
   const showTracking = (tab) => {
     const all = trackingRows();
     const counts = Object.fromEntries(
       TRACKING_TABS.map((name) => [name, all.filter((row) => row.tabs.includes(name)).length]),
     );
-    const query = searchKey(trackingQuery);
-    const rows = query
-      ? all.filter(
-          (row) => String(row.child.bib) === query || searchKey(row.child.name).startsWith(query),
-        )
-      : all.filter((row) => row.tabs.includes(tab));
     const race = pack.workshop.timed && isOpen() ? pack.workshop.bibsPerRace : 0;
-    view.innerHTML = trackingView({
-      rows,
-      tab,
-      counts,
-      query: trackingQuery,
-      tx,
-      format,
-      race,
-    });
+    const canRace = (row) => row.used < row.variant.attempts;
+    raceSelection = race
+      ? raceSelection.filter((bib) =>
+          all.some((row) => String(row.child.bib) === bib && canRace(row)),
+        )
+      : [];
 
+    view.innerHTML = trackingView({ tab, counts, query: trackingQuery, tx, race });
+    const results = view.querySelector('.entry-tracking-results');
     const search = view.querySelector('.entry-tracking-search');
-    search.addEventListener('submit', (event) => event.preventDefault());
-    search.querySelector('input').addEventListener('input', (event) => {
-      trackingQuery = event.target.value;
-      const caret = event.target.selectionStart;
-      showTracking(tab);
-      const input = view.querySelector('.entry-tracking-search input');
-      input.focus();
-      input.setSelectionRange(caret, caret);
-    });
+    const input = search.querySelector('input');
 
-    const form = view.querySelector('.entry-tracking-race');
-    if (race && form) {
+    const matching = () => {
+      const query = searchKey(trackingQuery);
+      return query
+        ? all.filter(
+            (row) => String(row.child.bib) === query || searchKey(row.child.name).startsWith(query),
+          )
+        : all.filter((row) => row.tabs.includes(tab));
+    };
+
+    // Only the list is redrawn: the search field keeps its focus and the keyboard its mode.
+    const renderResults = () => {
+      const selected = all.filter((row) => raceSelection.includes(String(row.child.bib)));
+      const rows = [
+        ...selected,
+        ...matching().filter((row) => !raceSelection.includes(String(row.child.bib))),
+      ];
+      results.innerHTML = trackingResults({
+        rows,
+        tab,
+        query: trackingQuery,
+        tx,
+        format,
+        race,
+        selected: raceSelection,
+      });
+      const form = results.querySelector('.entry-tracking-race');
+      if (!race || !form) {
+        return;
+      }
       const boxes = [...form.querySelectorAll('input[type="checkbox"]')];
       const start = form.querySelector('button[type="submit"]');
       const update = () => {
-        const ticked = boxes.filter((box) => box.checked).length;
         for (const box of boxes) {
-          box.disabled = !box.checked && ticked >= race;
+          box.disabled = !box.checked && raceSelection.length >= race;
         }
-        start.disabled = ticked === 0;
+        start.disabled = raceSelection.length === 0;
       };
       for (const box of boxes) {
-        box.addEventListener('change', update);
+        box.addEventListener('change', () => {
+          raceSelection = box.checked
+            ? [...raceSelection.filter((bib) => bib !== box.value), box.value]
+            : raceSelection.filter((bib) => bib !== box.value);
+          update();
+        });
       }
       form.addEventListener('submit', (event) => {
         event.preventDefault();
-        const ticked = boxes.filter((box) => box.checked).map((box) => box.value);
-        if (ticked.length > 0) {
-          location.hash = `race/${ticked[0]}/${ticked[1] ?? '-'}/timer`;
+        if (raceSelection.length > 0) {
+          const [first, second] = raceSelection;
+          raceSelection = [];
+          trackingQuery = '';
+          location.hash = `race/${first}/${second ?? '-'}/timer`;
         }
       });
       update();
-    }
+    };
+
+    input.addEventListener('input', () => {
+      trackingQuery = input.value;
+      renderResults();
+    });
+    // "Search" key of the phone keyboard (or Enter): a single free match is ticked
+    // and the field is cleared, ready for the next bib.
+    search.addEventListener('submit', (event) => {
+      event.preventDefault();
+      const free = matching().filter(
+        (row) => canRace(row) && !raceSelection.includes(String(row.child.bib)),
+      );
+      if (race && trackingQuery !== '' && free.length === 1 && raceSelection.length < race) {
+        raceSelection = [...raceSelection, String(free[0].child.bib)];
+        trackingQuery = '';
+        input.value = '';
+        renderResults();
+      }
+    });
+    renderResults();
   };
 
   const showHelp = () => {

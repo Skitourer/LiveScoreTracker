@@ -988,6 +988,7 @@ event = "Épreuve"
 best = "Meilleur"
 no_match = "Aucun enfant ne correspond à « {query} »."
 race_hint = "Cochez jusqu'à {count} enfant(s) pour lancer leur course."
+race_search_hint = "Cherchez un dossard ou un prénom puis appuyez sur Entrée pour le cocher : les enfants cochés restent affichés."
 start_race = "Lancer la course"
 
 [entry.tracking.tab]

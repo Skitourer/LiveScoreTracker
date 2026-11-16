@@ -876,6 +876,11 @@ pre.details {
 }
 
 /* ---------- Workshop follow-up (spec § 8.6) ---------- */
+/* Children ticked for the next race stay highlighted on top of the list. */
+.entry-tracking-race tr.selected {
+  background: var(--color-highlight);
+}
+
 .tracking-race-actions {
   position: sticky;
   bottom: 0;
