@@ -32,7 +32,7 @@ final class WorkshopChoiceAction
         }
 
         $workshops = [];
-        foreach ($this->config->workshops as $workshop) {
+        foreach ($this->config->activeWorkshops() as $workshop) {
             $workshops[] = ['workshop' => $workshop, 'levels' => $this->desk->levels($workshop)];
         }
 

@@ -45,7 +45,7 @@ final class Documents
     {
         $children = $this->children();
         $sheets = [];
-        foreach ($this->config->workshops as $workshop) {
+        foreach ($this->config->activeWorkshops() as $workshop) {
             foreach ($workshop->variants as $variant) {
                 $levels = $this->config->levelGroups[$variant->group] ?? [];
                 $sheets[] = [
@@ -101,7 +101,10 @@ final class Documents
             $result[] = [
                 'category' => $category,
                 'children' => $standings['children'],
-                'events' => array_map(static fn(array $event): array => ['variant' => $event['variant']], $standings['events']),
+                'events' => array_values(array_map(
+                    static fn(array $event): array => ['variant' => $event['variant']],
+                    array_filter($standings['events'], static fn(array $event): bool => !$event['disabled']),
+                )),
                 'ranking' => array_values(array_filter($standings['ranking'], static fn(RankedCompetitor $line): bool => $line->present)),
             ];
         }

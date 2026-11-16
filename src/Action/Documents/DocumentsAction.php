@@ -87,7 +87,7 @@ final class DocumentsAction
     private function helpSheets(): array
     {
         $sheets = [];
-        foreach ($this->config->workshops as $workshop) {
+        foreach ($this->config->activeWorkshops() as $workshop) {
             $sheets[] = [
                 'workshop' => $workshop,
                 'help' => $this->help->html($workshop, $this->translator->locale(), $this->config->edition->defaultLocale),

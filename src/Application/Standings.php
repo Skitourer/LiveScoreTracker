@@ -10,6 +10,7 @@ use LiveScoreTracker\Domain\Config\CompetitionConfig;
 use LiveScoreTracker\Domain\Config\Variant;
 use LiveScoreTracker\Domain\Registration\Registration;
 use LiveScoreTracker\Domain\Registration\RegistrationStatus;
+use LiveScoreTracker\Domain\Results\AttemptProgress;
 use LiveScoreTracker\Domain\Results\StoredAttempt;
 use LiveScoreTracker\Domain\Scoring\CategoryRanker;
 use LiveScoreTracker\Domain\Scoring\Competitor;
@@ -42,7 +43,7 @@ final class Standings
      * @return array{
      *     category: Category,
      *     children: array<int, Registration>,
-     *     events: list<array{variant: Variant, scores: EventScores, attempts: array<array-key, list<StoredAttempt>>}>,
+     *     events: list<array{variant: Variant, scores: EventScores, attempts: array<array-key, list<StoredAttempt>>, disabled: bool}>,
      *     ranking: list<RankedCompetitor>
      * }
      */
@@ -56,7 +57,8 @@ final class Standings
             }
         }
 
-        $variants = $this->config->variantsForGroup($category->group);
+        // Deactivated events are still shown (greyed) but left out of the ranking (spec § 10.4).
+        $variants = array_values(array_filter($this->config->allVariants(), static fn(Variant $v): bool => $v->group === $category->group));
         $byChild = $this->attempts->currentByChild(array_map(static fn(Variant $v): string => $v->id(), $variants));
 
         $events = [];
@@ -69,9 +71,16 @@ final class Standings
                     static fn(StoredAttempt $attempt): bool => $attempt->variantId === $variant->id(),
                 ));
                 $attempts[(string) $bib] = $list;
-                $entries[] = new EventEntry((string) $bib, $child->isPresent(), array_map(static fn(StoredAttempt $a) => $a->toScoring(), $list));
+                // Only the first allowed attempts count (spec § 10.4).
+                $retained = (new AttemptProgress($variant, $list))->retained();
+                $entries[] = new EventEntry((string) $bib, $child->isPresent(), array_map(static fn(StoredAttempt $a) => $a->toScoring(), $retained));
             }
-            $events[] = ['variant' => $variant, 'scores' => EventScorer::score($variant, $entries, $closed), 'attempts' => $attempts];
+            $events[] = [
+                'variant' => $variant,
+                'scores' => EventScorer::score($variant, $entries, $closed),
+                'attempts' => $attempts,
+                'disabled' => $this->config->isDisabled($variant->id()),
+            ];
         }
 
         $competitors = [];
@@ -82,7 +91,7 @@ final class Standings
         $ranking = ManualTieBreak::apply(
             CategoryRanker::rank(
                 $competitors,
-                array_map(static fn(array $event): EventScores => $event['scores'], $events),
+                array_map(static fn(array $event): EventScores => $event['scores'], array_values(array_filter($events, static fn(array $event): bool => !$event['disabled']))),
                 $this->config->scoring->tieBreakers,
             ),
             array_map(static fn(array $decision): array => $decision['bibs'], $this->tieDecisions->forCategory($category->id())),

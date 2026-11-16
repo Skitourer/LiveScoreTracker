@@ -18,7 +18,7 @@ Online registration (`Application/OnlineRegistration`, actions in `Action/Signup
 
 A **workshop** has one **variant** per level group (for example sprint 30 m for CP-CE1, 40 m for CE2-CM2). A variant defines the measure (time, distance, count, score), whether higher or lower is better, the number of attempts, the foul mode (strict: a foul uses an attempt; lenient: it does not), modifiers (penalties or bonuses), a plausible range and, for counters, the actions and limits.
 
-Each entry is a `StoredAttempt` with the measured value, modifiers, warnings and author. `AttemptProgress` tells how many attempts a child has used. `EntryChecks` adds warnings when entering (child not checked in, attempt too many, outside the plausible range, probable duplicate…): the referee confirms them, and the result is then "to check".
+Each entry is a `StoredAttempt` with the measured value, modifiers, warnings and author. `AttemptProgress` tells how many attempts a child has used; `retained()` keeps the first attempts in chronological order until the allowed number is used up (§ 10.4), and only those count for the best result, the ranking and the station pack. `EntryChecks` adds warnings when entering (child not checked in, attempt too many, outside the plausible range, probable duplicate…): the referee confirms them, and the result is then "to check".
 
 ## Checks (§ 10)
 

@@ -73,7 +73,7 @@ final class CompetitionConfig
     }
 
     /**
-     * Events of a level group, in workshop order.
+     * Active events of a level group, in workshop order.
      *
      * @return list<Variant>
      */
@@ -90,9 +90,38 @@ final class CompetitionConfig
     }
 
     /**
+     * Active events (deactivated workshops left out).
+     *
      * @return list<Variant>
      */
     public function variants(): array
+    {
+        $variants = [];
+        foreach ($this->activeWorkshops() as $workshop) {
+            foreach ($workshop->variants as $variant) {
+                $variants[] = $variant;
+            }
+        }
+
+        return $variants;
+    }
+
+    /**
+     * Workshops that are not deactivated (spec § 10.4), in file order.
+     *
+     * @return list<Workshop>
+     */
+    public function activeWorkshops(): array
+    {
+        return array_values(array_filter($this->workshops, static fn(Workshop $w): bool => !$w->disabled));
+    }
+
+    /**
+     * Every event, deactivated ones included.
+     *
+     * @return list<Variant>
+     */
+    public function allVariants(): array
     {
         $variants = [];
         foreach ($this->workshops as $workshop) {
@@ -104,9 +133,22 @@ final class CompetitionConfig
         return $variants;
     }
 
+    public function isDisabled(string $variantId): bool
+    {
+        foreach ($this->workshops as $workshop) {
+            foreach ($workshop->variants as $variant) {
+                if ($variant->id() === $variantId) {
+                    return $workshop->disabled;
+                }
+            }
+        }
+
+        return false;
+    }
+
     public function variant(string $id): Variant
     {
-        foreach ($this->variants() as $variant) {
+        foreach ($this->allVariants() as $variant) {
             if ($variant->id() === $id) {
                 return $variant;
             }

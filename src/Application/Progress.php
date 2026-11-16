@@ -54,7 +54,7 @@ final class Progress
         $rows = [];
         $totalDone = 0;
         $totalExpected = 0;
-        foreach ($this->config->workshops as $workshop) {
+        foreach ($this->config->activeWorkshops() as $workshop) {
             $doneBy = [];
             $expectedBy = [];
             foreach ($present as $child) {

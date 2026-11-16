@@ -16,5 +16,7 @@ final class Workshop
         public readonly string $id,
         public readonly ?string $help,
         public readonly array $variants,
+        /** Deactivated event (spec § 10.4): results kept but excluded, hidden from entry. */
+        public readonly bool $disabled = false,
     ) {}
 }

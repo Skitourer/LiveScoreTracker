@@ -137,6 +137,32 @@ final class AttemptRepository
     }
 
     /**
+     * Events that have current results: their measure is locked and they can
+     * only be deactivated (spec § 10.4).
+     *
+     * @return list<string> variant ids
+     */
+    public function variantsWithResults(): array
+    {
+        $statement = $this->pdo->query('SELECT DISTINCT variant_id FROM attempts WHERE replaced_at IS NULL AND deleted_at IS NULL ORDER BY variant_id');
+        $ids = $statement === false ? [] : $statement->fetchAll(PDO::FETCH_COLUMN);
+
+        return array_values(array_map(static fn(mixed $id): string => \is_scalar($id) ? (string) $id : '', $ids));
+    }
+
+    /**
+     * Move a child's attempts to the variant of their new level group, so that
+     * their results follow them (spec § 10.4). Every version moves, history included.
+     */
+    public function moveVariant(int $registrationId, string $from, string $to): int
+    {
+        $statement = $this->pdo->prepare('UPDATE attempts SET variant_id = :to WHERE registration_id = :reg AND variant_id = :from');
+        $statement->execute(['to' => $to, 'reg' => $registrationId, 'from' => $from]);
+
+        return $statement->rowCount();
+    }
+
+    /**
      * Whether an entry with this id (made on the form or the phone) was already stored.
      */
     public function hasClient(string $clientId): bool

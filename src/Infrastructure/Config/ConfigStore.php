@@ -6,6 +6,7 @@ namespace LiveScoreTracker\Infrastructure\Config;
 
 use DateTimeImmutable;
 use Internal\Toml\Toml;
+use LiveScoreTracker\Domain\Config\CompetitionConfig;
 use LiveScoreTracker\Domain\Config\ConfigError;
 use LiveScoreTracker\Domain\Config\ConfigParser;
 use LiveScoreTracker\Domain\Config\InvalidConfig;
@@ -76,6 +77,24 @@ final class ConfigStore
         }
 
         return [];
+    }
+
+    /**
+     * The configuration these data would give once written, without saving it.
+     *
+     * @param array<mixed> $data
+     *
+     * @throws InvalidConfig
+     */
+    public static function parse(array $data): CompetitionConfig
+    {
+        $toml = self::encode($data);
+        $errors = self::check($toml);
+        if ($errors !== []) {
+            throw new InvalidConfig($errors);
+        }
+
+        return ConfigParser::parse(Toml::parseToArray($toml));
     }
 
     /**

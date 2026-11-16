@@ -98,12 +98,12 @@ final class ConfigScreenTest extends TestCase
         self::assertStringContainsString('# ---------- Ateliers ----------', (string) file_get_contents($this->dataDir . '/competition.toml'));
     }
 
-    public function testFrozenTabsWhileTheCompetitionIsRunning(): void
+    public function testFrozenFileWhileTheCompetitionIsRunning(): void
     {
         $this->admin->post('/admin/phase', ['phase' => 'running']);
-        $this->admin->get('/admin/config/workshops');
+        $this->admin->get('/admin/config/file');
         self::assertStringContainsString('Compétition en cours', $this->admin->lastBody);
-        $this->admin->post('/admin/config/workshops', ['index' => '0', 'op' => 'delete']);
+        $this->admin->post('/admin/config/file', ['op' => 'edit', 'toml' => 'x = 1']);
         self::assertFileDoesNotExist($this->dataDir . '/competition.toml');
 
         // The edition stays editable.

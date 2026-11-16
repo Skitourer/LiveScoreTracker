@@ -1,0 +1,45 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('config.title') }} · {{ t('config.impact.title') }}{% endblock %}
+
+{% block content %}
+    {% include 'admin/_config-head.html.twig' %}
+    <h2>{{ t('config.impact.title') }}</h2>
+    <p class="notice">{{ t('config.impact.intro', {count: child_count}) }}</p>
+    {% for line in impact %}
+        <details class="card">
+            <summary>{{ t('workshop.' ~ line.workshop ~ '.name') }} · {{ t('config.impact.' ~ line.kind, {count: line.children|length}) }}</summary>
+            <div class="table-scroll">
+                <table>
+                    <thead><tr><th class="num">{{ t('entry.bib') }}</th><th>{{ t('report.child') }}</th><th>{{ t('config.impact.division') }}</th></tr></thead>
+                    <tbody>
+                    {% for child in line.children %}
+                        <tr><td class="num">{{ child.bib }}</td><td>{{ child.fullName() }}</td><td>{{ divisions[child.id] is defined ? category_label(divisions[child.id]) : '–' }}</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </details>
+    {% endfor %}
+    {% if changes is not empty %}
+        <details class="card">
+            <summary>{{ t('config.preview.count', {count: changes|length}) }}</summary>
+            <div class="table-scroll">
+                <table>
+                    <thead><tr><th>{{ t('config.preview.setting') }}</th><th>{{ t('config.preview.before') }}</th><th>{{ t('config.preview.after') }}</th></tr></thead>
+                    <tbody>{% for c in changes %}<tr><td><code>{{ c.path }}</code></td><td>{{ c.before ?? '—' }}</td><td>{{ c.after ?? '—' }}</td></tr>{% endfor %}</tbody>
+                </table>
+            </div>
+        </details>
+    {% endif %}
+    <form method="post" action="{{ url_for('admin-config', {tab: tab}) }}" class="form">
+        {{ csrf_field() }}
+        <input type="hidden" name="op" value="confirm_change">
+        <label class="choice"><input type="checkbox" name="alert" value="1" checked> {{ t('config.impact.alert') }}</label>
+        <p class="meta">{{ t('config.impact.alert_hint') }}</p>
+        <div class="toolbar">
+            <button type="submit" class="button">{{ t('config.impact.confirm') }}</button>
+            <a class="button secondary" href="{{ back }}">{{ t('phase.cancel') }}</a>
+        </div>
+    </form>
+{% endblock %}

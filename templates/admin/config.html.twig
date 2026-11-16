@@ -16,14 +16,14 @@
                 <tbody>
                 {% for workshop in workshops %}
                     <tr>
-                        <td><a href="{{ url_for('admin-config-workshop', {tab: 'workshops', workshop: loop.index0}) }}">{{ t('workshop.' ~ workshop.id ~ '.name') }}</a></td>
+                        <td><a href="{{ url_for('admin-config-workshop', {tab: 'workshops', workshop: loop.index0}) }}">{{ t('workshop.' ~ workshop.id ~ '.name') }}</a>{% if workshop.disabled ?? false %} <span class="badge muted">{{ t('config.workshop.disabled') }}</span>{% endif %}</td>
                         <td><code>{{ workshop.id }}</code></td>
                         <td>{% for variant in workshop.variants ?? [] %}{{ variant.group ?? '' }}{% if variant.label is defined %} ({{ t(variant.label) }}){% endif %}{% if not loop.last %}, {% endif %}{% endfor %}</td>
                         <td class="nowrap">
                             {% if editable %}
-                                {% for op in ['up', 'down', 'duplicate', 'delete'] %}
+                                {% for op in ['up', 'down', 'duplicate', (workshop.disabled ?? false) ? 'enable' : 'disable', 'delete'] %}
                                     {% if not (op == 'up' and loop.parent.loop.first) and not (op == 'down' and loop.parent.loop.last) %}
-                                        <form method="post" class="inline-form" {% if op == 'delete' %}data-confirm="{{ t('config.workshop.delete_confirm') }}"{% endif %}>
+                                        <form method="post" class="inline-form" {% if op == 'delete' %}data-confirm="{{ t('config.workshop.delete_confirm') }}"{% elseif op == 'disable' %}data-confirm="{{ t('config.workshop.disable_confirm') }}"{% endif %}>
                                             {{ csrf_field() }}<input type="hidden" name="index" value="{{ loop.parent.loop.index0 }}"><input type="hidden" name="op" value="{{ op }}">
                                             <button type="submit" class="button small secondary {% if op == 'delete' %}danger{% endif %}" title="{{ t('config.workshop.' ~ op) }}">{{ t('config.workshop.' ~ op ~ '_short') }}</button>
                                         </form>

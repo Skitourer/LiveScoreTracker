@@ -58,7 +58,7 @@
     <label class="choice"><input type="checkbox" name="volunteer" value="1" {% if values.volunteer %}checked{% endif %}> {{ t('registration.volunteer_label') }}</label>
 </fieldset>
 {% if warnings is defined and warnings is not empty %}
-    <div class="notice warning" role="alert">
+    <div class="notice warning" role="alert" tabindex="-1" data-focus-on-load>
         <ul>{% for key, params in warnings %}<li>{{ t(key, params) }}</li>{% endfor %}</ul>
         <label class="choice"><input type="checkbox" name="confirm_warnings" value="1"> {{ t('registration.confirm_warnings') }}</label>
     </div>

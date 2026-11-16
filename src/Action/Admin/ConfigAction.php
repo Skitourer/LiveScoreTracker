@@ -7,9 +7,15 @@ namespace LiveScoreTracker\Action\Admin;
 use Internal\Toml\Toml;
 use LiveScoreTracker\Action\Support\Responder;
 use LiveScoreTracker\Application\ConfigForms;
+use LiveScoreTracker\Application\ConfigGuard;
+use LiveScoreTracker\Domain\Config\CompetitionConfig;
 use LiveScoreTracker\Domain\Config\ConfigDiff;
 use LiveScoreTracker\Domain\Config\ConfigError;
 use LiveScoreTracker\Domain\Config\InvalidConfig;
+use LiveScoreTracker\Domain\Registration\Registration;
+use LiveScoreTracker\Domain\Results\ConfigImpact;
+use LiveScoreTracker\Domain\Security\Phase;
+use LiveScoreTracker\Infrastructure\Clock;
 use LiveScoreTracker\Infrastructure\Config\ConfigStore;
 use LiveScoreTracker\Infrastructure\I18n\Translator;
 use LiveScoreTracker\Infrastructure\Persistence\AttemptRepository;
@@ -29,11 +35,16 @@ final class ConfigAction
     /** Changes kept in one audit entry. */
     private const AUDIT_CHANGES = 60;
 
+    /** Session key of a change waiting for confirmation (spec § 10.4). */
+    private const PENDING = 'config_pending';
+
     public function __construct(
         private readonly Responder $responder,
         private readonly ConfigStore $store,
         private readonly AttemptRepository $attempts,
         private readonly Translator $translator,
+        private readonly ConfigGuard $guard,
+        private readonly Clock $clock,
     ) {}
 
     /**
@@ -58,6 +69,9 @@ final class ConfigAction
                 return $this->responder->redirect($response, '/admin/config/' . $tab);
             }
             $form = (array) $request->getParsedBody();
+            if (($form['op'] ?? null) === 'confirm_change') {
+                return $this->confirm($response, $tab, $form);
+            }
 
             return match (true) {
                 $workshop !== null => $this->saveWorkshop($request, $response, $workshop, $form),
@@ -87,12 +101,12 @@ final class ConfigAction
         $before = $this->store->data();
         $after = ConfigForms::apply($tab, $before, $form);
         try {
-            $this->save($before, $after, $tab);
+            $preview = $this->save($response, $before, $after, $tab, '/admin/config/' . $tab);
         } catch (InvalidConfig $exception) {
             return $this->renderTab($response, $tab, ConfigForms::values($tab, $after), $exception->issues, 422);
         }
 
-        return $this->responder->redirect($response, '/admin/config/' . $tab);
+        return $preview ?? $this->responder->redirect($response, '/admin/config/' . $tab);
     }
 
     /**
@@ -144,14 +158,14 @@ final class ConfigAction
         $after['workshops'] = $list;
 
         try {
-            $this->save($before, $after, 'workshops');
+            $preview = $this->save($response, $before, $after, 'workshops', '/admin/config/workshops');
         } catch (InvalidConfig $exception) {
             $values = ConfigForms::workshopValues($updated);
 
             return $this->renderWorkshop($response, $index, $values, $exception->issues, 422);
         }
 
-        return $this->responder->redirect($response, '/admin/config/workshops');
+        return $preview ?? $this->responder->redirect($response, '/admin/config/workshops');
     }
 
     /**
@@ -225,6 +239,15 @@ final class ConfigAction
                 }
                 array_splice($list, $index, 1);
                 break;
+            case 'disable':
+            case 'enable':
+                // An event with results is deactivated instead of deleted (spec § 10.4).
+                $item = $list[$index];
+                unset($item['disabled']);
+                $list[$index] = $op === 'disable'
+                    ? array_merge(array_intersect_key(['id' => null, 'name' => null, 'help' => null], $item), ['disabled' => true], $item)
+                    : $item;
+                break;
             case 'up':
             case 'down':
                 $other = $op === 'up' ? $index - 1 : $index + 1;
@@ -240,9 +263,12 @@ final class ConfigAction
         $after = $before;
         $after['workshops'] = $list;
         try {
-            $this->save($before, $after, 'workshops');
+            $preview = $this->save($response, $before, $after, 'workshops', '/admin/config/workshops');
         } catch (InvalidConfig $exception) {
             return $this->renderTab($response, 'workshops', [], $exception->issues, 422);
+        }
+        if ($preview !== null) {
+            return $preview;
         }
 
         return $this->responder->redirect($response, $op === 'duplicate' ? '/admin/config/workshops/' . ($index + 1) : '/admin/config/workshops');
@@ -318,6 +344,7 @@ final class ConfigAction
 
         $before = $this->store->data();
         try {
+            $this->checkLocks($before, Toml::parseToArray($toml));
             $this->store->saveToml($toml);
         } catch (InvalidConfig $exception) {
             return $this->renderTab($response, 'file', ['toml' => $toml], $exception->issues, 422);
@@ -355,25 +382,143 @@ final class ConfigAction
      *
      * @throws InvalidConfig
      */
-    private function save(array $before, array $after, string $tab): void
+    private function save(ResponseInterface $response, array $before, array $after, string $tab, string $back): ?ResponseInterface
     {
         if (ConfigDiff::compare($before, $after) === []) {
             $this->responder->flash('success', 'config.unchanged');
 
-            return;
+            return null;
         }
+        [$old, $new] = $this->checkLocks($before, $after);
+
+        // While running, a change that affects children is shown first, then confirmed (spec § 10.4).
+        if ($this->responder->context->phase === Phase::Running) {
+            $impact = $this->guard->configImpact($old, $new);
+            if ($impact !== []) {
+                $this->responder->context->session()->set(self::PENDING, [
+                    'tab' => $tab,
+                    'back' => $back,
+                    'base' => sha1(ConfigStore::encode($before)),
+                    'toml' => ConfigStore::encode($after),
+                ]);
+
+                return $this->renderImpact($response, $tab, $back, $impact, ConfigDiff::compare($before, $after), $new);
+            }
+        }
+
         $this->store->save($after);
         $this->audited($before, $after, $tab, 'form');
+
+        return null;
     }
 
     /**
+     * Valid new configuration that keeps the events with results: same
+     * measure, not removed (spec § 10.4).
+     *
      * @param array<mixed> $before
      * @param array<mixed> $after
+     *
+     * @return array{0: CompetitionConfig, 1: CompetitionConfig}
+     *
+     * @throws InvalidConfig
      */
-    private function audited(array $before, array $after, string $tab, string $source): void
+    private function checkLocks(array $before, array $after): array
+    {
+        $new = ConfigStore::parse($after);
+        try {
+            $old = ConfigStore::parse($before);
+        } catch (InvalidConfig) {
+            return [$new, $new];
+        }
+        $errors = $this->guard->lockErrors($old, $new);
+        if ($errors !== []) {
+            throw new InvalidConfig($errors);
+        }
+
+        return [$old, $new];
+    }
+
+    /**
+     * Saves the change shown in the preview, unless the configuration changed in between.
+     *
+     * @param array<mixed> $form
+     */
+    private function confirm(ResponseInterface $response, string $tab, array $form): ResponseInterface
+    {
+        $session = $this->responder->context->session();
+        $pending = $session->get(self::PENDING);
+        $session->remove(self::PENDING);
+        if (!\is_array($pending) || ($pending['tab'] ?? null) !== $tab || !\is_string($pending['toml'] ?? null) || !\is_string($pending['back'] ?? null)) {
+            return $this->responder->redirect($response, '/admin/config/' . $tab);
+        }
+        $back = $pending['back'];
+        $before = $this->store->data();
+        if (($pending['base'] ?? null) !== sha1(ConfigStore::encode($before))) {
+            $this->responder->flash('error', 'config.impact.stale');
+
+            return $this->responder->redirect($response, $back);
+        }
+        try {
+            [$old, $new] = $this->checkLocks($before, Toml::parseToArray($pending['toml']));
+            $impact = $this->guard->configImpact($old, $new);
+            $this->store->saveToml($pending['toml']);
+        } catch (InvalidConfig) {
+            $this->responder->flash('error', 'config.impact.stale');
+
+            return $this->responder->redirect($response, $back);
+        }
+        $alert = ($form['alert'] ?? null) === '1' && $impact !== [];
+        if ($alert) {
+            $this->guard->alertStations(array_map(static fn(array $line): string => $line['workshop'], $impact), $this->clock->now()->getTimestamp());
+        }
+        $this->audited($before, $this->store->data(), $tab, 'form', [
+            'children' => ConfigImpact::childCount($impact),
+            'stations_alerted' => $alert ? 'yes' : 'no',
+        ]);
+
+        return $this->responder->redirect($response, $back);
+    }
+
+    /**
+     * @param list<array{workshop: string, kind: string, children: list<Registration>}> $impact
+     * @param list<array{path: string, before: ?string, after: ?string}>                                                     $changes
+     */
+    private function renderImpact(ResponseInterface $response, string $tab, string $back, array $impact, array $changes, CompetitionConfig $config): ResponseInterface
+    {
+        $divisions = [];
+        foreach ($impact as $line) {
+            foreach ($line['children'] as $child) {
+                try {
+                    $divisions[$child->id] = $config->category($child->child->level, $child->child->gender);
+                } catch (\InvalidArgumentException) {
+                    // Level no longer listed: no division to show.
+                }
+            }
+        }
+        return $this->responder->render($response, 'admin/config-impact.html.twig', [
+            'tab' => $tab,
+            'tabs' => ConfigForms::TABS,
+            'back' => $back,
+            'impact' => $impact,
+            'child_count' => ConfigImpact::childCount($impact),
+            'error_list' => [],
+            'divisions' => $divisions,
+            'changes' => $changes,
+            'uses_example' => $this->store->usesExample(),
+            'phase' => $this->responder->context->phase->value,
+        ]);
+    }
+
+    /**
+     * @param array<mixed>               $before
+     * @param array<mixed>               $after
+     * @param array<string, string|int> $extra
+     */
+    private function audited(array $before, array $after, string $tab, string $source, array $extra = []): void
     {
         $changes = ConfigDiff::compare($before, $after);
-        $this->responder->audit('config.changed', [
+        $this->responder->audit('config.changed', $extra + [
             'tab' => $tab,
             'source' => $source,
             'count' => \count($changes),
@@ -413,7 +558,7 @@ final class ConfigAction
     private function errorList(array $errors): array
     {
         return array_map(
-            fn(ConfigError $error): string => ($error->path === '' ? '' : $error->path . ' : ') . $this->message($error),
+            fn(ConfigError $error): string => ($error->path === '' ? '' : $this->location($error->path) . ' : ') . $this->message($error),
             $errors,
         );
     }
@@ -421,7 +566,56 @@ final class ConfigAction
     private function message(ConfigError $error): string
     {
         $key = 'config.error.' . $error->key;
+        $params = $error->params;
+        // An event id ("long_jump.senior") is shown as its workshop name and group.
+        if ($error->key === 'event_has_results' && \is_string($params['id'] ?? null)) {
+            $params['id'] = $this->eventName($params['id']);
+        }
 
-        return $this->translator->has($key) ? $this->translator->trans($key, $error->params) : $error->english();
+        return $this->translator->has($key) ? $this->translator->trans($key, $params) : $error->english();
+    }
+
+    /**
+     * Readable place of an error: "Ateliers › Saut en longueur (senior) › Type de mesure"
+     * rather than "workshops[4].variants[0].measure".
+     */
+    private function location(string $path): string
+    {
+        if (preg_match('/^workshops(?:\[(\d+)\](?:\.variants\[(\d+)\])?)?(?:\.([a-z_]+))?/', $path, $m) === 1) {
+            $parts = [$this->translator->trans('config.tab.workshops')];
+            $list = $this->workshops($this->store->data());
+            if (($m[1] ?? '') !== '') {
+                $workshop = $list[(int) $m[1]] ?? [];
+                $id = \is_string($workshop['id'] ?? null) ? $workshop['id'] : '';
+                $name = $id === '' ? '#' . ((int) $m[1] + 1) : $this->translator->trans('workshop.' . $id . '.name');
+                if (($m[2] ?? '') !== '') {
+                    $variants = \is_array($workshop['variants'] ?? null) ? array_values($workshop['variants']) : [];
+                    $variant = \is_array($variants[(int) $m[2]] ?? null) ? $variants[(int) $m[2]] : [];
+                    $name .= ' (' . (\is_string($variant['group'] ?? null) ? $variant['group'] : '#' . ((int) $m[2] + 1)) . ')';
+                }
+                $parts[] = $name;
+            }
+            $field = $m[3] ?? '';
+            if ($field !== '') {
+                $section = ($m[2] ?? '') !== '' ? 'config.variant.' : 'config.workshop.';
+                $parts[] = $this->translator->has($section . $field) ? $this->translator->trans($section . $field) : $field;
+            }
+
+            return implode(' › ', $parts);
+        }
+        if (preg_match('/^([a-z_]+)\.([a-z_]+)$/', $path, $m) === 1 && $this->translator->has('config.' . $m[1] . '.' . $m[2])) {
+            $tab = $this->translator->has('config.tab.' . $m[1]) ? $this->translator->trans('config.tab.' . $m[1]) . ' › ' : '';
+
+            return $tab . $this->translator->trans('config.' . $m[1] . '.' . $m[2]);
+        }
+
+        return $path;
+    }
+
+    private function eventName(string $id): string
+    {
+        [$workshop, $group] = array_pad(explode('.', $id, 2), 2, '');
+
+        return $this->translator->trans('workshop.' . $workshop . '.name') . ($group === '' ? '' : ' (' . $group . ')');
     }
 }

@@ -25,11 +25,46 @@ final class AttemptProgress
         public readonly array $attempts,
     ) {}
 
+    /**
+     * Attempts that count (spec § 10.4): the first ones in chronological order
+     * until the allowed number is used up. Later ones stay stored but are
+     * excluded, e.g. after the number of attempts went down or the foul mode
+     * became strict.
+     *
+     * @return list<StoredAttempt>
+     */
+    public function retained(): array
+    {
+        $kept = [];
+        $used = 0;
+        foreach ($this->attempts as $attempt) {
+            if ($used >= $this->variant->attempts) {
+                break;
+            }
+            $kept[] = $attempt;
+            if ($this->counts($attempt)) {
+                ++$used;
+            }
+        }
+
+        return $kept;
+    }
+
+    /**
+     * Attempts stored but left out of the result.
+     *
+     * @return list<StoredAttempt>
+     */
+    public function excluded(): array
+    {
+        return \array_slice($this->attempts, \count($this->retained()));
+    }
+
     public function used(): int
     {
         $used = 0;
-        foreach ($this->attempts as $attempt) {
-            if (!$attempt->isFoul() || $this->variant->foulMode === FoulMode::Strict) {
+        foreach ($this->retained() as $attempt) {
+            if ($this->counts($attempt)) {
                 ++$used;
             }
         }
@@ -53,7 +88,7 @@ final class AttemptProgress
     public function best(): ?int
     {
         $best = null;
-        foreach ($this->attempts as $attempt) {
+        foreach ($this->retained() as $attempt) {
             $result = $attempt->result();
             if ($result !== null && ($best === null || ($this->variant->better === Better::Lower ? $result < $best : $result > $best))) {
                 $best = $result;
@@ -61,5 +96,10 @@ final class AttemptProgress
         }
 
         return $best;
+    }
+
+    private function counts(StoredAttempt $attempt): bool
+    {
+        return !$attempt->isFoul() || $this->variant->foulMode === FoulMode::Strict;
     }
 }

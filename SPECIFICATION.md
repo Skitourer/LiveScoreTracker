@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.28 — 16 November 2026
+> Version 1.29 — 16 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -571,6 +571,16 @@ The application shows the affected children before approval (e.g. "12 children w
 
 Every change is written to the **audit log** (who, what, when, old and new value).
 
+**Implementation (step 12b)**
+- In "in progress", the Participants and Workshops tabs of the configuration screen can be changed. When the change affects children, a "Children affected" page lists them by workshop (attempt to do or redo; attempts that no longer count; attempts that count again), with their division, then the admin confirms. If the configuration changed between the preview and the confirmation, nothing is saved.
+- The File tab (direct edit, import, going back to a version) stays read-only in "in progress": the safeguards only apply to the forms.
+- **First-N rule**: attempts are kept in chronological order until the allowed number is used up (a foul counts in strict mode, not in lenient mode). Later ones stay stored but count neither for the best result nor on the entry screen.
+- **Deactivation**: workshop key `disabled = true` ("Deactivate" button in the workshop list). The workshop disappears from the workshop choice, missing events, follow-up, sheets and ranking; in the detailed results of the division the event stays visible, greyed. "Reactivate" brings it back with its results.
+- **Lock**: a variant that has results keeps its measure type (the unit follows from the type) and cannot be removed; a workshop with results cannot be deleted. The lock applies in every phase, the file included.
+- **Change of a child's grade or gender** (registration card): if the child has results, the card shows the effect on their events and asks for a confirmation. If they change level group, their attempts move to the variant of the new group when it is measured the same way; otherwise they stay on the old variant, kept but excluded.
+- **Alert to stations**: "Alert the stations concerned" box (ticked by default) on the confirmation page. The entry screen of these workshops shows a banner until the referee closes it ("Got it"); the alert travels with the workshop pack.
+- **Audit**: `config.changed` with the changes, the number of children affected and whether the alert was sent; `registration.updated` with the old and new division and the number of attempts moved.
+
 ---
 
 ## 11. Admin and organizer screens
@@ -661,7 +671,7 @@ A complete example **with fictitious data** is given in **appendix A**.
 - **History**: every save keeps the previous version (last 20, `config-history/` in the data folder); "Go back to this version" button with a preview of the changes.
 - Export of the file; **import** with a setting-by-setting preview of the changes before applying (to start from a previous edition or share with another organizer); direct edit of the file's text for settings that are not in the forms (checked before saving).
 - Every change is written to the audit log (tab, old and new value of each setting).
-- **By phase**: everything can be changed in "preparation"; in "in progress", participants, workshops and the whole file (edit, import, going back to a version) are read-only — the § 10.4 safeguards come with step 12b; in "finished", the whole configuration is read-only.
+- **By phase**: everything can be changed in "preparation"; in "in progress", participants and workshops can be changed with the § 10.4 safeguards, the whole file (edit, import, going back to a version) is read-only; in "finished", the whole configuration is read-only.
 
 ### 12.4 Translations (i18n)
 
