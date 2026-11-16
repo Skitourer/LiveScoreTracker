@@ -1,6 +1,6 @@
 # Developer documentation
 
-This folder is for people who want to understand or change the code. What the application must do, and why, is in the [specification](../../SPECIFICATION.md); how to contribute is in [CONTRIBUTING](../../CONTRIBUTING.md).
+This folder is for people who want to understand or change the code. What the application must do, and why, is in the [specification](../../SPECIFICATION.md); how to contribute is in [CONTRIBUTING](../../CONTRIBUTING.md). Rules for AI coding assistants are in [CLAUDE.md](../../CLAUDE.md).
 
 | Page | Content |
 |---|---|
