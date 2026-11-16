@@ -7,7 +7,7 @@ Stable rules for working on this repository. Current status and next steps live 
 - Reply to the maintainer **in French, concisely**. Code, comments, commits and PRs in English.
 - Propose the next plan step (specification § 23) only when asked to continue; present it and wait for approval before coding. Fixes requested during testing: do them directly.
 - Save tokens: read files partially (grep, offset/limit), don't re-read the specification unless needed, batch feedback, commit and push often.
-- One branch and one PR per step. The maintainer tests on the test site, then merges. Before pushing a fix, check whether the PR is already merged; if so, new `fix/...` branch from `main` and a new PR.
+- One branch and one PR per step (`main` is protected: PR and the 6 CI checks required). The maintainer tests on the test site, then merges. Before pushing a fix, check whether the PR is already merged; if so, new `fix/...` branch from `main` and a new PR.
 - PR conflicts (often `CHANGELOG.md`): merge `origin/main` into the branch, keep both lines, push (no force push).
 - At session start: run `scripts/install-hooks.sh` and write the forbidden terms listed in the project notes to `~/.config/livescoretracker/forbidden-terms.txt` (never in the repo); then list open issues: `gh api repos/Skitourer/LiveScoreTracker/issues?state=open`.
 - Commit author: `Skitourer <149181038+Skitourer@users.noreply.github.com>`.
