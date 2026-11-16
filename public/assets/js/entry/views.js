@@ -289,7 +289,7 @@ export const TRACKING_TABS = ['todo', 'started', 'finished', 'absent', 'all'];
  * it works without network. On a time workshop, ticking 1 or 2 children starts
  * their race.
  */
-export const trackingView = ({ rows, tab, counts, query, tx, format, race }) => `
+export const trackingView = ({ rows, tab, counts, query, tx, format, race, selected = [] }) => `
   <p><a href="#">← ${h(tx('entry.back_to_entry'))}</a></p>
   <h1>${h(tx('entry.tracking.title'))}</h1>
   <nav class="chips" aria-label="${h(tx('entry.tracking.title'))}">
@@ -307,7 +307,7 @@ export const trackingView = ({ rows, tab, counts, query, tx, format, race }) => 
     rows.length === 0
       ? `<p class="meta">${h(query ? tx('entry.tracking.no_match', { query }) : tx(`entry.tracking.empty.${tab}`))}</p>`
       : `<form class="entry-tracking-race">
-          ${race ? `<p class="meta">${h(tx('entry.tracking.race_hint', { count: race }))}</p>` : ''}
+          ${race ? `<p class="meta">${h(tx('entry.tracking.race_hint', { count: race }))} ${h(tx('entry.tracking.race_search_hint'))}</p>` : ''}
           <div class="table-scroll"><table>
             <thead><tr>
               ${race ? '<th></th>' : ''}
@@ -317,7 +317,7 @@ export const trackingView = ({ rows, tab, counts, query, tx, format, race }) => 
             <tbody>${rows
               .map(
                 ({ child, variant, used, best, toCheck }) => `<tr>
-                ${race ? `<td>${used < variant.attempts ? `<input type="checkbox" name="bibs" value="${h(child.bib)}" aria-label="${h(child.name)}">` : ''}</td>` : ''}
+                ${race ? `<td>${used < variant.attempts ? `<input type="checkbox" name="bibs" value="${h(child.bib)}" aria-label="${h(child.name)}"${selected.includes(String(child.bib)) ? ' checked' : ''}>` : ''}</td>` : ''}
                 <td class="num"><a href="#bib/${h(child.bib)}"><span class="bib">${h(child.bib)}</span></a></td>
                 <td><a href="#bib/${h(child.bib)}">${h(child.name)}</a>
                   ${child.present ? '' : `<span class="badge muted">${h(tx('entry.not_checked_in'))}</span>`}

@@ -551,19 +551,32 @@ export const initEntryApp = () => {
       .sort((a, b) => a.child.bib - b.child.bib);
 
   let trackingQuery = '';
+  // Children ticked for a race: kept while searching for the next one.
+  let raceSelection = [];
 
   const showTracking = (tab) => {
     const all = trackingRows();
     const counts = Object.fromEntries(
       TRACKING_TABS.map((name) => [name, all.filter((row) => row.tabs.includes(name)).length]),
     );
+    const race = pack.workshop.timed && isOpen() ? pack.workshop.bibsPerRace : 0;
+    raceSelection = race
+      ? raceSelection.filter((bib) =>
+          all.some((row) => String(row.child.bib) === bib && row.used < row.variant.attempts),
+        )
+      : [];
     const query = searchKey(trackingQuery);
-    const rows = query
+    const matches = query
       ? all.filter(
           (row) => String(row.child.bib) === query || searchKey(row.child.name).startsWith(query),
         )
       : all.filter((row) => row.tabs.includes(tab));
-    const race = pack.workshop.timed && isOpen() ? pack.workshop.bibsPerRace : 0;
+    // Ticked children stay on top, even when the search no longer matches them.
+    const selected = all.filter((row) => raceSelection.includes(String(row.child.bib)));
+    const rows = [
+      ...selected,
+      ...matches.filter((row) => !raceSelection.includes(String(row.child.bib))),
+    ];
     view.innerHTML = trackingView({
       rows,
       tab,
@@ -572,10 +585,23 @@ export const initEntryApp = () => {
       tx,
       format,
       race,
+      selected: raceSelection,
     });
 
     const search = view.querySelector('.entry-tracking-search');
-    search.addEventListener('submit', (event) => event.preventDefault());
+    search.addEventListener('submit', (event) => {
+      event.preventDefault();
+      // Enter with a single match ticks it and clears the search, ready for the next bib.
+      const free = matches.filter(
+        (row) => row.used < row.variant.attempts && !raceSelection.includes(String(row.child.bib)),
+      );
+      if (race && query && free.length === 1 && raceSelection.length < race) {
+        raceSelection = [...raceSelection, String(free[0].child.bib)];
+        trackingQuery = '';
+        showTracking(tab);
+        view.querySelector('.entry-tracking-search input')?.focus();
+      }
+    });
     search.querySelector('input').addEventListener('input', (event) => {
       trackingQuery = event.target.value;
       const caret = event.target.selectionStart;
@@ -590,7 +616,8 @@ export const initEntryApp = () => {
       const boxes = [...form.querySelectorAll('input[type="checkbox"]')];
       const start = form.querySelector('button[type="submit"]');
       const update = () => {
-        const ticked = boxes.filter((box) => box.checked).length;
+        raceSelection = boxes.filter((box) => box.checked).map((box) => box.value);
+        const ticked = raceSelection.length;
         for (const box of boxes) {
           box.disabled = !box.checked && ticked >= race;
         }
@@ -603,6 +630,8 @@ export const initEntryApp = () => {
         event.preventDefault();
         const ticked = boxes.filter((box) => box.checked).map((box) => box.value);
         if (ticked.length > 0) {
+          raceSelection = [];
+          trackingQuery = '';
           location.hash = `race/${ticked[0]}/${ticked[1] ?? '-'}/timer`;
         }
       });

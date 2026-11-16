@@ -988,6 +988,7 @@ event = "Event"
 best = "Best"
 no_match = "No child matches \"{query}\"."
 race_hint = "Tick up to {count} child(ren) to start their race."
+race_search_hint = "Search a bib or a first name, then press Enter to tick it: ticked children stay on the list."
 start_race = "Start the race"
 
 [entry.tracking.tab]
