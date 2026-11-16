@@ -5,12 +5,14 @@ declare(strict_types=1);
 namespace LiveScoreTracker\Action\Registration;
 
 use LiveScoreTracker\Action\Support\Responder;
+use LiveScoreTracker\Application\ConfigGuard;
 use LiveScoreTracker\Application\RegistrationMailer;
 use LiveScoreTracker\Domain\Config\CompetitionConfig;
 use LiveScoreTracker\Domain\Registration\ChildValidator;
 use LiveScoreTracker\Domain\Registration\RegistrationSource;
 use LiveScoreTracker\Domain\Registration\RegistrationStatus;
 use LiveScoreTracker\Domain\Security\Permission;
+use LiveScoreTracker\Domain\Security\Phase;
 use LiveScoreTracker\Infrastructure\Persistence\RegistrationRepository;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -31,6 +33,7 @@ final class RegistrationCardAction
         private readonly ChildValidator $validator,
         private readonly CompetitionConfig $config,
         private readonly RegistrationMailer $mailer,
+        private readonly ConfigGuard $guard,
     ) {}
 
     /**
@@ -46,6 +49,7 @@ final class RegistrationCardAction
         $values = RegistrationForm::fromChild($registration->child);
         $errors = [];
         $warnings = [];
+        $impact = null;
 
         if ($request->getMethod() === 'POST') {
             $op = Responder::field($request, 'op');
@@ -64,13 +68,25 @@ final class RegistrationCardAction
                     if ($duplicate !== null) {
                         $errors['registration.duplicate'] = ['bib' => $duplicate->bib ?? '–', 'name' => $duplicate->fullName()];
                     } elseif ($warnings === [] || Responder::field($request, 'confirm_warnings') === '1') {
-                        $changes = $this->registrations->update($registration->id, $result->data, $context->user);
-                        if ($changes !== []) {
-                            $this->responder->audit('registration.updated', ['bib' => $registration->bib, 'fields' => implode(', ', array_keys($changes))]);
-                            $this->responder->flash('success', 'registration.updated');
-                        }
+                        $data = $result->data;
+                        $divisionChanged = $data->level !== $registration->child->level || $data->gender !== $registration->child->gender;
+                        // Running competition: a child with results changing division is shown first (spec § 10.4).
+                        if ($divisionChanged && $context->phase === Phase::Running && Responder::field($request, 'confirm_division') !== '1'
+                            && $this->guard->hasResults($this->config, $registration)) {
+                            $impact = $this->guard->childImpact($this->config, $registration, $data);
+                        } else {
+                            $moved = $data->level !== $registration->child->level ? $this->guard->moveResults($this->config, $registration, $data->level) : 0;
+                            $changes = $this->registrations->update($registration->id, $data, $context->user);
+                            if ($changes !== []) {
+                                $this->responder->audit('registration.updated', [
+                                    'bib' => $registration->bib,
+                                    'fields' => implode(', ', array_keys($changes)),
+                                ] + ($divisionChanged ? ['division' => $this->division($registration->child->level, $registration->child->gender) . ' → ' . $this->division($data->level, $data->gender), 'attempts_moved' => $moved] : []));
+                                $this->responder->flash('success', 'registration.updated');
+                            }
 
-                        return $this->responder->redirect($response, '/registrations/' . $registration->id);
+                            return $this->responder->redirect($response, '/registrations/' . $registration->id);
+                        }
                     }
                 }
             } elseif ($op === 'resend_email') {
@@ -113,6 +129,12 @@ final class RegistrationCardAction
             'transitions' => $registration->status->adminTransitions(),
             'history' => $this->registrations->history($registration->id),
             'config' => $this->config,
-        ], $errors === [] && $warnings === [] ? 200 : 422);
+            'division_impact' => $impact,
+        ], $errors === [] && $warnings === [] && $impact === null ? 200 : 422);
+    }
+
+    private function division(string $level, string $gender): string
+    {
+        return $level . '-' . $gender;
     }
 }

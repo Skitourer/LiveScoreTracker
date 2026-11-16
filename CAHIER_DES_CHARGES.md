@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.28 — 16 novembre 2026
+> Version 1.29 — 16 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -572,6 +572,16 @@ L'application affiche les enfants concernés avant validation (ex. « 12 enfants
 
 Toute modification est inscrite au **journal d'audit** (qui, quoi, quand, ancienne et nouvelle valeur).
 
+**Mise en œuvre (étape 12b)**
+- En « en cours », les onglets Participants et Ateliers de l'écran de configuration sont modifiables. Si le changement touche des enfants, une page « Enfants concernés » les liste par atelier (essai à faire ou à refaire ; essais qui ne comptent plus ; essais qui comptent à nouveau), avec leur série, puis l'admin confirme. Si la configuration a changé entre l'aperçu et la confirmation, rien n'est enregistré.
+- L'onglet Fichier (édition directe, import, retour à une version) reste en lecture seule en « en cours » : les garde-fous ne s'appliquent qu'aux formulaires.
+- **Règle des N premiers** : on retient les essais dans l'ordre chronologique jusqu'à épuisement du nombre d'essais autorisé (un nul compte en mode strict, pas en mode bienveillant). Les suivants restent enregistrés mais ne comptent ni pour le meilleur résultat, ni pour l'écran de saisie.
+- **Désactivation** : clé `disabled = true` de l'atelier (bouton « Désactiver » de la liste des ateliers). L'atelier disparaît du choix d'atelier, des épreuves manquantes, du suivi, des feuilles et du classement ; dans les résultats détaillés de la série, l'épreuve reste visible, grisée. « Réactiver » la remet en service avec ses résultats.
+- **Verrou** : une variante qui a des résultats garde son type de mesure (l'unité découle du type) et ne peut pas être retirée ; un atelier avec résultats ne peut pas être supprimé. Ce verrou vaut dans toutes les phases, y compris pour le fichier.
+- **Changement de classe ou de catégorie d'un enfant** (fiche d'inscription) : si l'enfant a des résultats, la fiche montre l'effet sur ses épreuves et demande une confirmation. S'il change de groupe de classes, ses essais passent à la variante de son nouveau groupe quand elle se mesure de la même façon ; sinon ils restent sur l'ancienne variante, conservés mais exclus.
+- **Alerte aux ateliers** : case « Prévenir les ateliers concernés » (cochée par défaut) sur la page de confirmation. L'écran de saisie de ces ateliers affiche un bandeau jusqu'à ce que l'arbitre le ferme (« Vu ») ; l'alerte est transmise avec le paquet de l'atelier.
+- **Audit** : `config.changed` avec les changements, le nombre d'enfants concernés et l'envoi ou non de l'alerte ; `registration.updated` avec l'ancienne et la nouvelle série et le nombre d'essais déplacés.
+
 ---
 
 ## 11. Écrans de l'admin et des organisateurs
@@ -662,7 +672,7 @@ Un exemple complet, **avec des données fictives**, figure en **annexe A**.
 - **Historique** : chaque enregistrement garde la version précédente (20 dernières, dossier `config-history/` du dossier de données) ; bouton « Revenir à cette version » avec aperçu des changements.
 - Export du fichier ; **import** avec aperçu des changements réglage par réglage avant d'appliquer (pour repartir d'une édition précédente ou partager avec un autre organisateur) ; édition directe du texte du fichier pour les réglages absents des formulaires (vérifiée avant l'enregistrement).
 - Chaque modification est inscrite au journal d'audit (onglet, ancienne et nouvelle valeur de chaque réglage).
-- **Selon la phase** : tout est modifiable en « préparation » ; en « en cours », les participants, les ateliers et le fichier complet (édition, import, retour à une version) sont en lecture seule — les garde-fous de la § 10.4 viendront à l'étape 12b ; en « terminée », toute la configuration est en lecture seule.
+- **Selon la phase** : tout est modifiable en « préparation » ; en « en cours », les participants et les ateliers sont modifiables avec les garde-fous de la § 10.4, le fichier complet (édition, import, retour à une version) est en lecture seule ; en « terminée », toute la configuration est en lecture seule.
 
 ### 12.4 Traductions (i18n)
 
