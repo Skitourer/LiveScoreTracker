@@ -9,6 +9,7 @@
 
 {% block content %}
     <div class="ceremony-screen" data-live="2">
+        {% if theme().logo %}<img class="ceremony-logo" src="{{ base_path() }}/logo?v={{ theme().logo }}" alt="">{% endif %}
         {% if not finished %}
             <h1>{{ t('ceremony.title') }}</h1>
             <p class="lead">{{ t('ceremony.not_finished') }}</p>

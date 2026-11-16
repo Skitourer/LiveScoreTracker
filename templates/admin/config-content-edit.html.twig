@@ -1,0 +1,46 @@
+{% extends 'layout.html.twig' %}
+
+{% set title = kind == 'pages' ? t('config.contents.page_' ~ name) : t('workshop.' ~ name ~ '.name') %}
+{% block title %}{{ t('config.title') }} · {{ title }}{% endblock %}
+
+{% block content %}
+    {% include 'admin/_config-head.html.twig' %}
+    <p><a href="{{ url_for('admin-contents') }}">← {{ t('config.tab.contents') }}</a></p>
+    <h2>{{ title }}</h2>
+    <nav class="chips" aria-label="{{ t('config.contents.language') }}">
+        {% for code, label in languages %}<a href="?lang={{ code }}" {% if code == lang %}aria-current="page"{% endif %}>{{ label }}</a>{% endfor %}
+    </nav>
+    <p class="meta">{{ written ? t('config.contents.written') : t('config.contents.default_text') }}</p>
+
+    <form method="post" class="form wide-form">
+        {{ csrf_field() }}
+        <fieldset {{ editable ? '' : 'disabled' }}>
+            <label>{{ t('config.contents.text') }} <small>{{ t('config.contents.text_hint') }}</small>
+                <textarea name="markdown" rows="20" class="code" dir="auto" lang="{{ lang }}">{{ markdown }}</textarea></label>
+        </fieldset>
+        {% if editable %}
+            <div class="toolbar">
+                <button type="submit" name="op" value="save" class="button">{{ t('config.save') }}</button>
+                <button type="submit" name="op" value="preview" class="button secondary">{{ t('config.contents.preview') }}</button>
+            </div>
+        {% endif %}
+    </form>
+    {% if editable and written %}
+        <form method="post" class="inline-form" data-confirm="{{ t('config.contents.reset_confirm') }}">
+            {{ csrf_field() }}<input type="hidden" name="op" value="reset">
+            <button type="submit" class="button small secondary danger">{{ t('config.contents.reset') }}</button>
+        </form>
+    {% endif %}
+
+    {% if preview is not null %}
+        <h2>{{ t('config.contents.preview') }}</h2>
+        <article class="help-page card" dir="auto">{{ preview|media(base_path())|replace({'<p>[contacts]</p>': include('partials/contacts.html.twig')})|raw }}</article>
+    {% endif %}
+
+    {% if images is not empty %}
+        <details class="card">
+            <summary>{{ t('config.contents.images') }}</summary>
+            <ul>{% for image in images %}<li><code>![{{ t('config.contents.image_alt') }}](image:{{ image.name }})</code></li>{% endfor %}</ul>
+        </details>
+    {% endif %}
+{% endblock %}

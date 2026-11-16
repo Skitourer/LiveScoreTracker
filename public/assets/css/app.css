@@ -80,9 +80,37 @@ pre {
 }
 
 .brand {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
   font-weight: var(--font-weight-heavy);
   color: var(--color-text);
   text-decoration: none;
+}
+
+/* Images of the edited pages (spec § 12.3). */
+.content-thumb {
+  height: var(--space-6);
+  width: auto;
+  vertical-align: middle;
+}
+
+.help-page img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Logo of the organisation (spec § 12.3). */
+.brand-logo {
+  height: var(--space-6);
+  width: auto;
+}
+
+.ceremony-logo {
+  display: block;
+  max-height: 6rem;
+  width: auto;
+  margin: 0 auto var(--space-4);
 }
 
 .topbar-nav {

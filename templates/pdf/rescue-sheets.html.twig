@@ -13,7 +13,7 @@
 </style>
 </head>
 <body>
-<header>{{ edition.name }} — {{ edition.date|date('d/m/Y') }}</header>
+<header>{% set logo = logo_data_uri() %}{% if logo %}<img src="{{ logo }}" alt="" style="height: 7mm; vertical-align: middle; margin-right: 2mm;">{% endif %}{{ edition.name }} — {{ edition.date|date('d/m/Y') }}</header>
 <footer>{{ t('documents.state_at', {at: local_time(printedAt)}) }} · {{ t('reception_list.page') }} <span class="page"></span></footer>
 {% for sheet in sheets %}
     {% set variant = sheet.variant %}

@@ -7,15 +7,17 @@
     <meta name="robots" content="{% block robots %}noindex, nofollow{% endblock %}">
     <title>{% block title %}{{ t('app.name') }}{% endblock %}</title>
     <link rel="manifest" href="{{ base_path() }}/manifest.webmanifest">
-    <meta name="theme-color" content="#1f5fbf">
+    {% set brand = theme() %}
+    <meta name="theme-color" content="{{ brand.accent ?? '#1f5fbf' }}">
     <link rel="apple-touch-icon" href="{{ base_path() }}/assets/icons/icon-192.png">
     <link rel="stylesheet" href="{{ base_path() }}/assets/css/tokens.css">
     <link rel="stylesheet" href="{{ base_path() }}/assets/css/app.css">
+    {% if brand.accent %}<link rel="stylesheet" href="{{ base_path() }}/theme.css?c={{ brand.accent|slice(1) }}">{% endif %}
     <script type="module" src="{{ base_path() }}/assets/js/app.js"></script>
 </head>
 <body>
     <header class="topbar">
-        <a class="brand" href="{{ logged_in() ? url_for('dashboard') : url_for('home') }}">{{ t('app.name') }}</a>
+        <a class="brand" href="{{ logged_in() ? url_for('dashboard') : url_for('home') }}">{% if brand.logo %}<img class="brand-logo" src="{{ base_path() }}/logo?v={{ brand.logo }}" alt=""> {% endif %}{{ t('app.name') }}</a>
         {% block topbar_nav %}<nav class="topbar-nav">
             {% set me = current_user() %}
             {% if me %}

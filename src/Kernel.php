@@ -9,6 +9,7 @@ use Dotenv\Dotenv;
 use LiveScoreTracker\Action\AccountAction;
 use LiveScoreTracker\Action\Admin\AuditAction;
 use LiveScoreTracker\Action\Admin\ConfigAction;
+use LiveScoreTracker\Action\Admin\ContentsAction;
 use LiveScoreTracker\Action\Admin\MailTestAction;
 use LiveScoreTracker\Action\Admin\PhaseAction;
 use LiveScoreTracker\Action\Admin\RefereeAccountAction;
@@ -25,6 +26,7 @@ use LiveScoreTracker\Action\Auth\ResetPasswordAction;
 use LiveScoreTracker\Action\Auth\SetupAction;
 use LiveScoreTracker\Action\Auth\TwoFactorChallengeAction;
 use LiveScoreTracker\Action\Auth\TwoFactorSetupAction;
+use LiveScoreTracker\Action\BrandingAction;
 use LiveScoreTracker\Action\DashboardAction;
 use LiveScoreTracker\Action\Documents\DocumentsAction;
 use LiveScoreTracker\Action\Entry\EntryBibAction;
@@ -79,11 +81,13 @@ use LiveScoreTracker\Http\Middleware\SessionMiddleware;
 use LiveScoreTracker\Http\RequestContext;
 use LiveScoreTracker\Infrastructure\BuildInfo;
 use LiveScoreTracker\Infrastructure\Clock;
+use LiveScoreTracker\Infrastructure\Config\Branding;
 use LiveScoreTracker\Infrastructure\Config\ConfigRepository;
 use LiveScoreTracker\Infrastructure\Config\ConfigStore;
 use LiveScoreTracker\Infrastructure\Database\ConnectionFactory;
 use LiveScoreTracker\Infrastructure\Database\Migrator;
 use LiveScoreTracker\Infrastructure\Help\HelpPages;
+use LiveScoreTracker\Infrastructure\Help\MediaStore;
 use LiveScoreTracker\Infrastructure\I18n\CatalogLoader;
 use LiveScoreTracker\Infrastructure\I18n\Translator;
 use LiveScoreTracker\Infrastructure\Mail\DnsMailDomains;
@@ -166,6 +170,8 @@ final class Kernel
 
         $app->get('/', HomeAction::class)->setName('home');
         $app->get('/health', HealthAction::class)->setName('health');
+        $app->get('/{what:theme\.css|logo}', BrandingAction::class)->setName('branding');
+        $app->get('/media/{file:[a-z0-9-]+\.(?:png|jpg|webp)}', BrandingAction::class)->setName('media');
         $app->get('/offline', OfflineAction::class)->setName('offline');
         $app->get('/status', StatusAction::class)->setName('status');
         $app->get('/reglement', RulesAction::class)->setName('rules');
@@ -241,6 +247,8 @@ final class Kernel
             $admin->map(['GET', 'POST'], '/referee', RefereeAccountAction::class)->setName('admin-referee')->add($guard(Permission::ManageAccounts));
             $admin->map(['GET', 'POST'], '/test-data', TestDataAction::class)->setName('admin-test-data')->add($guard(Permission::RestoreAndPurge));
             $admin->map(['GET', 'POST'], '/phase', PhaseAction::class)->setName('admin-phase')->add($guard(Permission::ChangePhase));
+            $admin->map(['GET', 'POST'], '/config/contents', ContentsAction::class)->setName('admin-contents')->add($guard(Permission::ManageConfiguration));
+            $admin->map(['GET', 'POST'], '/config/contents/{kind:pages|help}/{name:[a-z0-9_]+}', ContentsAction::class)->setName('admin-content')->add($guard(Permission::ManageConfiguration));
             $admin->map(['GET', 'POST'], '/config[/{tab:[a-z]+}]', ConfigAction::class)->setName('admin-config')->add($guard(Permission::ManageConfiguration));
             $admin->map(['GET', 'POST'], '/config/{tab:workshops}/{workshop:[0-9]+|new}', ConfigAction::class)->setName('admin-config-workshop')->add($guard(Permission::ManageConfiguration));
             $admin->map(['GET', 'POST'], '/mail-test', MailTestAction::class)->setName('admin-mail-test')->add($guard(Permission::ManageConfiguration));
@@ -270,6 +278,8 @@ final class Kernel
                 $settings->sessionIdleMinutes,
             ),
             HelpPages::class => static fn(): HelpPages => new HelpPages($settings->dataDir, $settings->rootDir . '/config.example'),
+            MediaStore::class => static fn(): MediaStore => new MediaStore($settings->dataDir),
+            Branding::class => static fn(): Branding => new Branding($settings->dataDir),
             PdfRenderer::class => static fn(): PdfRenderer => new PdfRenderer(sys_get_temp_dir()),
             Mailer::class => static fn(): Mailer => $settings->mailTransport === 'smtp'
                 ? new SmtpMailer($settings)
@@ -329,6 +339,16 @@ final class Kernel
                     self::service($c, ResultFormatter::class),
                     self::service($c, RequestContext::class),
                     $settings->timezone,
+                    // Branding read lazily: an invalid configuration falls back to the defaults.
+                    static function () use ($c): CompetitionConfig|null {
+                        try {
+                            return self::service($c, CompetitionConfig::class);
+                        } catch (\Throwable) {
+                            return null;
+                        }
+                    },
+                    self::service($c, Branding::class),
+                    self::service($c, MediaStore::class),
                 ));
                 // Versions the offline cache of the phones (spec § 8.8).
                 $twig->getEnvironment()->addGlobal('app_revision', self::service($c, BuildInfo::class)->revision);

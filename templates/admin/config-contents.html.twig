@@ -1,0 +1,53 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}{{ t('config.title') }} · {{ t('config.tab.contents') }}{% endblock %}
+
+{% block content %}
+    {% include 'admin/_config-head.html.twig' %}
+    <p class="meta">{{ t('config.contents.intro') }}</p>
+
+    <h2>{{ t('config.contents.pages') }}</h2>
+    <ul>
+        {% for page in pages %}
+            <li><a href="{{ url_for('admin-content', {kind: 'pages', name: page}) }}">{{ t('config.contents.page_' ~ page) }}</a></li>
+        {% endfor %}
+    </ul>
+
+    <h2>{{ t('config.contents.help') }}</h2>
+    <ul>
+        {% for workshop in workshops %}
+            <li><a href="{{ url_for('admin-content', {kind: 'help', name: workshop.id}) }}">{{ t('workshop.' ~ workshop.id ~ '.name') }}</a></li>
+        {% endfor %}
+    </ul>
+
+    <h2>{{ t('config.contents.images') }}</h2>
+    <p class="meta">{{ t('config.contents.images_hint') }}</p>
+    {% if images is empty %}<p class="meta">{{ t('config.contents.no_image') }}</p>{% else %}
+        <div class="table-scroll">
+            <table>
+                <thead><tr><th>{{ t('config.contents.image') }}</th><th>{{ t('config.contents.markdown') }}</th><th></th></tr></thead>
+                <tbody>
+                {% for image in images %}
+                    <tr>
+                        <td><img class="content-thumb" src="{{ base_path() }}/media/{{ image.name }}" alt=""> {{ image.name }}</td>
+                        <td><code>![{{ t('config.contents.image_alt') }}](image:{{ image.name }})</code></td>
+                        <td>{% if editable %}
+                            <form method="post" class="inline-form" data-confirm="{{ t('config.contents.image_delete_confirm') }}">
+                                {{ csrf_field() }}<input type="hidden" name="op" value="delete_image"><input type="hidden" name="image" value="{{ image.name }}">
+                                <button type="submit" class="button small secondary danger">{{ t('config.workshop.delete_short') }}</button>
+                            </form>
+                        {% endif %}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% endif %}
+    {% if editable %}
+        <form method="post" class="form" enctype="multipart/form-data">
+            {{ csrf_field() }}<input type="hidden" name="op" value="add_image">
+            <label>{{ t('config.contents.image_label') }} <input type="file" name="image" accept="image/png,image/jpeg,image/webp" required></label>
+            <button type="submit" class="button secondary">{{ t('config.contents.image_send') }}</button>
+        </form>
+    {% endif %}
+{% endblock %}

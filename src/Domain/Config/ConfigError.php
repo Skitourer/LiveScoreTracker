@@ -62,6 +62,9 @@ final class ConfigError
         'required_one_of' => 'is required ({values})',
         'file_unreadable' => 'file not found or not readable',
         'toml_syntax' => 'TOML syntax error: {detail}',
+        'color' => 'must be a colour such as "#1f5fbf"',
+        'color_contrast' => 'not readable enough (contrast {ratio}:1 on white, 4.5:1 needed): choose a darker colour',
+        'logo_file' => 'must be logo.png, logo.jpg or logo.webp (uploaded from the configuration screen)',
         'measure_locked' => 'cannot change: this event already has results',
         'event_has_results' => 'event "{id}" has results: it cannot be removed (deactivate its workshop instead)',
     ];

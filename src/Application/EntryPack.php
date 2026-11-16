@@ -104,7 +104,7 @@ final class EntryPack
             $children[] = [
                 'id' => $child->id,
                 'bib' => $child->bib,
-                'name' => $child->publicName(),
+                'name' => $child->nameFor($this->config->theme->refereeNames),
                 'level' => $child->child->level,
                 'levelLabel' => $this->translator->label('level.' . $child->child->level),
                 'present' => $child->isPresent(),

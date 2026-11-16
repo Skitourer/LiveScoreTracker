@@ -12,7 +12,7 @@
             {% set child = lane.child %}
             <li class="race-lane">
                 <span class="bib">{{ child.bib }}</span>
-                <span class="race-name">{{ child.publicName() }}</span>
+                <span class="race-name">{{ child_name(child) }}</span>
                 <span>{{ label('level.' ~ child.child.level) }} → <strong>{{ event_label(lane.variant) }}</strong></span>
                 <span class="meta">
                     {% if lane.progress.isFinished() %}<span class="badge muted">{{ t('entry.attempts_finished', {of: lane.variant.attempts}) }}</span>
@@ -41,7 +41,7 @@
                 <button type="button" class="button secondary stopwatch-undo" disabled>{{ t('entry.timer.undo_finish') }}</button>
                 <div class="stopwatch-dnf">
                     {% for lane in lanes %}
-                        <button type="button" class="button secondary" data-lane="{{ loop.index }}" disabled>{{ t('entry.timer.dnf', {name: lane.child.publicName()}) }}</button>
+                        <button type="button" class="button secondary" data-lane="{{ loop.index }}" disabled>{{ t('entry.timer.dnf', {name: child_name(lane.child)}) }}</button>
                     {% endfor %}
                 </div>
                 <button type="button" class="button danger stopwatch-cancel" data-confirm-text="{{ t('entry.timer.confirm_cancel') }}">{{ t('entry.timer.cancel') }}</button>
@@ -69,7 +69,7 @@
                 {% set form = forms[i] %}
                 {% set variant = lane.variant %}
                 <fieldset class="race-result" data-lane="{{ n }}" data-time-format="{{ variant.timeFormat ? variant.timeFormat.value : 'ss.cc' }}">
-                    <legend><span class="bib">{{ lane.child.bib }}</span> {{ lane.child.publicName() }} <small>{{ event_label(variant) }}</small></legend>
+                    <legend><span class="bib">{{ lane.child.bib }}</span> {{ child_name(lane.child) }} <small>{{ event_label(variant) }}</small></legend>
                     <p class="race-place" hidden></p>
                     <input type="hidden" name="{{ n }}_entry_id" value="{{ form.entry_id }}">
                     <input type="hidden" name="{{ n }}_timed" value="{{ form.timed }}" class="race-timed">

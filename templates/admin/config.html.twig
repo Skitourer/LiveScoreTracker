@@ -119,6 +119,17 @@
                         <label>{{ t('config.import.' ~ key) }} <input type="text" name="{{ key }}" value="{{ v[key] }}">{{ err(errors, 'import.columns.' ~ key) }}</label>
                     {% endfor %}
                 </div>
+            {% elseif tab == 'theme' %}
+                <div class="form-grid">
+                    <label>{{ t('config.theme.accent') }} <small>{{ t('config.theme.accent_hint') }}</small>
+                        <input type="text" name="accent" value="{{ v.accent }}" placeholder="#1f5fbf" pattern="#[0-9a-fA-F]{6}">{{ err(errors, 'theme.accent') }}</label>
+                    {% for key in ['referee_names', 'participant_names'] %}
+                        <label>{{ t('config.theme.' ~ key) }}
+                            <select name="{{ key }}">{% for style in ['short', 'full'] %}<option value="{{ style }}" {% if (v[key] ?: 'short') == style %}selected{% endif %}>{{ t('config.theme.names_' ~ style) }}</option>{% endfor %}</select>
+                        </label>
+                    {% endfor %}
+                </div>
+                <p class="meta">{{ t('config.theme.participant_hint') }}</p>
             {% elseif tab == 'contacts' %}
                 <p class="meta">{{ t('config.contacts.hint') }}</p>
                 {% for i, contact in v|merge([{role: '', label: '', name: '', phone: ''}, {role: '', label: '', name: '', phone: ''}]) %}
@@ -133,5 +144,22 @@
             </fieldset>
             {% if editable %}<button type="submit" class="button">{{ t('config.save') }}</button>{% endif %}
         </form>
+        {% if tab == 'theme' %}
+            <h2>{{ t('config.theme.logo') }}</h2>
+            {% if v.logo %}<p><img class="brand-logo" src="{{ base_path() }}/logo?v={{ v.logo }}" alt="{{ t('config.theme.logo') }}"></p>{% else %}<p class="meta">{{ t('config.theme.no_logo') }}</p>{% endif %}
+            {% if editable %}
+                <form method="post" class="form" enctype="multipart/form-data">
+                    {{ csrf_field() }}<input type="hidden" name="op" value="logo">
+                    <label>{{ t('config.theme.logo_label') }} <input type="file" name="logo" accept="image/png,image/jpeg,image/webp" required></label>
+                    <button type="submit" class="button secondary">{{ t('config.theme.logo_send') }}</button>
+                </form>
+                {% if v.logo %}
+                    <form method="post" class="inline-form" data-confirm="{{ t('config.theme.logo_remove_confirm') }}">
+                        {{ csrf_field() }}<input type="hidden" name="op" value="logo_remove">
+                        <button type="submit" class="button small secondary danger">{{ t('config.theme.logo_remove') }}</button>
+                    </form>
+                {% endif %}
+            {% endif %}
+        {% endif %}
     {% endif %}
 {% endblock %}

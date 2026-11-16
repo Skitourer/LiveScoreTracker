@@ -42,7 +42,7 @@
         {% endif %}
 
         {% if presentation %}
-            <article class="help-page public-presentation">{{ presentation|raw }}</article>
+            <article class="help-page public-presentation">{{ presentation|media(base_path())|replace({'<p>[contacts]</p>': include('partials/contacts.html.twig')})|raw }}</article>
         {% endif %}
 
         <h2>{{ t('public.events') }}</h2>

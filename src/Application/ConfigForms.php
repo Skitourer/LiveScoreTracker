@@ -17,7 +17,7 @@ use LiveScoreTracker\Domain\Security\Phase;
 final class ConfigForms
 {
     /** Tabs of the screen, in display order. */
-    public const TABS = ['edition', 'participants', 'registration', 'scoring', 'workshops', 'import', 'contacts', 'file'];
+    public const TABS = ['edition', 'participants', 'registration', 'scoring', 'workshops', 'import', 'contacts', 'contents', 'theme', 'file'];
 
     /** The whole file is frozen once the competition is running: the § 10.4 safeguards only apply to the forms. */
     private const FROZEN_WHILE_RUNNING = ['file'];
@@ -60,6 +60,7 @@ final class ConfigForms
                 )),
             ],
             'registration' => self::texts($section('registration'), ['opens_at', 'closes_at', 'quota', 'first_bib']),
+            'theme' => self::texts($section('theme'), ['accent', 'logo', 'referee_names', 'participant_names']),
             'scoring' => self::texts($section('scoring'), ['max_score', 'floor', 'foul_score', 'dnf_score'])
                 + ['tie_breakers' => array_map(self::text(...), \is_array($section('scoring')['tie_breakers'] ?? null) ? $section('scoring')['tie_breakers'] : [])],
             'import' => self::texts(\is_array($section('import')['columns'] ?? null) ? $section('import')['columns'] : [], self::IMPORT_FIELDS),
@@ -142,6 +143,19 @@ final class ConfigForms
                     $groups[trim($group)] = array_values(array_filter(array_map('trim', explode(',', $levels)), static fn(string $l): bool => $l !== ''));
                 }
                 $data['level_groups'] = $groups;
+                break;
+
+            case 'theme':
+                $theme = \is_array($data['theme'] ?? null) ? $data['theme'] : [];
+                self::put($theme, 'accent', strtolower($field('accent')));
+                foreach (['referee_names', 'participant_names'] as $key) {
+                    self::put($theme, $key, $field($key) === 'full' ? 'full' : '');
+                }
+                if ($theme === []) {
+                    unset($data['theme']);
+                } else {
+                    $data['theme'] = $theme;
+                }
                 break;
 
             case 'registration':
