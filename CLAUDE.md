@@ -39,5 +39,5 @@ Stable rules for working on this repository. Current status and next steps live 
 - PDF checks: `pdftotext -layout`, `pdftoppm -png`. Sample data through the test WebClient: POST `/admin/test-data` with `confirmation=EFFACER`, `with_results=1`. Rankings: `/results?category=CE1-girl`.
 - Screenshots: render with the WebClient, write the page temporarily into `public/`, open it with Playwright via `file://`, then delete it.
 - Tests: `WebClient->clock` (ShiftedClock) moves time; `WebClient::post` accepts nested fields; `WebClient->mailTransport` (`'smtp'` default, `'log'`). Don't use `@example.org` when a test expects a send through `SmtpMailer` (fictitious domains are skipped with `MailSkipped`).
-- The test site (https://test-olympiades.usepcoteau.fr, deployed on push to `feat/**`, `fix/**`, `test`) is unreachable from the sandbox: rely on the deploy job.
+- The test site (deployed on push to `feat/**`, `fix/**`, `test`) is unreachable from the sandbox: rely on the deploy job.
 - PRs: `gh api repos/Skitourer/LiveScoreTracker/pulls --input file.json`; CI: `gh api repos/Skitourer/LiveScoreTracker/commits/<sha>/check-runs`. API 503 "Session policy temporarily unavailable": retry. Push refused by the proxy (403): add the repo with push access, then push again.
