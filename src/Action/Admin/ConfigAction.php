@@ -12,9 +12,9 @@ use LiveScoreTracker\Domain\Config\CompetitionConfig;
 use LiveScoreTracker\Domain\Config\ConfigDiff;
 use LiveScoreTracker\Domain\Config\ConfigError;
 use LiveScoreTracker\Domain\Config\InvalidConfig;
-use LiveScoreTracker\Domain\Security\Phase;
 use LiveScoreTracker\Domain\Registration\Registration;
 use LiveScoreTracker\Domain\Results\ConfigImpact;
+use LiveScoreTracker\Domain\Security\Phase;
 use LiveScoreTracker\Infrastructure\Clock;
 use LiveScoreTracker\Infrastructure\Config\ConfigStore;
 use LiveScoreTracker\Infrastructure\I18n\Translator;
@@ -502,6 +502,7 @@ final class ConfigAction
             'back' => $back,
             'impact' => $impact,
             'child_count' => ConfigImpact::childCount($impact),
+            'error_list' => [],
             'divisions' => $divisions,
             'changes' => $changes,
             'uses_example' => $this->store->usesExample(),

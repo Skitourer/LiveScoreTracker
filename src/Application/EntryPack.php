@@ -88,18 +88,17 @@ final class EntryPack
             }
             $variantId = $levels[$child->child->level] ?? null;
             $own = array_values(array_filter($byChild[$child->id] ?? [], static fn(StoredAttempt $a): bool => $a->variantId === $variantId));
-            if ($variantId !== null) {
-                // Only the first allowed attempts count (spec § 10.4).
-                $own = (new AttemptProgress($this->config->variant($variantId), $own))->retained();
-            }
+            // Only the first allowed attempts count (spec § 10.4); the others are shown but excluded.
+            $kept = $variantId === null ? \count($own) : \count((new AttemptProgress($this->config->variant($variantId), $own))->retained());
             $attempts = [];
-            foreach ($own as $attempt) {
+            foreach ($own as $i => $attempt) {
                 $attempts[] = [
                     'm' => $attempt->measured,
                     'r' => $attempt->result(),
                     'at' => (int) strtotime($attempt->enteredAt . ' UTC'),
                     // "To check" and not verified yet (follow-up list).
                     'k' => $attempt->isFlagged() && !$attempt->isChecked(),
+                    'x' => $i >= $kept,
                 ];
             }
             $children[] = [

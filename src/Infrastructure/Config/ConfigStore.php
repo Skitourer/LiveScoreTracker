@@ -6,6 +6,7 @@ namespace LiveScoreTracker\Infrastructure\Config;
 
 use DateTimeImmutable;
 use Internal\Toml\Toml;
+use LiveScoreTracker\Domain\Config\CompetitionConfig;
 use LiveScoreTracker\Domain\Config\ConfigError;
 use LiveScoreTracker\Domain\Config\ConfigParser;
 use LiveScoreTracker\Domain\Config\InvalidConfig;

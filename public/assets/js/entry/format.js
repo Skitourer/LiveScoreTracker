@@ -41,9 +41,10 @@ export const formatResult = (value, variant, tx) => {
   return tx('unit.points', { value });
 };
 
-/** Attempts used: a foul counts only in strict mode. */
+/** Attempts used: a foul counts only in strict mode; excluded attempts (spec § 10.4) never do. */
 export const usedAttempts = (variant, attempts) =>
-  attempts.filter((attempt) => attempt.m !== null || variant.foulMode === 'strict').length;
+  attempts.filter((attempt) => !attempt.x && (attempt.m !== null || variant.foulMode === 'strict'))
+    .length;
 
 export const bestResult = (variant, attempts) => {
   let best = null;
@@ -51,6 +52,7 @@ export const bestResult = (variant, attempts) => {
     const result = attempt.r;
     if (
       result !== null &&
+      !attempt.x &&
       (best === null || (variant.better === 'lower' ? result < best : result > best))
     ) {
       best = result;

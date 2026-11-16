@@ -621,7 +621,7 @@ export const initEntryApp = () => {
     if (!pack.alert) {
       return '';
     }
-    let seen = 0;
+    let seen;
     try {
       seen = Number(localStorage.getItem(alertKey) ?? 0);
     } catch {
