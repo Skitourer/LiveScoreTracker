@@ -26,6 +26,7 @@ phone_invalid = "电话号码无效：“{value}”（以 0 开头的 10 位数�
 phone_format = "以 0 开头的 10 位数字，或国际格式（+33 6…）"
 email_format = "完整的电子邮箱地址，例如 prenom.nom@example.com"
 email_invalid = "电子邮箱地址无效：“{value}”。"
+email_domain = "电子邮箱地址无效：域名“{domain}”无法接收邮件。请检查拼写。"
 age_unusual = "该出生日期对于 {level} 年级的孩子不常见（通常出生于 {year} 年）。"
 
 [registration.field]

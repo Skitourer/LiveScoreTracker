@@ -11,6 +11,7 @@ use LiveScoreTracker\Domain\Registration\RegistrationStatus;
 use LiveScoreTracker\Domain\Security\Phase;
 use LiveScoreTracker\Http\RequestContext;
 use LiveScoreTracker\Infrastructure\I18n\Translator;
+use LiveScoreTracker\Infrastructure\Mail\LinkBase;
 use LiveScoreTracker\Infrastructure\Mail\Mailer;
 use LiveScoreTracker\Infrastructure\Mail\MailFailed;
 use LiveScoreTracker\Infrastructure\Mail\MailSkipped;
@@ -116,6 +117,17 @@ final class RegistrationMailer
         }
     }
 
+    /** See Mailer::beginBatch(). */
+    public function beginBatch(): void
+    {
+        $this->mailer->beginBatch();
+    }
+
+    public function endBatch(): void
+    {
+        $this->mailer->endBatch();
+    }
+
     /**
      * @param array<string, string> $extra
      */
@@ -145,13 +157,13 @@ final class RegistrationMailer
             if ($index === 0) {
                 $subject = $this->translator->transIn($locale, $key . '.subject', $params);
             } else {
-                $parts[] = "———————\n" . $this->translator->transIn('fr', 'email.common.french_version') . "\n";
+                $parts[] = $this->translator->transIn('fr', 'email.common.french_version') . "\n";
             }
             $parts[] = self::tidy($this->translator->transIn($locale, $key . '.body', $params));
         }
 
         try {
-            $this->mailer->send($registration->child->guardianEmail, $subject, implode("\n", $parts));
+            $this->mailer->send($registration->child->guardianEmail, $subject, implode("\n", $parts), $this->config->edition->contactEmail);
             $this->lastError = null;
             $this->lastSkipped = false;
 
@@ -194,7 +206,7 @@ final class RegistrationMailer
 
     private function url(string $path): string
     {
-        return ($this->settings->appUrl !== '' ? $this->settings->appUrl : $this->context->baseUrl) . $path;
+        return LinkBase::of($this->settings->appUrl, $this->context->baseUrl) . $path;
     }
 
     /**

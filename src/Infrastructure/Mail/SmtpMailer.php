@@ -14,18 +14,48 @@ use PHPMailer\PHPMailer\SMTP;
  */
 final class SmtpMailer implements Mailer
 {
-    public function __construct(private readonly Settings $settings) {}
+    /** Open connection during a batch, reused from one email to the next. */
+    private ?PHPMailer $batch = null;
 
-    public function send(string $to, string $subject, string $body): void
+    private bool $batchSent = false;
+
+    /**
+     * @param int $batchPauseMicroseconds pause between two emails of a batch
+     */
+    public function __construct(
+        private readonly Settings $settings,
+        private readonly int $batchPauseMicroseconds = 500_000,
+    ) {}
+
+    public function send(string $to, string $subject, string $body, ?string $replyTo = null): void
     {
         if (self::isFictitious($to)) {
             throw new MailSkipped('Fictitious address (reserved example domain): nothing sent.');
         }
+        if ($this->batch !== null) {
+            if ($this->batchSent && $this->batchPauseMicroseconds > 0) {
+                usleep($this->batchPauseMicroseconds);
+            }
+            $this->batchSent = true;
+        }
         try {
-            $this->message($to, $subject, $body)->send();
+            $this->message($to, $subject, $body, $replyTo)->send();
         } catch (PHPMailerException $exception) {
             throw new MailFailed($exception->getMessage(), 0, $exception);
         }
+    }
+
+    public function beginBatch(): void
+    {
+        $this->batch = new PHPMailer(true);
+        $this->batch->SMTPKeepAlive = true;
+        $this->batchSent = false;
+    }
+
+    public function endBatch(): void
+    {
+        $this->batch?->smtpClose();
+        $this->batch = null;
     }
 
     /**
@@ -35,7 +65,7 @@ final class SmtpMailer implements Mailer
      */
     public static function isFictitious(string $address): bool
     {
-        $domain = strtolower(trim(substr((string) strrchr($address, '@'), 1), '. '));
+        $domain = self::domainOf($address);
 
         return preg_match('/(^|\.)(example\.(com|org|net)|example|test|invalid|localhost)$/', $domain) === 1;
     }
@@ -89,10 +119,22 @@ final class SmtpMailer implements Mailer
         return null;
     }
 
-    private function message(string $to, string $subject, string $body): PHPMailer
+    /**
+     * Domain of an address, for the Message-ID: the sender's domain rather than
+     * the name of the hosting's server, which antispam filters find suspicious.
+     */
+    public static function domainOf(string $address): string
     {
-        $mail = new PHPMailer(true);
+        return strtolower(trim(substr((string) strrchr($address, '@'), 1), '. '));
+    }
+
+    private function message(string $to, string $subject, string $body, ?string $replyTo = null): PHPMailer
+    {
+        $mail = $this->batch ?? new PHPMailer(true);
         try {
+            $mail->clearAllRecipients();
+            $mail->clearReplyTos();
+            $mail->clearCustomHeaders();
             $mail->isSMTP();
             $mail->Host = $this->settings->mailHost;
             $mail->Port = $this->settings->mailPort;
@@ -102,7 +144,14 @@ final class SmtpMailer implements Mailer
             $mail->SMTPSecure = $this->settings->mailEncryption === 'tls' ? PHPMailer::ENCRYPTION_STARTTLS : PHPMailer::ENCRYPTION_SMTPS;
             $mail->CharSet = PHPMailer::CHARSET_UTF8;
             $mail->Timeout = 15;
-            $mail->setFrom($this->settings->mailFrom, $this->settings->mailFromName);
+            // Envelope sender = From address (no bounce to the server's own account).
+            $mail->setFrom($this->settings->mailFrom, $this->settings->mailFromName, true);
+            $domain = self::domainOf($this->settings->mailFrom);
+            $mail->MessageID = $domain !== '' ? \sprintf('<%s@%s>', bin2hex(random_bytes(16)), $domain) : '';
+            $mail->addCustomHeader('Auto-Submitted', 'auto-generated');
+            if ($replyTo !== null && $replyTo !== '' && strcasecmp($replyTo, $this->settings->mailFrom) !== 0) {
+                $mail->addReplyTo($replyTo);
+            }
             $mail->addAddress($to);
             $mail->Subject = $subject;
             $mail->Body = $body;

@@ -26,6 +26,7 @@ phone_invalid = "رقم هاتف غير صحيح: «{value}» (10 أرقام ت�
 phone_format = "10 أرقام تبدأ بـ 0، أو الصيغة الدولية (‎+33 6…)"
 email_format = "عنوان بريد إلكتروني كامل، مثل prenom.nom@example.com"
 email_invalid = "عنوان بريد إلكتروني غير صحيح: «{value}»."
+email_domain = "عنوان بريد إلكتروني غير صحيح: النطاق «{domain}» لا يستقبل الرسائل. يرجى التحقق من الكتابة."
 age_unusual = "تاريخ ميلاد غير معتاد لطفل في قسم {level} (يولد عادة سنة {year})."
 
 [registration.field]

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace LiveScoreTracker\Tests\Integration;
 
+use LiveScoreTracker\Domain\Registration\MailDomains;
 use LiveScoreTracker\Infrastructure\Clock;
 use LiveScoreTracker\Infrastructure\Database\ConnectionFactory;
 use LiveScoreTracker\Infrastructure\Database\Migrator;
@@ -11,6 +12,7 @@ use LiveScoreTracker\Infrastructure\Mail\LogMailer;
 use LiveScoreTracker\Infrastructure\Mail\Mailer;
 use LiveScoreTracker\Infrastructure\Settings;
 use LiveScoreTracker\Kernel;
+use LiveScoreTracker\Tests\Support\FakeMailDomains;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\UploadedFileInterface;
 use Slim\Psr7\Factory\ServerRequestFactory;
@@ -29,6 +31,8 @@ final class WebClient
     public array $cookies = [];
     public LogMailer $mailer;
 
+    public FakeMailDomains $mailDomains;
+
     /** 'smtp' (default: emails are captured as if sent) or 'log'. */
     public string $mailTransport = 'smtp';
     /** Shared clock that tests may move forward (min. filling time, 48 h links). */
@@ -42,6 +46,7 @@ final class WebClient
         private readonly string $environment = 'test',
     ) {
         $this->mailer = new LogMailer(null);
+        $this->mailDomains = new FakeMailDomains();
         $this->clock = new ShiftedClock();
     }
 
@@ -60,6 +65,7 @@ final class WebClient
     {
         $other = new self($this->dataDir, $this->environment);
         $other->mailer = $this->mailer;
+        $other->mailDomains = $this->mailDomains;
         $other->clock = $this->clock;
 
         return $other;
@@ -155,7 +161,7 @@ final class WebClient
                 ->withHeader('Content-Type', $files === [] ? 'application/x-www-form-urlencoded' : 'multipart/form-data; boundary=test');
         }
 
-        $response = Kernel::createApp($this->settings(), [Mailer::class => $this->mailer, Clock::class => $this->clock])->handle($request);
+        $response = Kernel::createApp($this->settings(), [Mailer::class => $this->mailer, Clock::class => $this->clock, MailDomains::class => $this->mailDomains])->handle($request);
 
         foreach ($response->getHeader('Set-Cookie') as $header) {
             $parts = explode(';', $header);

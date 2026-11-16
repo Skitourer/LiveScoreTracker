@@ -23,6 +23,7 @@
             <li class="error">{{ t('home.config_error') }}</li>
         {% endif %}
         <li class="{{ mailDelivers ? 'ok' : 'warning' }}">{{ mailDelivers ? t('home.mail_smtp') : t('home.mail_log') }}</li>
+        <li class="{{ appUrl == 'ok' ? 'ok' : 'warning' }}">{{ t('home.app_url_' ~ appUrl) }}</li>
     </ul>
 
     {% if can('manage_configuration') %}
