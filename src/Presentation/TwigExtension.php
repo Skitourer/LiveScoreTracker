@@ -4,14 +4,21 @@ declare(strict_types=1);
 
 namespace LiveScoreTracker\Presentation;
 
+use Closure;
 use LiveScoreTracker\Domain\Config\Category;
+use LiveScoreTracker\Domain\Config\CompetitionConfig;
+use LiveScoreTracker\Domain\Config\Theme;
 use LiveScoreTracker\Domain\Config\TieBreaker;
 use LiveScoreTracker\Domain\Config\Variant;
+use LiveScoreTracker\Domain\Registration\Registration;
 use LiveScoreTracker\Http\Middleware\CsrfMiddleware;
 use LiveScoreTracker\Http\RequestContext;
+use LiveScoreTracker\Infrastructure\Config\Branding;
+use LiveScoreTracker\Infrastructure\Help\MediaStore;
 use LiveScoreTracker\Infrastructure\I18n\Translator;
 use Twig\Extension\AbstractExtension;
 use Twig\Extension\GlobalsInterface;
+use Twig\TwigFilter;
 use Twig\TwigFunction;
 
 /**
@@ -26,6 +33,10 @@ final class TwigExtension extends AbstractExtension implements GlobalsInterface
         private readonly ResultFormatter $formatter,
         private readonly RequestContext $context,
         private readonly string $timezone = 'UTC',
+        /** @var (Closure(): ?CompetitionConfig)|null */
+        private readonly ?Closure $config = null,
+        private readonly ?Branding $branding = null,
+        private readonly ?MediaStore $media = null,
     ) {}
 
     public function getGlobals(): array
@@ -50,8 +61,43 @@ final class TwigExtension extends AbstractExtension implements GlobalsInterface
             new TwigFunction('local_time', $this->localTime(...)),
             new TwigFunction('long_date', $this->longDate(...)),
             new TwigFunction('referee_name', $this->context->refereeName(...)),
+            new TwigFunction('theme', $this->theme(...)),
+            new TwigFunction('contacts', fn(): array => $this->competition()->contacts ?? []),
+            new TwigFunction('logo_data_uri', fn(): ?string => $this->branding?->logoDataUri($this->theme())),
+            new TwigFunction('child_name', fn(Registration $child): string => $child->nameFor($this->theme()->refereeNames)),
+            new TwigFunction('participant_name', fn(Registration $child): string => $child->nameFor($this->theme()->participantNames)),
             new TwigFunction('flashes', fn(): array => $this->context->hasSession() ? $this->context->session()->takeFlashes() : []),
         ];
+    }
+
+    public function getFilters(): array
+    {
+        return [
+            // Images of the edited pages are written "image:plan.png" (spec § 12.3).
+            new TwigFilter('media', static fn(string $html, string $basePath): string => str_replace(['src="image:', 'href="image:'], ['src="' . $basePath . '/media/', 'href="' . $basePath . '/media/'], $html)),
+            // PDF documents: the images are embedded (Dompdf does not fetch URLs).
+            new TwigFilter('media_pdf', $this->mediaPdf(...)),
+        ];
+    }
+
+    private function mediaPdf(string $html): string
+    {
+        return (string) preg_replace_callback('/src="image:([a-z0-9-]+\\.(?:png|jpg|webp))"/', function (array $m): string {
+            $path = $this->media?->path($m[1]);
+            $content = $path === null ? false : file_get_contents($path);
+
+            return $content === false ? 'src=""' : 'src="data:' . Branding::mimeType($path) . ';base64,' . base64_encode($content) . '"';
+        }, $html);
+    }
+
+    public function theme(): Theme
+    {
+        return $this->competition()->theme ?? new Theme();
+    }
+
+    private function competition(): ?CompetitionConfig
+    {
+        return $this->config === null ? null : ($this->config)();
     }
 
     public function categoryLabel(Category $category): string

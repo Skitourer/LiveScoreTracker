@@ -6,12 +6,12 @@
 {% include 'pdf/_style.html.twig' %}
 </head>
 <body>
-<header>{{ edition.name }} — {{ edition.date|date('d/m/Y') }}</header>
+<header>{% set logo = logo_data_uri() %}{% if logo %}<img src="{{ logo }}" alt="" style="height: 7mm; vertical-align: middle; margin-right: 2mm;">{% endif %}{{ edition.name }} — {{ edition.date|date('d/m/Y') }}</header>
 <footer>{{ t('reception_list.printed_at', {at: local_time(printedAt)}) }} · {{ t('reception_list.page') }} <span class="page"></span></footer>
 {% for sheet in sheets %}
     <div{% if not loop.first %} class="break"{% endif %}>
         <h1>{{ t('workshop.' ~ sheet.workshop.id ~ '.name') }}</h1>
-        {% if sheet.help %}{{ sheet.help|raw }}{% else %}<p>{{ t('entry.no_help') }}</p>{% endif %}
+        {% if sheet.help %}{{ sheet.help|media_pdf|raw }}{% else %}<p>{{ t('entry.no_help') }}</p>{% endif %}
         {% if contacts is not empty %}
             <h2>{{ t('entry.contacts') }}</h2>
             <ul>

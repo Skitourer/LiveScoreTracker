@@ -39,7 +39,7 @@ final class ConfigParser
      */
     private function build(array $data): CompetitionConfig
     {
-        $this->allowKeys($data, '', ['edition', 'participants', 'level_groups', 'registration', 'scoring', 'workshops', 'import', 'contacts']);
+        $this->allowKeys($data, '', ['edition', 'participants', 'level_groups', 'registration', 'scoring', 'workshops', 'import', 'contacts', 'theme']);
 
         $edition = $this->edition($this->table($data, 'edition', 'edition', true));
         [$levels, $genders, $schools] = $this->participants($this->table($data, 'participants', 'participants', true));
@@ -49,6 +49,7 @@ final class ConfigParser
         $workshops = $this->workshops($data['workshops'] ?? null, array_keys($levelGroups), $scoring);
         $importColumns = $this->importColumns($this->table($data, 'import', 'import', false));
         $contacts = $this->contacts($data['contacts'] ?? []);
+        $theme = $this->theme($this->table($data, 'theme', 'theme', false));
 
         foreach (array_keys($levelGroups) as $group) {
             if (!$this->groupHasVariant($workshops, $group)) {
@@ -72,6 +73,7 @@ final class ConfigParser
             $importColumns,
             $contacts,
             $this->labels,
+            $theme,
         );
     }
 
@@ -180,6 +182,36 @@ final class ConfigParser
             $closesAt,
             $this->int($t, 'quota', 'registration', 100, 1),
             $this->int($t, 'first_bib', 'registration', 1, 1),
+        );
+    }
+
+    /**
+     * Accent colour, logo and name display (spec § 12.3).
+     *
+     * @param array<mixed> $t
+     */
+    private function theme(array $t): Theme
+    {
+        $this->allowKeys($t, 'theme', ['accent', 'logo', 'referee_names', 'participant_names']);
+        $accent = $this->string($t, 'accent', 'theme', false);
+        if ($accent !== null && !Theme::isColor($accent)) {
+            $this->error('theme.accent', 'color');
+            $accent = null;
+        } elseif ($accent !== null && !Theme::readable($accent)) {
+            $this->error('theme.accent', 'color_contrast', ['ratio' => number_format(Theme::contrast($accent, '#ffffff'), 1)]);
+            $accent = null;
+        }
+        $logo = $this->string($t, 'logo', 'theme', false);
+        if ($logo !== null && preg_match('/^logo\.(png|jpe?g|webp)$/', $logo) !== 1) {
+            $this->error('theme.logo', 'logo_file');
+            $logo = null;
+        }
+
+        return new Theme(
+            $accent === null ? null : strtolower($accent),
+            $logo,
+            $this->enum($t, 'referee_names', 'theme', NameStyle::class, NameStyle::Short) ?? NameStyle::Short,
+            $this->enum($t, 'participant_names', 'theme', NameStyle::class, NameStyle::Short) ?? NameStyle::Short,
         );
     }
 

@@ -1,6 +1,6 @@
 {% extends 'layout.html.twig' %}
 
-{% block title %}{{ child.publicName() }} · {{ t('workshop.' ~ workshop.id ~ '.name') }}{% endblock %}
+{% block title %}{{ child_name(child) }} · {{ t('workshop.' ~ workshop.id ~ '.name') }}{% endblock %}
 
 {% block content %}
     {% include 'entry/_nav.html.twig' %}
@@ -8,7 +8,7 @@
 
     <div class="check-in-child">
         <span class="bib">{{ child.bib }}</span>
-        <p class="check-in-first-name">{{ child.publicName() }}</p>
+        <p class="check-in-first-name">{{ child_name(child) }}</p>
         <p>{{ label('level.' ~ child.child.level) }} → <strong>{{ event_label(variant) }}</strong></p>
         <p class="entry-attempt">
             {% if progress.isFinished() %}<span class="badge muted">{{ t('entry.attempts_finished', {of: variant.attempts}) }}</span>
@@ -21,7 +21,7 @@
         <div class="notice warning">
             {{ t('entry.warning.not_present') }}
             {% if open %}
-                <form method="post" class="inline" data-confirm="{{ t('entry.confirm_present', {name: child.publicName()}) }}">
+                <form method="post" class="inline" data-confirm="{{ t('entry.confirm_present', {name: child_name(child)}) }}">
                     {{ csrf_field() }}
                     <input type="hidden" name="op" value="mark_present">
                     <button type="submit" class="button small secondary">{{ t('entry.mark_present') }}</button>
@@ -86,7 +86,7 @@
 
     <h2>{{ t('entry.attempts') }}</h2>
     {% if can_clear %}
-        <form method="post" class="inline" data-confirm="{{ t('entry.confirm_clear', {name: child.publicName(), event: event_label(variant)}) }}">
+        <form method="post" class="inline" data-confirm="{{ t('entry.confirm_clear', {name: child_name(child), event: event_label(variant)}) }}">
             {{ csrf_field() }}
             <input type="hidden" name="op" value="clear">
             <button type="submit" class="button small danger">{{ t('entry.clear') }}</button>

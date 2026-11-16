@@ -1,0 +1,10 @@
+{# Contacts block (spec § 12.3): numbers can be tapped on a phone. #}
+{% set list = contacts() %}
+{% if list is not empty %}
+    <h2>{{ t('entry.contacts') }}</h2>
+    <ul class="contacts">
+        {% for contact in list %}
+            <li><strong>{{ t('contact.' ~ contact.role) }}</strong> : {{ contact.name }} — <a class="button small secondary" href="tel:{{ contact.phone|replace({' ': ''}) }}">{{ contact.phone }}</a></li>
+        {% endfor %}
+    </ul>
+{% endif %}

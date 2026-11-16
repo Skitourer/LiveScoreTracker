@@ -33,6 +33,7 @@ final class CompetitionConfig
         public readonly array $importColumns = [],
         public readonly array $contacts = [],
         public readonly array $labels = [],
+        public readonly Theme $theme = new Theme(),
     ) {}
 
     /**

@@ -6,7 +6,7 @@
 {% include 'pdf/_style.html.twig' %}
 </head>
 <body>
-<header>{{ edition.name }} — {{ edition.date|date('d/m/Y') }}{% if not closed %}<span class="provisional">{{ t('documents.provisional') }}</span>{% endif %}</header>
+<header>{% set logo = logo_data_uri() %}{% if logo %}<img src="{{ logo }}" alt="" style="height: 7mm; vertical-align: middle; margin-right: 2mm;">{% endif %}{{ edition.name }} — {{ edition.date|date('d/m/Y') }}{% if not closed %}<span class="provisional">{{ t('documents.provisional') }}</span>{% endif %}</header>
 <footer>{{ t('documents.state_at', {at: local_time(printedAt)}) }} · {{ t('reception_list.page') }} <span class="page"></span></footer>
 {% for category in categories %}
     <div{% if not loop.first %} class="break"{% endif %}>

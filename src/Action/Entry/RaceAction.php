@@ -6,6 +6,7 @@ namespace LiveScoreTracker\Action\Entry;
 
 use LiveScoreTracker\Action\Support\Responder;
 use LiveScoreTracker\Application\EntryDesk;
+use LiveScoreTracker\Domain\Config\CompetitionConfig;
 use LiveScoreTracker\Domain\Config\Measure;
 use LiveScoreTracker\Domain\Config\Variant;
 use LiveScoreTracker\Domain\Config\Workshop;
@@ -46,6 +47,7 @@ final class RaceAction
         private readonly AttemptRepository $attempts,
         private readonly ResultFormatter $formatter,
         private readonly Clock $clock,
+        private readonly CompetitionConfig $config,
     ) {}
 
     /**
@@ -224,7 +226,7 @@ final class RaceAction
             EntryFields::timerDetails($form['timed'], $measured),
         );
         $this->responder->flash($warnings === [] ? 'success' : 'warning', $measured === null ? 'entry.recorded_foul' : 'entry.recorded', [
-            'name' => $child->publicName(),
+            'name' => $child->nameFor($this->config->theme->refereeNames),
             'bib' => (string) $child->bib,
             'result' => $measured === null ? '' : $this->formatter->format(max(0, $measured + $total), $variant),
             'number' => $progress->nextNumber(),

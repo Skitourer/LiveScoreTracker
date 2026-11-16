@@ -6,6 +6,7 @@ namespace LiveScoreTracker\Action\Entry;
 
 use LiveScoreTracker\Action\Support\Responder;
 use LiveScoreTracker\Application\EntryDesk;
+use LiveScoreTracker\Domain\Config\CompetitionConfig;
 use LiveScoreTracker\Domain\Config\Measure;
 use LiveScoreTracker\Domain\Config\Variant;
 use LiveScoreTracker\Domain\Measurement\EntryParser;
@@ -47,6 +48,7 @@ final class EntryChildAction
         private readonly RegistrationRepository $registrations,
         private readonly ResultFormatter $formatter,
         private readonly Clock $clock,
+        private readonly CompetitionConfig $config,
     ) {}
 
     /**
@@ -86,7 +88,7 @@ final class EntryChildAction
             }
             if ($op === 'mark_present') {
                 $this->registrations->setAttendance($child->id, AttendanceMark::CheckedIn, true, $this->responder->context->user);
-                $this->responder->flash('success', 'entry.marked_present', ['name' => $child->publicName()]);
+                $this->responder->flash('success', 'entry.marked_present', ['name' => $child->nameFor($this->config->theme->refereeNames)]);
 
                 return $this->responder->redirect($response, $self);
             }
@@ -96,14 +98,14 @@ final class EntryChildAction
                     $this->attempts->delete($attempt, Author::from($this->responder->context));
                 }
                 $this->responder->audit('results.cleared', ['bib' => $child->bib, 'event' => $variant->id(), 'count' => \count($progress->attempts)]);
-                $this->responder->flash('warning', 'entry.cleared', ['name' => $child->publicName(), 'count' => \count($progress->attempts)]);
+                $this->responder->flash('warning', 'entry.cleared', ['name' => $child->nameFor($this->config->theme->refereeNames), 'count' => \count($progress->attempts)]);
 
                 return $this->responder->redirect($response, $self);
             }
             $target = $this->editable($progress, (int) Responder::field($request, 'attempt_id'));
             if ($op === 'delete' && $target !== null) {
                 $this->attempts->delete($target, Author::from($this->responder->context));
-                $this->responder->flash('warning', 'entry.deleted', ['name' => $child->publicName()]);
+                $this->responder->flash('warning', 'entry.deleted', ['name' => $child->nameFor($this->config->theme->refereeNames)]);
 
                 return $this->responder->redirect($response, $self);
             }
@@ -191,7 +193,7 @@ final class EntryChildAction
     ): ResponseInterface {
         $author = Author::from($this->responder->context);
         $result = $measured === null ? null : $this->formatter->format(max(0, $measured + $total), $variant);
-        $params = ['name' => $child->publicName(), 'bib' => (string) $child->bib, 'result' => $result ?? '', 'number' => $progress->nextNumber(), 'of' => $variant->attempts];
+        $params = ['name' => $child->nameFor($this->config->theme->refereeNames), 'bib' => (string) $child->bib, 'result' => $result ?? '', 'number' => $progress->nextNumber(), 'of' => $variant->attempts];
         if ($correcting !== null) {
             $this->attempts->correct($correcting, $entryId, $measured, $modifiers, $total, $warnings, $author, $details);
             $this->responder->flash('success', $measured === null ? 'entry.corrected_foul' : 'entry.corrected', $params);

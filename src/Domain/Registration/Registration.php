@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace LiveScoreTracker\Domain\Registration;
 
+use LiveScoreTracker\Domain\Config\NameStyle;
+
 /**
  * A registered child, as stored.
  */
@@ -56,6 +58,14 @@ final class Registration
     public function publicName(): string
     {
         return $this->child->firstName . ' ' . mb_substr($this->child->lastName, 0, 1) . '.';
+    }
+
+    /**
+     * Name as set for referees or the participant area (spec § 12.3).
+     */
+    public function nameFor(NameStyle $style): string
+    {
+        return $style === NameStyle::Full ? $this->fullName() : $this->publicName();
     }
 
     public function fullName(): string

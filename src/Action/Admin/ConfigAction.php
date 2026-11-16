@@ -16,12 +16,14 @@ use LiveScoreTracker\Domain\Registration\Registration;
 use LiveScoreTracker\Domain\Results\ConfigImpact;
 use LiveScoreTracker\Domain\Security\Phase;
 use LiveScoreTracker\Infrastructure\Clock;
+use LiveScoreTracker\Infrastructure\Config\Branding;
 use LiveScoreTracker\Infrastructure\Config\ConfigStore;
 use LiveScoreTracker\Infrastructure\I18n\Translator;
 use LiveScoreTracker\Infrastructure\Persistence\AttemptRepository;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UploadedFileInterface;
+use RuntimeException;
 use Slim\Exception\HttpNotFoundException;
 use Throwable;
 
@@ -45,6 +47,7 @@ final class ConfigAction
         private readonly Translator $translator,
         private readonly ConfigGuard $guard,
         private readonly Clock $clock,
+        private readonly Branding $branding,
     ) {}
 
     /**
@@ -77,6 +80,7 @@ final class ConfigAction
                 $workshop !== null => $this->saveWorkshop($request, $response, $workshop, $form),
                 $tab === 'workshops' => $this->workshopListAction($response, $form),
                 $tab === 'file' => $this->fileAction($request, $response, $form),
+                $tab === 'theme' && \in_array($form['op'] ?? null, ['logo', 'logo_remove'], true) => $this->logoAction($request, $response, $form),
                 default => $this->saveTab($response, $tab, $form),
             };
         }
@@ -352,6 +356,46 @@ final class ConfigAction
         $this->audited($before, $this->store->data(), 'file', \is_string($form['source'] ?? null) ? $form['source'] : $op);
 
         return $this->responder->redirect($response, '/admin/config/file');
+    }
+
+    /**
+     * Upload or remove the logo (spec § 12.3): the file is checked, then its name goes into [theme].
+     *
+     * @param array<mixed> $form
+     */
+    private function logoAction(ServerRequestInterface $request, ResponseInterface $response, array $form): ResponseInterface
+    {
+        $before = $this->store->data();
+        $after = $before;
+        $theme = \is_array($after['theme'] ?? null) ? $after['theme'] : [];
+        if (($form['op'] ?? null) === 'logo_remove') {
+            $this->branding->removeLogo();
+            unset($theme['logo']);
+        } else {
+            $file = $request->getUploadedFiles()['logo'] ?? null;
+            try {
+                if (!$file instanceof UploadedFileInterface || $file->getError() !== UPLOAD_ERR_OK) {
+                    throw new RuntimeException('config.theme.logo_too_big');
+                }
+                $theme['logo'] = $this->branding->saveLogo((string) $file->getStream());
+            } catch (RuntimeException $exception) {
+                $this->responder->flash('error', $exception->getMessage());
+
+                return $this->responder->redirect($response, '/admin/config/theme');
+            }
+        }
+        if ($theme === []) {
+            unset($after['theme']);
+        } else {
+            $after['theme'] = $theme;
+        }
+        try {
+            $this->save($response, $before, $after, 'theme', '/admin/config/theme');
+        } catch (InvalidConfig $exception) {
+            return $this->renderTab($response, 'theme', ConfigForms::values('theme', $after), $exception->issues, 422);
+        }
+
+        return $this->responder->redirect($response, '/admin/config/theme');
     }
 
     private function uploaded(ServerRequestInterface $request): string

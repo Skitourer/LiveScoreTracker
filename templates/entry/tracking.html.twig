@@ -42,10 +42,10 @@
                     {% for row in rows %}
                         {% set child = row.child %}
                         <tr>
-                            {% if race %}<td>{% if not row.finished %}<input type="checkbox" name="bibs[]" value="{{ child.bib }}" aria-label="{{ child.publicName() }}">{% endif %}</td>{% endif %}
+                            {% if race %}<td>{% if not row.finished %}<input type="checkbox" name="bibs[]" value="{{ child.bib }}" aria-label="{{ child_name(child) }}">{% endif %}</td>{% endif %}
                             <td class="num"><a href="{{ url_for('entry-child', {workshop: workshop.id, bib: child.bib}) }}"><span class="bib">{{ child.bib }}</span></a></td>
                             <td>
-                                <a href="{{ url_for('entry-child', {workshop: workshop.id, bib: child.bib}) }}">{{ child.publicName() }}</a>
+                                <a href="{{ url_for('entry-child', {workshop: workshop.id, bib: child.bib}) }}">{{ child_name(child) }}</a>
                                 {% if not child.isPresent() %}<span class="badge muted">{{ t('entry.not_checked_in') }}</span>{% endif %}
                                 {% if row.to_check %}<span class="badge warning">{{ t('entry.to_check') }}</span>{% endif %}
                             </td>

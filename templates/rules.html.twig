@@ -6,5 +6,5 @@
     {% if languages is defined %}{% include 'signup/_languages.html.twig' with {page: '/reglement'} %}{% endif %}
     <p><a href="{{ url_for('home') }}">← {{ t('public.back_home') }}</a></p>
     <h1>{{ t('public.rules') }}</h1>
-    <article class="help-page">{{ rules|raw }}</article>
+    <article class="help-page">{{ rules|media(base_path())|replace({'<p>[contacts]</p>': include('partials/contacts.html.twig')})|raw }}</article>
 {% endblock %}

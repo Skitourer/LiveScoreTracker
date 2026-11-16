@@ -49,11 +49,12 @@
         </div>
 
         <h2>{{ t('participant.ranking', {category: category_label(category)}) }}</h2>
+        {% if theme().participantNames.value == 'full' %}<p class="meta">{{ t('participant.full_names_notice') }}</p>{% endif %}
         <ol class="participant-ranking">
             {% for other in standings.ranking|filter(l => l.present) %}
                 {% set registration = standings.children[other.bib] %}
                 <li value="{{ other.rank }}"{% if other.bib == child.bib ~ '' %} class="me"{% endif %}>
-                    {{ registration.publicName() }} · {{ t('participant.points', {total: other.total}) }}
+                    {{ participant_name(registration) }} · {{ t('participant.points', {total: other.total}) }}
                 </li>
             {% endfor %}
         </ol>

@@ -33,7 +33,7 @@
             {% if rules_html %}
                 <details class="signup-rules">
                     <summary>{{ t('signup.rules_link') }}</summary>
-                    <article class="help-page">{{ rules_html|raw }}</article>
+                    <article class="help-page">{{ rules_html|media(base_path())|replace({'<p>[contacts]</p>': include('partials/contacts.html.twig')})|raw }}</article>
                 </details>
             {% endif %}
             <div class="toolbar">
