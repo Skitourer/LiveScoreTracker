@@ -1,5 +1,10 @@
 # LiveScoreTracker
 
+[![CI](https://github.com/Skitourer/LiveScoreTracker/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/Skitourer/LiveScoreTracker/actions/workflows/ci.yml)
+[![Licence : MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![PHP](https://img.shields.io/badge/php-%E2%89%A5%208.2-777bb4.svg)](composer.json)
+[![PHPStan niveau 9](https://img.shields.io/badge/PHPStan-level%209-brightgreen.svg)](phpstan.dist.neon)
+
 *[English version](README.md)*
 
 LiveScoreTracker gère une compétition multisports d'une journée pour les enfants : inscriptions, accueil, saisie des résultats à chaque atelier depuis le téléphone des arbitres (même sans réseau), calcul automatique des points et des classements par série (classe + fille/garçon), contrôles, écrans d'avancement et remise des prix.
