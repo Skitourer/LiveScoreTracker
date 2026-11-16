@@ -33,7 +33,7 @@ Each step of the development plan (specification § 23) is one or more pull requ
 
 ### Fixed
 
-- Entry follow-up (races with several bibs): ticked children stay ticked and listed while searching for the next one; Enter on a search with a single match ticks it.
+- Entry follow-up (races with several bibs): ticked children stay ticked and listed on top while searching for the next one (also after a data refresh); the keyboard "search" key (or Enter) ticks a single match; only the list is redrawn while typing, so the phone keyboard keeps its numeric mode.
 - Configuration errors name the place in words ("Ateliers › Saut en longueur (senior) › Type de mesure") instead of the file path; after a refused save, the page scrolls to the first error or warning and focuses it.
 - Email deliverability, after the hosting's antispam filter blocked legitimate emails: links always in https (`/status` checks APP_URL), `Message-ID` on the sender's domain, `Reply-To` to the edition's contact, `Auto-Submitted` header, plainer separator in bilingual emails; imports send at most 30 confirmation emails, paced over one connection, and name the families left out; addresses whose domain receives no email are refused (warning in imports).
 - Registration forms (child card, new registration, public form) no longer rely on the browser's own checks, which could block saving without any message: the server explains every missing or invalid field, and the page scrolls to the messages (#23).
