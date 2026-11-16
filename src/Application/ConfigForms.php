@@ -19,8 +19,8 @@ final class ConfigForms
     /** Tabs of the screen, in display order. */
     public const TABS = ['edition', 'participants', 'registration', 'scoring', 'workshops', 'import', 'contacts', 'file'];
 
-    /** Tabs that change the events or the categories: frozen once the competition is running (until step 12b). */
-    private const FROZEN_WHILE_RUNNING = ['participants', 'workshops', 'file'];
+    /** The whole file is frozen once the competition is running: the § 10.4 safeguards only apply to the forms. */
+    private const FROZEN_WHILE_RUNNING = ['file'];
 
     public const IMPORT_FIELDS = ['last_name', 'first_name', 'gender', 'level', 'birth_date', 'school', 'guardian_name', 'guardian_phone', 'guardian_email', 'volunteer'];
     public const TIE_BREAKERS = ['first_places', 'top3_places', 'youngest'];
@@ -222,8 +222,8 @@ final class ConfigForms
         }
         $workshop['variants'] = $variants;
 
-        // Key order of the written file: id, name, help, then the variants.
-        return array_merge(array_intersect_key(['id' => null, 'name' => null, 'help' => null], $workshop), $workshop);
+        // Key order of the written file: id, name, help, disabled, then the variants.
+        return array_merge(array_intersect_key(['id' => null, 'name' => null, 'help' => null, 'disabled' => null], $workshop), $workshop);
     }
 
     /**

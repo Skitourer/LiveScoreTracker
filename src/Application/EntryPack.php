@@ -25,6 +25,7 @@ final class EntryPack
 {
     /** Texts used by the entry screens (placeholders such as {number} are filled on the phone). */
     private const TEXTS = [
+        'entry.config_alert', 'entry.config_alert_seen',
         'entry.bib', 'entry.race_bib', 'entry.optional', 'entry.open', 'entry.mode_timer', 'entry.mode_manual',
         'entry.see_bib', 'entry.other_bib', 'entry.other_race', 'entry.see_attempts', 'entry.not_checked_in',
         'entry.different_events', 'entry.time', 'entry.result', 'entry.did_not_finish', 'entry.attempt_number',
@@ -61,6 +62,7 @@ final class EntryPack
         private readonly AttemptRepository $attempts,
         private readonly Translator $translator,
         private readonly ResultFormatter $formatter,
+        private readonly ConfigGuard $guard,
     ) {}
 
     /**
@@ -126,6 +128,8 @@ final class EntryPack
             'phase' => $phase,
             'csrf' => $csrf,
             'generatedAt' => time(),
+            // Time of the last "settings changed" alert for this workshop (spec § 10.4).
+            'alert' => $this->guard->stationAlert($workshop->id),
             'variants' => $variants,
             'levels' => $levels,
             'children' => $children,

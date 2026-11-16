@@ -62,6 +62,8 @@ final class ConfigError
         'required_one_of' => 'is required ({values})',
         'file_unreadable' => 'file not found or not readable',
         'toml_syntax' => 'TOML syntax error: {detail}',
+        'measure_locked' => 'cannot change: this event already has results',
+        'event_has_results' => 'event "{id}" has results: it cannot be removed (deactivate its workshop instead)',
     ];
 
     /**

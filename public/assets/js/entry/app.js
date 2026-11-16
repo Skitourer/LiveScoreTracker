@@ -614,6 +614,25 @@ export const initEntryApp = () => {
     view.innerHTML = helpView({ pack, tx });
   };
 
+  // ---------- Settings changed (spec § 10.4) ----------
+
+  const alertKey = `lst-config-alert-${workshop}`;
+  const alertNotice = () => {
+    if (!pack.alert) {
+      return '';
+    }
+    let seen = 0;
+    try {
+      seen = Number(localStorage.getItem(alertKey) ?? 0);
+    } catch {
+      seen = 0;
+    }
+    if (seen >= pack.alert) {
+      return '';
+    }
+    return `<p class="notice warning">${h(tx('entry.config_alert'))} <button type="button" class="button small secondary" data-alert-seen>${h(tx('entry.config_alert_seen'))}</button></p>`;
+  };
+
   // ---------- Routing ----------
 
   const route = (force = false) => {
@@ -629,7 +648,15 @@ export const initEntryApp = () => {
       return;
     }
     const key = pack.phase === 'finished' ? 'entry.error.finished' : 'entry.error.not_running';
-    phaseNotice.innerHTML = isOpen() ? '' : `<p class="notice">${h(tx(key))}</p>`;
+    phaseNotice.innerHTML = (isOpen() ? '' : `<p class="notice">${h(tx(key))}</p>`) + alertNotice();
+    phaseNotice.querySelector('[data-alert-seen]')?.addEventListener('click', () => {
+      try {
+        localStorage.setItem(alertKey, String(pack.alert));
+      } catch {
+        // Storage unavailable: the banner comes back on the next screen.
+      }
+      route(true);
+    });
     const [screen, ...args] = hash.split('/');
     if (screen === 'tracking') {
       showTracking(TRACKING_TABS.includes(args[0]) ? args[0] : 'todo');

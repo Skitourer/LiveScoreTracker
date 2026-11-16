@@ -79,6 +79,24 @@ final class ConfigStore
     }
 
     /**
+     * The configuration these data would give once written, without saving it.
+     *
+     * @param array<mixed> $data
+     *
+     * @throws InvalidConfig
+     */
+    public static function parse(array $data): CompetitionConfig
+    {
+        $toml = self::encode($data);
+        $errors = self::check($toml);
+        if ($errors !== []) {
+            throw new InvalidConfig($errors);
+        }
+
+        return ConfigParser::parse(Toml::parseToArray($toml));
+    }
+
+    /**
      * Saves decoded data (from the forms); the file is rewritten, so its comments are lost.
      *
      * @param array<mixed> $data
