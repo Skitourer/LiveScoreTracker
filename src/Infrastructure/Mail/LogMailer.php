@@ -9,14 +9,14 @@ namespace LiveScoreTracker\Infrastructure\Mail;
  */
 final class LogMailer implements Mailer
 {
-    /** @var list<array{to: string, subject: string, body: string}> */
+    /** @var list<array{to: string, subject: string, body: string, replyTo: string|null}> */
     public array $sent = [];
 
     public function __construct(private readonly ?string $file) {}
 
-    public function send(string $to, string $subject, string $body): void
+    public function send(string $to, string $subject, string $body, ?string $replyTo = null): void
     {
-        $this->sent[] = ['to' => $to, 'subject' => $subject, 'body' => $body];
+        $this->sent[] = ['to' => $to, 'subject' => $subject, 'body' => $body, 'replyTo' => $replyTo];
         if ($this->file === null) {
             return;
         }
@@ -29,4 +29,8 @@ final class LogMailer implements Mailer
             throw new MailFailed('Cannot write the mail log.');
         }
     }
+
+    public function beginBatch(): void {}
+
+    public function endBatch(): void {}
 }

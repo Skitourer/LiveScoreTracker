@@ -26,6 +26,7 @@ phone_invalid = "Número de teléfono no válido: «{value}» (10 cifras que emp
 phone_format = "10 cifras que empiezan por 0, o formato internacional (+33 6…)"
 email_format = "Dirección de correo completa, por ejemplo nombre.apellido@ejemplo.es"
 email_invalid = "Dirección de correo no válida: «{value}»."
+email_domain = "Dirección de correo no válida: el dominio «{domain}» no recibe correos. Compruebe la ortografía."
 age_unusual = "Fecha de nacimiento poco habitual para un niño de {level} (normalmente nacido en {year})."
 
 [registration.field]

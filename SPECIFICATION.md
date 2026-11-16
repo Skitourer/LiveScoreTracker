@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.27 — 13 November 2026
+> Version 1.28 — 16 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -869,6 +869,8 @@ The **anonymous history** of previous editions remains available (year-over-year
 | Google Drive | Google Drive API (account authorized once by the admin) | Backup copies |
 | Markdown | safe Markdown converter | Help pages |
 | Dependencies | **Composer** | |
+
+**Email deliverability.** Emails are plain text, without attachments, with sober subjects. Links always use https (APP_URL, or the current address rewritten to https; `/status` warns if APP_URL is missing or not in https). Headers: `Message-ID` on the sender's domain, envelope sender = From address, `Reply-To` = the edition's contact for family emails, `Auto-Submitted: auto-generated`. An import sends at most 30 confirmation emails, over one connection with a pause between two emails; the families left out are named so their email can be resent later from their card. An email address whose domain receives no email (no MX nor address record in the DNS) is refused in forms and flagged as a warning in imports; when the DNS cannot be queried, nothing is refused.
 
 ### 20.2 Client (browser)
 

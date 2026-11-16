@@ -1,6 +1,6 @@
 # LiveScoreTracker — Cahier des charges
 
-> Version 1.27 — 13 novembre 2026
+> Version 1.28 — 16 novembre 2026
 > Ce document sert de référence pour le développement, réalisé étape par étape sous la supervision du porteur du projet.
 > Version anglaise : [SPECIFICATION.md](SPECIFICATION.md), tenue à jour en miroir.
 
@@ -870,6 +870,8 @@ L'**historique anonyme** des éditions précédentes reste consultable (comparai
 | Google Drive | API Google Drive (compte autorisé une fois par l'admin) | Copie des sauvegardes |
 | Markdown | convertisseur Markdown sécurisé | Pages d'aide |
 | Dépendances | **Composer** | |
+
+**Délivrabilité des emails.** Les emails sont en texte brut, sans pièce jointe, avec des objets sobres. Les liens sont toujours en https (APP_URL, ou l'adresse consultée réécrite en https ; `/status` avertit si APP_URL est absent ou pas en https). En-têtes : `Message-ID` sur le domaine de l'expéditeur, expéditeur d'enveloppe = adresse From, `Reply-To` = contact de l'édition pour les emails aux familles, `Auto-Submitted: auto-generated`. Un import envoie au plus 30 emails de confirmation, sur une seule connexion avec une pause entre deux emails ; les familles non prévenues sont nommées pour renvoyer leur email plus tard depuis leur fiche. Une adresse email dont le domaine ne reçoit pas d'emails (ni MX ni adresse dans le DNS) est refusée dans les formulaires et signalée en avertissement à l'import ; si le DNS ne répond pas, rien n'est refusé.
 
 ### 20.2 Client (navigateur)
 

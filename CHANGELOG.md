@@ -31,6 +31,7 @@ Each step of the development plan (specification § 23) is one or more pull requ
 
 ### Fixed
 
+- Email deliverability, after the hosting's antispam filter blocked legitimate emails: links always in https (`/status` checks APP_URL), `Message-ID` on the sender's domain, `Reply-To` to the edition's contact, `Auto-Submitted` header, plainer separator in bilingual emails; imports send at most 30 confirmation emails, paced over one connection, and name the families left out; addresses whose domain receives no email are refused (warning in imports).
 - Registration forms (child card, new registration, public form) no longer rely on the browser's own checks, which could block saving without any message: the server explains every missing or invalid field, and the page scrolls to the messages (#23).
 - Confirmation emails: when emails are only written to the mail log (`MAIL_TRANSPORT=log`), the screen no longer says "sent" but warns that sending is not enabled; `/status` shows whether emails are sent by SMTP; the reason of a failed sending is kept in the audit log; new admin page "Test email" (`/admin/mail-test`, linked from `/status`) sending a message and showing the dialogue with the SMTP server, without credentials; emails are never sent to fictitious addresses (domains reserved for examples, such as the test data's `example.org`), and the screen says so (#24).
 - Podium rows of the rankings and of the calculation report were laid out as the ceremony podium (shared CSS class).

@@ -22,12 +22,13 @@ final class ChildValidator
     public function __construct(
         private readonly CompetitionConfig $config,
         private readonly ValueMatcher $matcher,
+        private readonly MailDomains $mailDomains,
     ) {}
 
     /**
      * @param array<string, string> $input        raw values by field name
      * @param bool                  $birthDateRequired false for children added on site (spec § 5.8)
-     * @param bool                  $strictSchool unknown school: error (forms) or warning, value kept (imports)
+     * @param bool                  $strictSchool unknown school or email domain: error (forms) or warning, value kept (imports)
      */
     public function validate(array $input, bool $birthDateRequired = true, bool $strictSchool = true): ValidationResult
     {
@@ -81,6 +82,15 @@ final class ChildValidator
         $email = TextCleaner::email($value('guardian_email'));
         if ($email !== '' && !TextCleaner::isEmail($email)) {
             $errors['registration.email_invalid'] = ['value' => $value('guardian_email')];
+        } elseif ($email !== '') {
+            $domain = substr((string) strrchr($email, '@'), 1);
+            if (!$this->mailDomains->receivesMail($domain)) {
+                if ($strictSchool) {
+                    $errors['registration.email_domain'] = ['domain' => $domain];
+                } else {
+                    $warnings['registration.email_domain'] = ['domain' => $domain];
+                }
+            }
         }
 
         if ($birthDate !== null && $level !== null) {

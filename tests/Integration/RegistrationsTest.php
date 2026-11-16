@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace LiveScoreTracker\Tests\Integration;
 
+use LiveScoreTracker\Action\Registration\RegistrationImportAction;
 use LiveScoreTracker\Demo\ImportSample;
 use LiveScoreTracker\Infrastructure\Config\ConfigRepository;
 use PhpOffice\PhpSpreadsheet\IOFactory;
@@ -234,9 +235,14 @@ final class RegistrationsTest extends TestCase
         self::assertStringContainsString('<strong>1</strong> doublon', $this->admin->lastBody);
 
         $done = $this->admin->post('/registrations/import', ['op' => 'confirm', 'send_emails' => '1']);
-        self::assertCount(40, $this->admin->mailer->sent);
+        // Paced and capped so the hosting's antispam filter does not block them.
+        self::assertCount(RegistrationImportAction::MAX_EMAILS, $this->admin->mailer->sent);
+        self::assertSame('contact@example.org', $this->admin->mailer->sent[0]['replyTo'], 'Answers go to the contact');
+        self::assertStringStartsWith('https://', (string) strstr($this->admin->mailer->sent[0]['body'], 'https://'));
         self::assertSame('/registrations', $done->getHeaderLine('Location'));
         $this->admin->get('/registrations');
+        self::assertStringContainsString('Emails de confirmation limités à 30 par import', $this->admin->lastBody);
+        self::assertStringContainsString('10 famille(s) non prévenue(s)', $this->admin->lastBody);
         self::assertStringContainsString('<strong>41</strong> / 100', $this->admin->lastBody);
         self::assertStringContainsString('40 enfant(s) ajouté(s)', $this->admin->lastBody);
 

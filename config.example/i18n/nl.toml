@@ -26,6 +26,7 @@ phone_invalid = "Ongeldig telefoonnummer: ‘{value}’ (10 cijfers beginnend me
 phone_format = "10 cijfers beginnend met 0, of internationaal formaat (+33 6…)"
 email_format = "Volledig e-mailadres, bijvoorbeeld voornaam.achternaam@voorbeeld.nl"
 email_invalid = "Ongeldig e-mailadres: ‘{value}’."
+email_domain = "Ongeldig e-mailadres: het domein ‘{domain}’ ontvangt geen e-mails. Controleer de spelling."
 age_unusual = "Ongebruikelijke geboortedatum voor een kind in {level} (meestal geboren in {year})."
 
 [registration.field]

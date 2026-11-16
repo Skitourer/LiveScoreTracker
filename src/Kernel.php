@@ -65,6 +65,7 @@ use LiveScoreTracker\Action\StatusAction;
 use LiveScoreTracker\Action\StyleguideAction;
 use LiveScoreTracker\Domain\Config\CompetitionConfig;
 use LiveScoreTracker\Domain\Config\InvalidConfig;
+use LiveScoreTracker\Domain\Registration\MailDomains;
 use LiveScoreTracker\Domain\Registration\ValueMatcher;
 use LiveScoreTracker\Domain\Security\Permission;
 use LiveScoreTracker\Http\AppErrorHandler;
@@ -85,6 +86,7 @@ use LiveScoreTracker\Infrastructure\Database\Migrator;
 use LiveScoreTracker\Infrastructure\Help\HelpPages;
 use LiveScoreTracker\Infrastructure\I18n\CatalogLoader;
 use LiveScoreTracker\Infrastructure\I18n\Translator;
+use LiveScoreTracker\Infrastructure\Mail\DnsMailDomains;
 use LiveScoreTracker\Infrastructure\Mail\LogMailer;
 use LiveScoreTracker\Infrastructure\Mail\Mailer;
 use LiveScoreTracker\Infrastructure\Mail\SmtpMailer;
@@ -272,6 +274,7 @@ final class Kernel
             Mailer::class => static fn(): Mailer => $settings->mailTransport === 'smtp'
                 ? new SmtpMailer($settings)
                 : new LogMailer($settings->dataDir . '/logs/mail.log'),
+            MailDomains::class => static fn(): MailDomains => new DnsMailDomains(),
             ConfigRepository::class => static fn(): ConfigRepository => new ConfigRepository(
                 $settings->dataDir,
                 $settings->rootDir . '/config.example',

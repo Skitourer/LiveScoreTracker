@@ -6,6 +6,7 @@ namespace LiveScoreTracker\Action\Auth;
 
 use LiveScoreTracker\Action\Support\Responder;
 use LiveScoreTracker\Infrastructure\I18n\Translator;
+use LiveScoreTracker\Infrastructure\Mail\LinkBase;
 use LiveScoreTracker\Infrastructure\Mail\Mailer;
 use LiveScoreTracker\Infrastructure\Mail\MailFailed;
 use LiveScoreTracker\Infrastructure\Persistence\PasswordResetRepository;
@@ -70,11 +71,8 @@ final class ForgotPasswordAction
 
     private function baseUrl(ServerRequestInterface $request): string
     {
-        if ($this->settings->appUrl !== '') {
-            return $this->settings->appUrl;
-        }
         $uri = $request->getUri();
 
-        return $uri->getScheme() . '://' . $uri->getAuthority();
+        return LinkBase::of($this->settings->appUrl, $uri->getScheme() . '://' . $uri->getAuthority());
     }
 }

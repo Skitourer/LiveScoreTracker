@@ -9,6 +9,7 @@ use LiveScoreTracker\Domain\Registration\ChildValidator;
 use LiveScoreTracker\Domain\Registration\TextCleaner;
 use LiveScoreTracker\Domain\Registration\ValueMatcher;
 use LiveScoreTracker\Infrastructure\Config\ConfigRepository;
+use LiveScoreTracker\Tests\Support\FakeMailDomains;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
@@ -87,6 +88,16 @@ final class RegistrationRulesTest extends TestCase
         self::assertSame('martin|zoe|cm1', $result->data->matchKey());
     }
 
+    public function testEmailDomainThatReceivesNoMail(): void
+    {
+        $form = self::validator()->validate(self::input(['guardian_email' => 'parent@gmial.com']));
+        self::assertSame(['domain' => 'gmial.com'], $form->errors['registration.email_domain'] ?? null);
+
+        $import = self::validator()->validate(self::input(['guardian_email' => 'parent@gmial.com']), strictSchool: false);
+        self::assertTrue($import->isValid());
+        self::assertArrayHasKey('registration.email_domain', $import->warnings);
+    }
+
     public function testErrorsAndWarnings(): void
     {
         $result = self::validator()->validate(self::input(['first_name' => '', 'gender' => 'x', 'guardian_email' => 'nope', 'school' => 'Elsewhere']));
@@ -136,7 +147,7 @@ final class RegistrationRulesTest extends TestCase
     {
         $config = self::config();
 
-        return new ChildValidator($config, new ValueMatcher($config, ['girl' => ['Fille'], 'boy' => ['Garçon']]));
+        return new ChildValidator($config, new ValueMatcher($config, ['girl' => ['Fille'], 'boy' => ['Garçon']]), new FakeMailDomains());
     }
 
     private static function config(): CompetitionConfig

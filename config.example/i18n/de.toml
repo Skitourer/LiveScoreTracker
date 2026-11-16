@@ -26,6 +26,7 @@ phone_invalid = "Ungültige Telefonnummer: „{value}“ (10 Ziffern, beginnend 
 phone_format = "10 Ziffern, beginnend mit 0, oder internationales Format (+33 6…)"
 email_format = "Vollständige E-Mail-Adresse, zum Beispiel vorname.nachname@beispiel.de"
 email_invalid = "Ungültige E-Mail-Adresse: „{value}“."
+email_domain = "Ungültige E-Mail-Adresse: Die Domain „{domain}“ empfängt keine E-Mails. Bitte die Schreibweise prüfen."
 age_unusual = "Ungewöhnliches Geburtsdatum für ein Kind der Klasse {level} (meist geboren {year})."
 
 [registration.field]

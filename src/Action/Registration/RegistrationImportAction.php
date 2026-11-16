@@ -29,6 +29,9 @@ final class RegistrationImportAction
     private const SESSION_KEY = 'import_plan';
     private const MAX_SIZE = 5 * 1024 * 1024;
 
+    /** Confirmation emails sent by one import: beyond that, a mass mailing for the antispam filter. */
+    public const MAX_EMAILS = 30;
+
     public function __construct(
         private readonly Responder $responder,
         private readonly RegistrationImport $import,
@@ -53,14 +56,32 @@ final class RegistrationImportAction
             $this->responder->flash('success', 'import.done', ['count' => \count($ids)]);
             if (Responder::field($request, 'send_emails') === '1') {
                 $failed = 0;
-                foreach ($ids as $id) {
+                $toSend = \array_slice($ids, 0, self::MAX_EMAILS);
+                @set_time_limit(120);
+                $this->mailer->beginBatch();
+                try {
+                    foreach ($toSend as $id) {
+                        $registration = $this->registrations->find($id);
+                        if ($registration !== null && !$this->mailer->sendConfirmation($registration)) {
+                            ++$failed;
+                        }
+                    }
+                } finally {
+                    $this->mailer->endBatch();
+                }
+                $sent = \count($toSend) - $failed;
+                $unsent = [];
+                foreach (\array_slice($ids, self::MAX_EMAILS) as $id) {
                     $registration = $this->registrations->find($id);
-                    if ($registration !== null && !$this->mailer->sendConfirmation($registration)) {
-                        ++$failed;
+                    if ($registration !== null) {
+                        $unsent[] = $registration->fullName();
                     }
                 }
-                $this->responder->audit('registration.emails_sent', ['sent' => \count($ids) - $failed, 'failed' => $failed]);
-                $this->responder->flash($failed === 0 ? 'success' : 'warning', 'import.emails_sent', ['sent' => \count($ids) - $failed, 'failed' => $failed]);
+                $this->responder->audit('registration.emails_sent', ['sent' => $sent, 'failed' => $failed, 'not_sent' => \count($unsent)]);
+                $this->responder->flash($failed === 0 ? 'success' : 'warning', 'import.emails_sent', ['sent' => $sent, 'failed' => $failed]);
+                if ($unsent !== []) {
+                    $this->responder->flash('warning', 'import.emails_capped', ['max' => self::MAX_EMAILS, 'count' => \count($unsent), 'names' => implode(', ', $unsent)]);
+                }
             }
 
             return $this->responder->redirect($response, '/registrations');

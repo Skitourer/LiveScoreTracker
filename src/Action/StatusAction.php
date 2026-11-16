@@ -35,6 +35,7 @@ final class StatusAction
             'status' => $this->status->check(),
             'config' => $this->configSummary(),
             'mailDelivers' => $this->settings->mailTransport === 'smtp',
+            'appUrl' => $this->settings->appUrl === '' ? 'missing' : (stripos($this->settings->appUrl, 'https://') === 0 ? 'ok' : 'http'),
             'showReport' => !$this->settings->isProduction(),
         ]);
     }

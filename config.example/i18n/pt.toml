@@ -26,6 +26,7 @@ phone_invalid = "Número de telefone inválido: «{value}» (10 algarismos come�
 phone_format = "10 algarismos começados por 0, ou formato internacional (+33 6…)"
 email_format = "Endereço de email completo, por exemplo nome.apelido@exemplo.pt"
 email_invalid = "Endereço de email inválido: «{value}»."
+email_domain = "Endereço de email inválido: o domínio «{domain}» não recebe emails. Verifique a ortografia."
 age_unusual = "Data de nascimento invulgar para uma criança do {level} (normalmente nascida em {year})."
 
 [registration.field]
