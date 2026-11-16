@@ -1,6 +1,6 @@
 # LiveScoreTracker — Specification
 
-> Version 1.29 — 16 November 2026
+> Version 1.30 — 16 November 2026
 > This document is the reference for development, carried out step by step under the supervision of the project owner.
 > English mirror of [CAHIER_DES_CHARGES.md](CAHIER_DES_CHARGES.md) (French). The French version is the reference; both are kept in sync.
 
@@ -663,7 +663,7 @@ A complete example **with fictitious data** is given in **appendix A**.
 
 ### 12.3 Configuration screen (admin)
 
-- Page `/admin/config`, **admins only**, with one tab per part: Edition, Participants (levels, genders, schools, level groups), Registration, Scoring (including the order of the tie-breaking criteria), Workshops, Excel import (column headers), Contacts, File.
+- Page `/admin/config`, **admins only**, with one tab per part: Edition, Participants (levels, genders, schools, level groups), Registration, Scoring (including the order of the tie-breaking criteria), Workshops, Excel import (column headers), Contacts, Contents, Branding, File.
 - Forms to change every setting without editing the file by hand. The screen **reads and writes** `competition.toml`; a rewrite by the forms loses the comments of the file.
 - **Workshops**: add, edit, duplicate, move up/down, delete (refused when the workshop has results). For each variant: group, label, measure, best result, attempts, fouls, plausible range, time format, bibs per race, bonuses/penalties, counter limit and actions. A workshop's identifier cannot change once created.
 - Optional **display names** in the file: `name` of a workshop, a bonus/penalty or a counter action, `label` of a contact. They override the translations in every language (useful for a workshop added from the screen).
@@ -671,6 +671,10 @@ A complete example **with fictitious data** is given in **appendix A**.
 - **History**: every save keeps the previous version (last 20, `config-history/` in the data folder); "Go back to this version" button with a preview of the changes.
 - Export of the file; **import** with a setting-by-setting preview of the changes before applying (to start from a previous edition or share with another organizer); direct edit of the file's text for settings that are not in the forms (checked before saving).
 - Every change is written to the audit log (tab, old and new value of each setting).
+- **Contents** (step 12c): Markdown editor with preview for the home page and the rules (in the 10 languages, optional) and for the help of each workshop (French, English). A text not written in a language shows the one of the default language, then English, then the text shipped with the application; "Back to the default text" clears the written text. Texts go to the data folder (`pages/<lang>/`, `help/<lang>/`; help of a workshop without a `help` key: `<id>.md`). A line `[contacts]` shows the Contacts block (numbers can be tapped).
+- **Images**: PNG, JPEG or WebP, 2 MB at most (type read from the content, no SVG), in `media/` of the data folder; they are inserted with `![description](image:plan.png)` and embedded in the PDFs.
+- **Branding** (`[theme]` section): single accent colour `accent = "#rrggbb"`, refused when its contrast with white or with its text is below 4.5:1 (AA); the dark mode version is computed. PNG, JPEG or WebP logo, 1 MB at most, no SVG (`logo`, file in `branding/`), shown in the top bar, the PDFs and the ceremony screen.
+- **Name display**: `referee_names` (entry screens and workshop pack) and `participant_names` (other children of the division in the participant area), `short` (first name + initial, default) or `full` (full name). With `full`, the participant area shows an information sentence for the families. Email texts cannot be edited from the screen.
 - **By phase**: everything can be changed in "preparation"; in "in progress", participants and workshops can be changed with the § 10.4 safeguards, the whole file (edit, import, going back to a version) is read-only; in "finished", the whole configuration is read-only.
 
 ### 12.4 Translations (i18n)

@@ -217,3 +217,10 @@ phone = "+33 6 00 00 00 01"
 role = "general"
 name = "Paul Garnier"
 phone = "+33 6 00 00 00 02"
+
+# ---------- Habillage (facultatif, modifiable dans l'onglet « Habillage ») ----------
+# [theme]
+# accent = "#1f5fbf"            # couleur d'accent (contraste vérifié)
+# logo = "logo.png"             # envoyé depuis l'écran de configuration
+# referee_names = "short"       # "short" = prénom + initiale, "full" = nom complet
+# participant_names = "short"
