@@ -21,7 +21,7 @@ final class NoInputAutofocusTest extends TestCase
         foreach (['templates', 'public/assets/js'] as $dir) {
             $files = new RecursiveIteratorIterator(new RecursiveDirectoryIterator($root . '/' . $dir));
             foreach ($files as $file) {
-                if (!$file->isFile() || !preg_match('/\.(twig|js)$/', $file->getFilename())) {
+                if (!$file instanceof \SplFileInfo || !$file->isFile() || !preg_match('/\.(twig|js)$/', $file->getFilename())) {
                     continue;
                 }
                 $code = (string) file_get_contents($file->getPathname());
