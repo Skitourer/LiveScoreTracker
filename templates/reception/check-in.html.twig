@@ -13,7 +13,7 @@
 
     <form method="get" class="check-in-search" role="search">
         <label>{{ t('check_in.bib') }}
-            <input type="text" name="q" class="bib-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" {% if query is empty %}autofocus{% endif %} value="{{ query matches '/^[0-9]+$/' ? query : '' }}">
+            <input type="text" name="q" class="bib-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" value="{{ query matches '/^[0-9]+$/' ? query : '' }}">
         </label>
         <button type="submit" class="button">{{ t('check_in.find') }}</button>
     </form>

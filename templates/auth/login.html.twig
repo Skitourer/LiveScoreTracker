@@ -9,7 +9,7 @@
         {{ csrf_field() }}
         <input type="hidden" name="next" value="{{ next }}">
         <label>{{ t('login.username') }}
-            <input type="text" name="username" value="{{ username }}" autocomplete="username" autocapitalize="none" spellcheck="false" required autofocus>
+            <input type="text" name="username" value="{{ username }}" autocomplete="username" autocapitalize="none" spellcheck="false" required>
         </label>
         <label>{{ t('login.password') }}
             <input type="password" name="password" autocomplete="current-password" required>
