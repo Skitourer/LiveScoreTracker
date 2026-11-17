@@ -57,7 +57,7 @@ export const homeView = ({ pack, tx, open, serverChildUrl }) => {
     return `
       <form class="check-in-search entry-bib-form">
         <label>${h(tx('entry.bib'))}
-          <input type="text" name="bib" class="bib-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" required autofocus>
+          <input type="text" name="bib" class="bib-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" required>
         </label>
         <button type="submit" class="button" ${closed}>${h(tx('entry.open'))}</button>
       </form>`;
@@ -67,7 +67,7 @@ export const homeView = ({ pack, tx, open, serverChildUrl }) => {
     const label =
       workshop.bibsPerRace > 1 ? tx('entry.race_bib', { number: slot }) : tx('entry.bib');
     bibs.push(`<label>${h(label)}${slot > 1 ? ` <small>${h(tx('entry.optional'))}</small>` : ''}
-        <input type="text" name="bib${slot}" class="bib-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" ${slot === 1 ? 'required autofocus' : ''}>
+        <input type="text" name="bib${slot}" class="bib-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" ${slot === 1 ? 'required' : ''}>
       </label>`);
   }
   return `
@@ -174,7 +174,7 @@ export const childView = ({ child, variant, card, tx, open, finished, childUrl }
             variant.measure === 'counter'
               ? counterFields(variant, tx)
               : `<label>${h(tx('entry.result'))} <small>${h(tx(hintKey(variant)))}</small>
-                   <input type="text" name="value" class="result-input" inputmode="numeric" pattern="[0-9]*" maxlength="7" autocomplete="off" autofocus ${resultData(variant, tx, 'entry-interpreted')}>
+                   <input type="text" name="value" class="result-input" inputmode="numeric" pattern="[0-9]*" maxlength="7" autocomplete="off" ${resultData(variant, tx, 'entry-interpreted')}>
                  </label>
                  <output class="interpreted" id="entry-interpreted" aria-live="polite"></output>
                  ${modifierFields(variant, '')}

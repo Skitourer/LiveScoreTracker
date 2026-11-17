@@ -9,7 +9,7 @@
     <form method="post" action="{{ url_for('login-2fa') }}" class="form">
         {{ csrf_field() }}
         <label>{{ t('two_factor.code') }}
-            <input type="text" name="code" inputmode="numeric" autocomplete="one-time-code" autocapitalize="none" maxlength="12" required autofocus>
+            <input type="text" name="code" inputmode="numeric" autocomplete="one-time-code" autocapitalize="none" maxlength="12" required>
         </label>
         <label class="choice"><input type="checkbox" name="trust_device" value="1"> {{ t('two_factor.trust_device', {days: 30}) }}</label>
         <button type="submit" class="button">{{ t('two_factor.submit') }}</button>

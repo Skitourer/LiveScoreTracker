@@ -24,7 +24,7 @@
                 <div class="race-bibs">
                     {% for slot in 1..bibs_per_race %}
                         <label>{{ bibs_per_race > 1 ? t('entry.race_bib', {number: slot}) : t('entry.bib') }}{% if slot > 1 %} <small>{{ t('entry.optional') }}</small>{% endif %}
-                            <input type="text" name="bib{{ slot }}" class="bib-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" {% if slot == 1 %}autofocus required{% endif %}>
+                            <input type="text" name="bib{{ slot }}" class="bib-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" {% if slot == 1 %}required{% endif %}>
                         </label>
                     {% endfor %}
                 </div>
@@ -43,7 +43,7 @@
         {% else %}
             <form method="get" class="check-in-search">
                 <label>{{ t('entry.bib') }}
-                    <input type="text" name="bib" class="bib-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" autofocus required>
+                    <input type="text" name="bib" class="bib-input" inputmode="numeric" pattern="[0-9]*" autocomplete="off" required>
                 </label>
                 <button type="submit" class="button">{{ t('entry.open') }}</button>
             </form>

@@ -33,6 +33,7 @@ Each step of the development plan (specification § 23) is one or more pull requ
 
 ### Fixed
 
+- No form field takes the focus on its own any more (sign-in, bib entry, results, check-in): on phones it opened the keyboard and hid half the screen. Error and warning messages still take the focus (#33).
 - Entry follow-up (races with several bibs): ticked children stay ticked and listed on top while searching for the next one (also after a data refresh); the keyboard "search" key (or Enter) ticks a single match; only the list is redrawn while typing, so the phone keyboard keeps its numeric mode.
 - Configuration errors name the place in words ("Ateliers › Saut en longueur (senior) › Type de mesure") instead of the file path; after a refused save, the page scrolls to the first error or warning and focuses it.
 - Email deliverability, after the hosting's antispam filter blocked legitimate emails: links always in https (`/status` checks APP_URL), `Message-ID` on the sender's domain, `Reply-To` to the edition's contact, `Auto-Submitted` header, plainer separator in bilingual emails; imports send at most 30 confirmation emails, paced over one connection, and name the families left out; addresses whose domain receives no email are refused (warning in imports).

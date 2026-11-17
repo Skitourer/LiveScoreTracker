@@ -9,7 +9,7 @@
     <form method="post" action="{{ url_for('referee-name') }}" class="form">
         {{ csrf_field() }}
         <label>{{ t('registration.field.first_name') }}
-            <input type="text" name="first_name" value="{{ name }}" maxlength="{{ max }}" autocomplete="given-name" required autofocus>
+            <input type="text" name="first_name" value="{{ name }}" maxlength="{{ max }}" autocomplete="given-name" required>
         </label>
         <button type="submit" class="button">{{ t('referee.name_submit') }}</button>
     </form>

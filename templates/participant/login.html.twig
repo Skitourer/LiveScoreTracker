@@ -10,7 +10,7 @@
     <form method="post" action="{{ url_for('participant') }}" class="form">
         {{ csrf_field() }}
         <label>{{ t('participant.bib') }}
-            <input type="text" name="bib" value="{{ bib }}" inputmode="numeric" pattern="[0-9]*" autocomplete="off" required autofocus>
+            <input type="text" name="bib" value="{{ bib }}" inputmode="numeric" pattern="[0-9]*" autocomplete="off" required>
         </label>
         <label>{{ t('participant.birth_date') }}
             <input type="date" name="birth_date" required>

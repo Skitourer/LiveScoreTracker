@@ -57,7 +57,7 @@
                 {% include 'entry/_counter.html.twig' %}
             {% else %}
                 <label>{{ t('entry.result') }} <small>{{ t('entry.hint.' ~ (variant.measure.value == 'time' ? 'time_' ~ variant.timeFormat.value|replace({':': '', '.': ''}) : variant.measure.value)) }}</small>
-                    <input type="text" name="value" class="result-input" inputmode="numeric" pattern="[0-9]*" maxlength="7" autocomplete="off" value="{{ form.value }}" {% if form.value is empty %}autofocus{% endif %}
+                    <input type="text" name="value" class="result-input" inputmode="numeric" pattern="[0-9]*" maxlength="7" autocomplete="off" value="{{ form.value }}"
                         data-measure="{{ variant.measure.value }}" data-time-format="{{ variant.timeFormat ? variant.timeFormat.value : '' }}"
                         data-unit-seconds="{{ t('unit.seconds') }}" data-unit-minutes="{{ t('unit.minutes_seconds') }}" data-unit-metres="{{ t('unit.metres') }}" data-unit-points="{{ t('unit.points') }}"
                         data-decimal="{{ t('format.decimal_separator') }}" data-invalid="{{ t('entry.error.invalid_value') }}">

@@ -254,7 +254,6 @@ export const initEntryApp = () => {
         }
       });
     }
-    view.querySelector('.bib-input')?.focus();
   };
 
   /** Blocking checks of a race's bibs (spec § 8.4), as a message, or null. */
