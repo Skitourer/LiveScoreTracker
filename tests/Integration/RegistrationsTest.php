@@ -7,6 +7,7 @@ namespace LiveScoreTracker\Tests\Integration;
 use LiveScoreTracker\Action\Registration\RegistrationImportAction;
 use LiveScoreTracker\Demo\ImportSample;
 use LiveScoreTracker\Infrastructure\Config\ConfigRepository;
+use LiveScoreTracker\Tests\Support\TempDir;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PHPUnit\Framework\TestCase;
 
@@ -27,7 +28,7 @@ final class RegistrationsTest extends TestCase
 
     protected function tearDown(): void
     {
-        exec('rm -rf ' . escapeshellarg($this->dataDir));
+        TempDir::remove($this->dataDir);
     }
 
     public function testDuringPreparationAWithdrawnChildGivesTheBibBack(): void

@@ -6,6 +6,7 @@ namespace LiveScoreTracker\Tests\Integration;
 
 use LiveScoreTracker\Infrastructure\Settings;
 use LiveScoreTracker\Kernel;
+use LiveScoreTracker\Tests\Support\TempDir;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Slim\Psr7\Factory\ServerRequestFactory;
@@ -25,7 +26,7 @@ final class HttpTest extends TestCase
     protected function tearDown(): void
     {
         if (is_dir($this->dataDir)) {
-            exec('rm -rf ' . escapeshellarg($this->dataDir));
+            TempDir::remove($this->dataDir);
         }
     }
 

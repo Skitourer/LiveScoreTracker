@@ -6,6 +6,7 @@ namespace LiveScoreTracker\Tests\Integration;
 
 use Internal\Toml\Toml;
 use LiveScoreTracker\Application\ConfigForms;
+use LiveScoreTracker\Tests\Support\TempDir;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -29,7 +30,7 @@ final class RunningChangesTest extends TestCase
 
     protected function tearDown(): void
     {
-        exec('rm -rf ' . escapeshellarg($this->dataDir));
+        TempDir::remove($this->dataDir);
     }
 
     public function testMoreAttemptsAreShownThenConfirmedWithAnAlert(): void

@@ -6,6 +6,7 @@ namespace LiveScoreTracker\Tests\Integration;
 
 use LiveScoreTracker\Infrastructure\Clock;
 use LiveScoreTracker\Infrastructure\Security\TwoFactor;
+use LiveScoreTracker\Tests\Support\TempDir;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 
@@ -28,7 +29,7 @@ final class AccountsTest extends TestCase
 
     protected function tearDown(): void
     {
-        exec('rm -rf ' . escapeshellarg($this->dataDir));
+        TempDir::remove($this->dataDir);
     }
 
     public function testFirstAdminSetupIsProtectedAndOneTime(): void

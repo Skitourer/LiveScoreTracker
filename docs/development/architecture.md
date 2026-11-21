@@ -76,7 +76,7 @@ Each file is looked up first in the installation's **data folder** (outside the 
 ## Tests
 
 - `tests/Unit`: domain rules (scoring, tie-breaking, attempts, checks, configuration parsing…), no database.
-- `tests/Integration`: the whole Slim application on a temporary SQLite database, driven by `WebClient` (cookies, CSRF, redirects) and `AdminSession` (creates the first admin and logs in). Each test tells a story through the screens: register children, enter results, close the competition, look at the rankings.
+- `tests/Integration`: the whole Slim application on a temporary SQLite database, driven by `WebClient` (cookies, CSRF, redirects) and `AdminSession` (creates the first admin and logs in). Each test tells a story through the screens: register children, enter results, close the competition, look at the rankings. Each test creates its data directory as `lst-*` in the system temp directory and removes it in `tearDown()` with `TempDir::remove()` (no shell command, so it works on Windows); directories still locked by an open SQLite connection on Windows are purged when the next run starts (`tests/bootstrap.php`).
 - `composer qa` runs PHP-CS-Fixer, PHPStan (level 9, no baseline) and PHPUnit; `npm run lint` checks JavaScript and CSS.
 
 ## Deployment

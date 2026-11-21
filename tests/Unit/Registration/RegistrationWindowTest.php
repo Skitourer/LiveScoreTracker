@@ -16,6 +16,7 @@ use LiveScoreTracker\Infrastructure\Database\Migrator;
 use LiveScoreTracker\Infrastructure\Persistence\AppState;
 use LiveScoreTracker\Infrastructure\Persistence\RegistrationRepository;
 use LiveScoreTracker\Infrastructure\Settings;
+use LiveScoreTracker\Tests\Support\TempDir;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -40,7 +41,7 @@ final class RegistrationWindowTest extends TestCase
 
     protected function tearDown(): void
     {
-        exec('rm -rf ' . escapeshellarg($this->dataDir));
+        TempDir::remove($this->dataDir);
     }
 
     public function testStatesAlongTheWindow(): void
