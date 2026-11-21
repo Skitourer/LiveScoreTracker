@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace LiveScoreTracker\Tests\Integration;
 
+use LiveScoreTracker\Tests\Support\TempDir;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -33,7 +34,7 @@ final class CeremonyTest extends TestCase
 
     protected function tearDown(): void
     {
-        exec('rm -rf ' . escapeshellarg($this->dataDir));
+        TempDir::remove($this->dataDir);
     }
 
     public function testOnlyAfterTheClosing(): void

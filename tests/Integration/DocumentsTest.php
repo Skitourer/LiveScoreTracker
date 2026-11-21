@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace LiveScoreTracker\Tests\Integration;
 
+use LiveScoreTracker\Tests\Support\TempDir;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use PHPUnit\Framework\TestCase;
 
@@ -27,7 +28,7 @@ final class DocumentsTest extends TestCase
 
     protected function tearDown(): void
     {
-        exec('rm -rf ' . escapeshellarg($this->dataDir));
+        TempDir::remove($this->dataDir);
     }
 
     public function testRescueSheetsAndFreshness(): void

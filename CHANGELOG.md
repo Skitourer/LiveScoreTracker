@@ -33,6 +33,7 @@ Each step of the development plan (specification § 23) is one or more pull requ
 
 ### Fixed
 
+- Tests remove their temporary data directories in PHP instead of `rm -rf`, so the suite also cleans up on Windows.
 - No form field takes the focus on its own any more (sign-in, bib entry, results, check-in): on phones it opened the keyboard and hid half the screen. Error and warning messages still take the focus (#33).
 - Entry follow-up (races with several bibs): ticked children stay ticked and listed on top while searching for the next one (also after a data refresh); the keyboard "search" key (or Enter) ticks a single match; only the list is redrawn while typing, so the phone keyboard keeps its numeric mode.
 - Configuration errors name the place in words ("Ateliers › Saut en longueur (senior) › Type de mesure") instead of the file path; after a refused save, the page scrolls to the first error or warning and focuses it.
